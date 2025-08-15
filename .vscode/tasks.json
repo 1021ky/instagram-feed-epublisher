@@ -1,0 +1,35 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Smoke Test: instagram_to_epub all --target_user",
+            "type": "shell",
+            "command": "zsh",
+            "args": [
+                "scripts/smoke_test.sh"
+            ],
+            "options": {
+                "env": {
+                    "LOGIN_USER": "${input:loginUser}",
+                    "TARGET_USER": "${input:targetUser}"
+                }
+            },
+            "group": "test",
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "loginUser",
+            "type": "promptString",
+            "description": "Instagram login user (must have an existing Instaloader session)",
+            "default": ""
+        },
+        {
+            "id": "targetUser",
+            "type": "promptString",
+            "description": "Public target user to fetch posts from",
+            "default": "instagram"
+        }
+    ]
+}
