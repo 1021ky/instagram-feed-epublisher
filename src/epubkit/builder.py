@@ -8,13 +8,18 @@ from PIL import Image
 from app.config import OUTPUT_EPUB_FILE, DEFAULT_AUTHOR
 
 
-def create_epub(posts: List[dict], *, title: str | None = None,
-                author: str | None = None, output_epub: str | None = None):
+def create_epub(
+    posts: List[dict],
+    *,
+    title: str | None = None,
+    author: str | None = None,
+    output_epub: str | None = None,
+):
     """取得した投稿データからEPUBファイルを生成する関数"""
     resolved_output = output_epub or OUTPUT_EPUB_FILE
-    resolved_title = title or os.path.splitext(
-        os.path.basename(resolved_output)
-    )[0]
+    resolved_title = (
+        title or os.path.splitext(os.path.basename(resolved_output))[0]
+    )
     resolved_author = author or DEFAULT_AUTHOR
 
     book = epub.EpubBook()

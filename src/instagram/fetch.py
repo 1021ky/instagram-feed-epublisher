@@ -18,7 +18,9 @@ def fetch_instagram_data(
     """Instagramからデータ取得して画像を保存し、メタデータをJSONに書き出す。"""
     normalized_tags = parse_hashtags(hashtags)
     if not normalized_tags and not target_user:
-        print("[!] ハッシュタグまたはターゲットのユーザー名を指定してください。")
+        print(
+            "[!] ハッシュタグまたはターゲットのユーザー名を指定してください。"
+        )
         return
 
     if target_user:
@@ -136,7 +138,9 @@ def fetch_instagram_data(
         print("\n処理を中断しました。")
 
     if not posts_data:
-        print("条件に一致する投稿が見つかりませんでした。JSONは書き出しません。")
+        print(
+            "条件に一致する投稿が見つかりませんでした。JSONは書き出しません。"
+        )
         return
 
     try:

@@ -8,9 +8,12 @@ from app.config import TEMP_IMAGE_DIR, POSTS_DATA_FILE
 from epubkit.builder import create_epub
 
 
-def create_epub_from_saved_data(*, title: str | None = None,
-                                author: str | None = None,
-                                output_epub: str | None = None):
+def create_epub_from_saved_data(
+    *,
+    title: str | None = None,
+    author: str | None = None,
+    output_epub: str | None = None,
+):
     """
     保存済みJSON(POSTS_DATA_FILE)を読み込み、EPUBを生成する。
     欠損画像はimage_urlから再取得を試みる。
@@ -57,7 +60,9 @@ def create_epub_from_saved_data(*, title: str | None = None,
             ext = ".jpg"
         save_path = os.path.join(TEMP_IMAGE_DIR, f"{shortcode}{ext}")
         try:
-            print(f"  [-] 欠損画像を再取得開始 url={img_url} -> save={save_path}")
+            print(
+                f"  [-] 欠損画像を再取得開始 url={img_url} -> save={save_path}"
+            )
             urllib.request.urlretrieve(img_url, save_path)
             p["image_path"] = save_path
             print(f"  [+] 欠損画像を再取得: {shortcode}{ext}")
