@@ -1,0 +1,42 @@
+name: Smoke Test (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      login_user:
+        description: 'Instaloader login user'
+        required: true
+      target_user:
+        description: 'Public target user'
+        required: true
+      session_b64:
+        description: 'Base64-encoded session file content (session-<login_user>)'
+        required: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Restore Instaloader session
+        run: |
+          echo "${{ inputs.session_b64 }}" | base64 -d > "session-${{ inputs.login_user }}"
+
+      - name: Run smoke test
+        env:
+          LOGIN_USER: ${{ inputs.login_user }}
+          TARGET_USER: ${{ inputs.target_user }}
+        run: zsh scripts/smoke_test.sh

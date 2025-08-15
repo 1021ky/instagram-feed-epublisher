@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache/
+.mypy_cache/
+.venv/
+
+# macOS
+.DS_Store
+
+# uv
+.uv/
+
+# VS Code
+.vscode/
+
+# Instaloader session files
+session-*
+
+# EPUB outputs
+*.epub
+
+# Runtime artifacts
+posts_data.json
+temp_images/

@@ -1,0 +1,2 @@
+[console_scripts]
+instagram-to-epub = app.cli:main

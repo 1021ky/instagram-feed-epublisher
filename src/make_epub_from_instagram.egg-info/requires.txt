@@ -1,0 +1,10 @@
+instaloader>=4.11
+EbookLib>=0.18
+Pillow>=10.0
+fire>=0.6
+
+[dev]
+pytest>=8.0
+black>=24.0
+isort>=5.12
+mypy>=1.8

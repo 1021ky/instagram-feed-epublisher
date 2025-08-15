@@ -1,0 +1,80 @@
+# make_epub_from_instagram
+
+Instagramの投稿を収集してEPUBを生成する小さなツールです。ハッシュタグ指定または対象ユーザー（target_user）指定に対応します。Google FireベースのサブコマンドCLIです。
+
+## セットアップ
+
+- 前提: Python 3.10+
+- uv推奨（pipでも可）。このリポジトリは `pyproject.toml` で依存と各種ツール設定を管理します。
+
+uvを使う場合:
+
+```sh
+uv venv
+uv pip install -e .[dev]
+```
+
+pipを使う場合:
+
+```sh
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .[dev]
+```
+
+- Instaloaderのログインセッションを作成（初回のみ）
+
+```sh
+instaloader --login <your_login_user>
+```
+
+2FAが有効な場合は手順にしたがって認証してください。成功するとカレントディレクトリに`session-<your_login_user>`が保存されます。
+
+## 使い方
+
+エントリポイントは `instagram_to_epub.py` です。
+
+- 収集→EPUB生成→一時ファイル削除を一括実行
+
+```sh
+python instagram_to_epub.py all --login_user=<login_user> --hashtags "tag1 tag2"
+# または
+python instagram_to_epub.py all --login_user=<login_user> --target_user=<account>
+```
+
+- 収集のみ
+
+```sh
+python instagram_to_epub.py fetch --login_user=<login_user> --hashtags "tag1 tag2"
+python instagram_to_epub.py fetch --login_user=<login_user> --target_user=<account>
+```
+
+- EPUB生成のみ（前段で `posts_data.json` がある前提）
+
+```sh
+python instagram_to_epub.py build --title "My Book" --author "Me" --output_epub output.epub
+```
+
+- 一時ファイル削除
+
+```sh
+python instagram_to_epub.py clean
+```
+
+### 出力ファイル名とメタデータ
+
+- output_epub未指定時は以下の優先で自動決定
+  - target_user指定あり: `<target_user>.epub`
+  - ハッシュタグ指定あり: 先頭タグの`<tag>.epub`
+  - どちらもなし: `config.py` の `OUTPUT_EPUB_FILE`
+- title未指定時は、最終的なEPUBファイル名（拡張子除去）
+- author未指定時は`Instagram Collector`
+
+## 注意事項
+
+- Instaloaderの仕様やInstagramの変更により、取得に失敗する可能性があります。
+- 利用は各サービスの利用規約にしたがってください。
+
+## ライセンス
+
+MIT
