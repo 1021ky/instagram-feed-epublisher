@@ -1,27 +1,36 @@
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
-*.pytest_cache/
-.mypy_cache/
+*.so
+
+# Env
 .venv/
+venv/
+.env
+.python-version
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Tools caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
 
 # macOS
 .DS_Store
 
-# uv
-.uv/
+# VSCode project settings (keep tasks, so don't ignore .vscode by default)
+# .vscode/
 
-# VS Code
-.vscode/
+# Jupyter
+.ipynb_checkpoints/
 
-# Instaloader session files
+# Project-specific
 session-*
-
-# EPUB outputs
 *.epub
-
-# Runtime artifacts
-posts_data.json
-temp_images/
