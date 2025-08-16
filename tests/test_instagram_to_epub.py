@@ -1,8 +1,7 @@
 from unittest.mock import patch
 
-import pytest
-
 import instagram_to_epub as cli
+import pytest
 
 
 @pytest.mark.parametrize(

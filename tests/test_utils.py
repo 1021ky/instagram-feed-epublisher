@@ -1,5 +1,4 @@
 import pytest
-
 from utils import default_epub_name, parse_hashtags
 
 
