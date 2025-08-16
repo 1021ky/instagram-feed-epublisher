@@ -3,7 +3,6 @@ from io import BytesIO
 from typing import List
 
 from app.config import DEFAULT_AUTHOR, OUTPUT_EPUB_FILE
-
 from ebooklib import epub
 from PIL import Image
 
