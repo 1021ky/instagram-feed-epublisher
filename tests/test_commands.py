@@ -1,11 +1,11 @@
-from pathlib import Path
 import json
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
-from commands import create_epub_from_saved_data
-from config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
+from app.commands import create_epub_from_saved_data
+from app.config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
 
 
 @pytest.fixture(autouse=True)
@@ -14,9 +14,9 @@ def _chdir(tmp_path, monkeypatch):
     yield
 
 
-@patch("commands.urlparse")
-@patch("commands.urllib.request.urlretrieve")
-@patch("commands.create_epub")
+@patch("app.commands.urlparse")
+@patch("app.commands.urllib.request.urlretrieve")
+@patch("app.commands.create_epub")
 @pytest.mark.parametrize(
     "has_json, has_images, expect_epub",
     [

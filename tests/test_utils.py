@@ -1,6 +1,6 @@
 import pytest
 
-from utils import parse_hashtags, default_epub_name
+from app.utils import default_epub_name, parse_hashtags
 
 
 @pytest.mark.parametrize(
