@@ -1,4 +1,4 @@
-from config import (
+from app.config import (
     OUTPUT_EPUB_FILE,
     DEFAULT_AUTHOR,
     TEMP_IMAGE_DIR,
