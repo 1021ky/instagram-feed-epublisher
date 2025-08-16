@@ -1,7 +1,8 @@
 from unittest.mock import patch
 
-from app import cli
 import pytest
+
+from app import cli
 
 
 @pytest.mark.parametrize(
