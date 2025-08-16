@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from epub_builder import create_epub
+from epubkit.builder import create_epub
 
 
 @pytest.fixture()

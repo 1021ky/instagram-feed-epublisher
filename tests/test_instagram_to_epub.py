@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-import instagram_to_epub as cli
+from app import cli
 import pytest
 
 

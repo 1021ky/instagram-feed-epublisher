@@ -4,8 +4,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
-from instagram_fetch import fetch_instagram_data
+from app.config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
+from instagram.fetch import fetch_instagram_data
 
 
 @pytest.fixture(autouse=True)
