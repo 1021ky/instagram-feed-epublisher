@@ -39,7 +39,7 @@ dev = [
 
 [tool.pytest.ini_options]
 addopts = "-q --maxfail=1 --strict-markers"
-pythonpath = [ "src", "." ]
+pythonpath = [ "src", "tests" ]
 
 [tool.black]
 line-length = 79
