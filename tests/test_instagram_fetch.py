@@ -80,11 +80,15 @@ def test_fetch_instagram_data_controls(
     L.download_pic.side_effect = fake_download_pic
 
     # Execute
-    fetch_instagram_data(hashtags=hashtags, login_user="login", target_user=target_user)
+    fetch_instagram_data(
+        hashtags=hashtags, login_user="login", target_user=target_user
+    )
 
     # Verify JSON presence according to mode
     if expect_saved:
-        assert Path(POSTS_DATA_FILE).exists(), "posts_data.json should be written"
+        assert Path(
+            POSTS_DATA_FILE
+        ).exists(), "posts_data.json should be written"
         data = json.loads(Path(POSTS_DATA_FILE).read_text("utf-8"))
         assert isinstance(data, list) and len(data) > 0
         for item in data:
@@ -142,7 +146,9 @@ def test_fetch_filters_by_caption(
 
     L.download_pic.side_effect = fake_download_pic
 
-    fetch_instagram_data(hashtags=hashtags, login_user="login", target_user=None)
+    fetch_instagram_data(
+        hashtags=hashtags, login_user="login", target_user=None
+    )
 
     saved = json.loads(Path(POSTS_DATA_FILE).read_text("utf-8"))
     assert len(saved) == expected_count
