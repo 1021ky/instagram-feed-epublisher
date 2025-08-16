@@ -1,5 +1,5 @@
-from pathlib import Path
 import json
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -16,7 +16,7 @@ def _chdir(tmp_path, monkeypatch):
 
 @patch("commands.urlparse")
 @patch("commands.urllib.request.urlretrieve")
-@patch("commands.create_epub")
+@patch("app.commands.create_epub")
 @pytest.mark.parametrize(
     "has_json, has_images, expect_epub",
     [

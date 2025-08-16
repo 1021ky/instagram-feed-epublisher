@@ -1,12 +1,12 @@
+import json
 from datetime import datetime
 from pathlib import Path
-import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
+from config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
 from instagram_fetch import fetch_instagram_data
-from config import TEMP_IMAGE_DIR, POSTS_DATA_FILE
 
 
 @pytest.fixture(autouse=True)
@@ -48,7 +48,7 @@ def _make_posts(count=3, with_tags=("tag1", "tag2")):
         (None, "publicuser", True),  # user mode
     ],
 )
-@patch("instagram_fetch.instaloader")
+@patch("instagram.fetch.instaloader")
 def test_fetch_instagram_data_controls(
     mock_instaloader, hashtags, target_user, expect_saved
 ):
@@ -116,7 +116,7 @@ def test_fetch_instagram_data_controls(
         ("tag1", ["#tag1", "#TAG1", "nope"], 2),  # case-insensitive
     ],
 )
-@patch("instagram_fetch.instaloader")
+@patch("instagram.fetch.instaloader")
 def test_fetch_filters_by_caption(
     mock_instaloader, hashtags, provided_captions, expected_count
 ):

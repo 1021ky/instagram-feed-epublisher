@@ -1,12 +1,12 @@
+import json
 import os
 import time
-import json
 from datetime import datetime
 
-import instaloader
-
-from app.config import TEMP_IMAGE_DIR, POSTS_DATA_FILE
+from app.config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
 from app.utils import parse_hashtags
+
+import instaloader
 
 
 def fetch_instagram_data(

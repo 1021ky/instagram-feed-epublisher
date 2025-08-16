@@ -34,8 +34,8 @@ def sample_posts(tmp_path):
     ]
 
 
-@patch("epub_builder.Image")
-@patch("epub_builder.epub")
+@patch("epubkit.builder.Image")
+@patch("epubkit.builder.epub")
 @pytest.mark.parametrize(
     "title, author, output_name",
     [
