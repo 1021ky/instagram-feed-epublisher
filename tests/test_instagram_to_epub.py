@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-import instagram_to_epub as cli
+import app.cli as cli
 
 
 @pytest.mark.parametrize(
@@ -15,9 +15,9 @@ import instagram_to_epub as cli
         (None, "user", True),
     ],
 )
-@patch("instagram_to_epub.create_epub_from_saved_data")
-@patch("instagram_to_epub.fetch_instagram_data")
-@patch("instagram_to_epub.cleanup_temp_files")
+@patch("app.cli.create_epub_from_saved_data")
+@patch("app.cli.fetch_instagram_data")
+@patch("app.cli.cleanup_temp_files")
 def test_run_all_dispatch(
     mock_clean, mock_fetch, mock_build, hashtags, target_user, should_call
 ):
