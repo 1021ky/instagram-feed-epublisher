@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from epubkit.builder import create_epub, load_layout_files
+from epubkit.builder import create_epub, _load_layout_files
 
 
 class TestLayoutLoading:
@@ -90,7 +90,7 @@ img { width: 100%; }
         monkeypatch.chdir(valid_layout_fixtures.parent)
 
         # Act - 実行
-        html_template, css_content = load_layout_files()
+        html_template, css_content = _load_layout_files()
 
         # Assert - アサート
         # 期待される内容が含まれていることを確認
@@ -114,7 +114,7 @@ img { width: 100%; }
         # Act & Assert - 実行とアサート
         with patch("sys.stderr", captured_stderr):
             with pytest.raises(ValueError):
-                load_layout_files()
+                _load_layout_files()
 
             # エラーメッセージが標準エラーに出力されていることを確認
             stderr_output = captured_stderr.getvalue()
@@ -133,7 +133,7 @@ img { width: 100%; }
         # Act & Assert - 実行とアサート
         with patch("sys.stderr", captured_stderr):
             with pytest.raises(FileNotFoundError):
-                load_layout_files()
+                _load_layout_files()
 
             # エラーメッセージが標準エラーに出力されていることを確認
             stderr_output = captured_stderr.getvalue()
@@ -159,7 +159,7 @@ img { width: 100%; }
         # Act & Assert - 実行とアサート
         with patch("sys.stderr", captured_stderr):
             with pytest.raises(FileNotFoundError):
-                load_layout_files()
+                _load_layout_files()
 
             stderr_output = captured_stderr.getvalue()
             assert "layout.css" in stderr_output
@@ -345,7 +345,7 @@ img { width: 100%; }
         monkeypatch.chdir(tmp_path)
 
         # Act - 実行
-        html_template, css_content_result = load_layout_files(
+        html_template, css_content_result = _load_layout_files(
             layout_dir="custom_layouts",
             html_file=custom_html_name,
             css_file=custom_css_name,

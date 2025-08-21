@@ -15,7 +15,7 @@ from app.config import (
 )
 
 
-def load_layout_files(
+def _load_layout_files(
     layout_dir=DEFAULT_LAYOUT_DIR,
     html_file=DEFAULT_LAYOUT_HTML_FILE,
     css_file=DEFAULT_LAYOUT_CSS_FILE,
@@ -85,9 +85,9 @@ def create_epub(
 
     # レイアウトファイルを読み込み
     try:
-        html_template, css_content = load_layout_files()
+        html_template, css_content = _load_layout_files()
     except (FileNotFoundError, ValueError):
-        # エラーはload_layout_files内で標準エラーに出力済み
+        # エラーは_load_layout_files内で標準エラーに出力済み
         return
 
     book = epub.EpubBook()
