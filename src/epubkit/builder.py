@@ -38,21 +38,6 @@ def load_layout_files(
     html_path = os.path.join(layout_dir, html_file)
     css_path = os.path.join(layout_dir, css_file)
 
-    # ファイルの存在確認
-    if not os.path.exists(html_path):
-        print(
-            f"[!] レイアウトファイルが見つかりません: {html_path}",
-            file=sys.stderr,
-        )
-        raise FileNotFoundError(f"Layout HTML file not found: {html_path}")
-
-    if not os.path.exists(css_path):
-        print(
-            f"[!] レイアウトファイルが見つかりません: {css_path}",
-            file=sys.stderr,
-        )
-        raise FileNotFoundError(f"Layout CSS file not found: {css_path}")
-
     try:
         # HTMLファイルを読み込み
         with open(html_path, "r", encoding="utf-8") as f:
@@ -74,11 +59,14 @@ def load_layout_files(
 
         return html_template, css_content
 
-    except Exception as e:
-        if isinstance(e, (FileNotFoundError, ValueError)):
-            raise
-        print(f"[!] layoutファイルの構造が不正です: {e}", file=sys.stderr)
-        raise ValueError(f"Invalid layout file content: {e}")
+    except FileNotFoundError as e:
+        print(
+            f"[!] レイアウトファイルが見つかりません: {e.filename}",
+            file=sys.stderr,
+        )
+        raise e
+    except ValueError as e:
+        raise e
 
 
 def create_epub(
