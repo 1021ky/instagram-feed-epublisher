@@ -82,58 +82,62 @@ img { width: 100%; }
         # ファイルは作成しない
         return book_layout_dir
 
-    @pytest.mark.parametrize(
-        "fixture_name,expected_exception,expected_error_message",
-        [
-            ("valid_layout_fixtures", None, None),
-            (
-                "invalid_layout_fixtures",
-                ValueError,
-                "Invalid layout structure",
-            ),
-            (
-                "missing_files_fixtures",
-                FileNotFoundError,
-                "Layout HTML file not found",
-            ),
-        ],
-    )
-    def test_load_layout_files(
-        self,
-        request,
-        monkeypatch,
-        fixture_name,
-        expected_exception,
-        expected_error_message,
+    def test_load_layout_files_success(
+        self, valid_layout_fixtures, monkeypatch
     ):
-        """レイアウトファイル読み込みのテスト（AAAパターン）"""
+        """レイアウトファイル読み込み成功のテスト（AAAパターン）"""
         # Arrange - 準備
-        fixtures = request.getfixturevalue(fixture_name)
-        monkeypatch.chdir(fixtures.parent)
+        monkeypatch.chdir(valid_layout_fixtures.parent)
+
+        # Act - 実行
+        html_template, css_content = load_layout_files()
+
+        # Assert - アサート
+        # 期待される内容が含まれていることを確認
+        assert "{chapter_title}" in html_template
+        assert "{css_content}" in html_template
+        assert "{image_filename}" in html_template
+        assert "{caption_html}" in html_template
+        assert "{post_url}" in html_template
+        assert "font-family: serif" in css_content
+
+    def test_load_layout_files_invalid_structure(
+        self, invalid_layout_fixtures, monkeypatch
+    ):
+        """レイアウトファイル構造不正時のテスト（AAAパターン）"""
+        # Arrange - 準備
+        monkeypatch.chdir(invalid_layout_fixtures.parent)
 
         # stderr出力をキャプチャ
         captured_stderr = StringIO()
 
         # Act & Assert - 実行とアサート
-        if expected_exception:
-            with patch("sys.stderr", captured_stderr):
-                with pytest.raises(expected_exception):
-                    load_layout_files()
+        with patch("sys.stderr", captured_stderr):
+            with pytest.raises(ValueError):
+                load_layout_files()
 
-                # エラーメッセージが標準エラーに出力されていることを確認
-                stderr_output = captured_stderr.getvalue()
-                assert "[!]" in stderr_output
-        else:
-            # 正常ケース
-            html_template, css_content = load_layout_files()
+            # エラーメッセージが標準エラーに出力されていることを確認
+            stderr_output = captured_stderr.getvalue()
+            assert "[!]" in stderr_output
 
-            # 期待される内容が含まれていることを確認
-            assert "{chapter_title}" in html_template
-            assert "{css_content}" in html_template
-            assert "{image_filename}" in html_template
-            assert "{caption_html}" in html_template
-            assert "{post_url}" in html_template
-            assert "font-family: serif" in css_content
+    def test_load_layout_files_missing_files(
+        self, missing_files_fixtures, monkeypatch
+    ):
+        """レイアウトファイル不存在時のテスト（AAAパターン）"""
+        # Arrange - 準備
+        monkeypatch.chdir(missing_files_fixtures.parent)
+
+        # stderr出力をキャプチャ
+        captured_stderr = StringIO()
+
+        # Act & Assert - 実行とアサート
+        with patch("sys.stderr", captured_stderr):
+            with pytest.raises(FileNotFoundError):
+                load_layout_files()
+
+            # エラーメッセージが標準エラーに出力されていることを確認
+            stderr_output = captured_stderr.getvalue()
+            assert "[!]" in stderr_output
 
     def test_load_layout_files_with_missing_css_only(
         self, tmp_path, monkeypatch
