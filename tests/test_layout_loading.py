@@ -1,12 +1,10 @@
-import os
-import tempfile
+from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
-import pytest
-import sys
-from io import StringIO
 
-from epubkit.builder import load_layout_files, create_epub
+import pytest
+
+from epubkit.builder import create_epub, load_layout_files
 
 
 class TestLayoutLoading:
