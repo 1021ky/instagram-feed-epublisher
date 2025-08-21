@@ -12,10 +12,10 @@ from app.config import DEFAULT_AUTHOR, OUTPUT_EPUB_FILE
 def load_layout_files():
     """
     book_layoutディレクトリからレイアウトファイルを読み込む
-    
+
     Returns:
         tuple: (html_template, css_content)
-        
+
     Raises:
         FileNotFoundError: レイアウトファイルが見つからない場合
         ValueError: レイアウトファイルの内容が不正な場合
@@ -23,32 +23,43 @@ def load_layout_files():
     layout_dir = "book_layout"
     html_path = os.path.join(layout_dir, "layout.html")
     css_path = os.path.join(layout_dir, "layout.css")
-    
+
     # ファイルの存在確認
     if not os.path.exists(html_path):
-        print(f"[!] レイアウトファイルが見つかりません: {html_path}", file=sys.stderr)
+        print(
+            f"[!] レイアウトファイルが見つかりません: {html_path}",
+            file=sys.stderr,
+        )
         raise FileNotFoundError(f"Layout HTML file not found: {html_path}")
-    
+
     if not os.path.exists(css_path):
-        print(f"[!] レイアウトファイルが見つかりません: {css_path}", file=sys.stderr)
+        print(
+            f"[!] レイアウトファイルが見つかりません: {css_path}",
+            file=sys.stderr,
+        )
         raise FileNotFoundError(f"Layout CSS file not found: {css_path}")
-    
+
     try:
         # HTMLファイルを読み込み
         with open(html_path, "r", encoding="utf-8") as f:
             html_template = f.read()
-        
+
         # CSSファイルを読み込み
         with open(css_path, "r", encoding="utf-8") as f:
             css_content = f.read()
-        
+
         # 基本的な構造検証
         if "{chapter_title}" not in html_template:
-            print("[!] layoutファイルの構造が不正です: {chapter_title}が見つかりません", file=sys.stderr)
-            raise ValueError("Invalid layout structure: {chapter_title} placeholder not found")
-        
+            print(
+                "[!] layoutファイルの構造が不正です: {chapter_title}が見つかりません",
+                file=sys.stderr,
+            )
+            raise ValueError(
+                "Invalid layout structure: {chapter_title} placeholder not found"
+            )
+
         return html_template, css_content
-        
+
     except Exception as e:
         if isinstance(e, (FileNotFoundError, ValueError)):
             raise
@@ -120,7 +131,7 @@ def create_epub(
         chapter = epub.EpubHtml(
             title=chapter_title, file_name=chapter_filename, lang="ja"
         )
-        
+
         # テンプレートに値を埋め込み
         try:
             chapter.content = html_template.format(
@@ -128,12 +139,12 @@ def create_epub(
                 css_content=css_content,
                 image_filename=epub_image_item.file_name,
                 caption_html=caption_html,
-                post_url=post['post_url']
+                post_url=post["post_url"],
             )
         except Exception as e:
             print(f"[!] layoutファイルの構造が不正です: {e}", file=sys.stderr)
             continue
-            
+
         book.add_item(chapter)
         chapters.append(chapter)
 
