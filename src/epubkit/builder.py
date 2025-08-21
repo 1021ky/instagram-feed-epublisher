@@ -6,7 +6,7 @@ from typing import List
 from ebooklib import epub
 from PIL import Image
 
-from app.config import OUTPUT_EPUB_FILE, DEFAULT_AUTHOR
+from app.config import DEFAULT_AUTHOR, OUTPUT_EPUB_FILE
 
 
 def load_layout_files():

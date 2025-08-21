@@ -1,8 +1,8 @@
 from app.config import (
-    OUTPUT_EPUB_FILE,
     DEFAULT_AUTHOR,
-    TEMP_IMAGE_DIR,
+    OUTPUT_EPUB_FILE,
     POSTS_DATA_FILE,
+    TEMP_IMAGE_DIR,
 )
 
 

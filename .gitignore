@@ -36,3 +36,10 @@ auth.json
 session-*
 *.epub
 posts_data.json
+
+# Test compatibility alias modules (auto-generated for testing)
+commands.py
+config.py
+utils.py
+epub_builder.py
+instagram_fetch.py
