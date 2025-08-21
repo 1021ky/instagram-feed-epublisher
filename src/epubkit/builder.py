@@ -6,12 +6,27 @@ from typing import List
 from ebooklib import epub
 from PIL import Image
 
-from app.config import DEFAULT_AUTHOR, OUTPUT_EPUB_FILE
+from app.config import (
+    DEFAULT_AUTHOR,
+    DEFAULT_LAYOUT_CSS_FILE,
+    DEFAULT_LAYOUT_DIR,
+    DEFAULT_LAYOUT_HTML_FILE,
+    OUTPUT_EPUB_FILE,
+)
 
 
-def load_layout_files():
+def load_layout_files(
+    layout_dir=DEFAULT_LAYOUT_DIR,
+    html_file=DEFAULT_LAYOUT_HTML_FILE,
+    css_file=DEFAULT_LAYOUT_CSS_FILE,
+):
     """
     book_layoutディレクトリからレイアウトファイルを読み込む
+
+    Args:
+        layout_dir: レイアウトファイルが格納されているディレクトリ
+        html_file: HTMLテンプレートファイル名
+        css_file: CSSファイル名
 
     Returns:
         tuple: (html_template, css_content)
@@ -20,9 +35,8 @@ def load_layout_files():
         FileNotFoundError: レイアウトファイルが見つからない場合
         ValueError: レイアウトファイルの内容が不正な場合
     """
-    layout_dir = "book_layout"
-    html_path = os.path.join(layout_dir, "layout.html")
-    css_path = os.path.join(layout_dir, "layout.css")
+    html_path = os.path.join(layout_dir, html_file)
+    css_path = os.path.join(layout_dir, css_file)
 
     # ファイルの存在確認
     if not os.path.exists(html_path):

@@ -299,3 +299,59 @@ img { width: 100%; }
         stderr_output = captured_stderr.getvalue()
         assert "[!]" in stderr_output
         assert "layoutファイルの構造が不正です" in stderr_output
+
+    def test_load_layout_files_with_custom_parameters(
+        self, tmp_path, monkeypatch
+    ):
+        """カスタムパラメータでレイアウトファイルを読み込むテスト（AAAパターン）"""
+        # Arrange - 準備
+        custom_layout_dir = tmp_path / "custom_layouts"
+        custom_layout_dir.mkdir()
+
+        # カスタムファイル名を使用
+        custom_html_name = "custom_template.html"
+        custom_css_name = "custom_styles.css"
+
+        html_content = """<html>
+<head>
+    <title>{chapter_title}</title>
+    <style>{css_content}</style>
+</head>
+<body>
+    <h1>{chapter_title}</h1>
+    <img src="{image_filename}" alt="Post Image"/>
+    <p class="caption">{caption_html}</p>
+    <p class="post-link">
+        <a href="{post_url}">View Original</a>
+    </p>
+</body>
+</html>"""
+
+        css_content = """body { font-family: custom-font; }
+img { width: 100%; }
+.caption { color: green; }"""
+
+        (custom_layout_dir / custom_html_name).write_text(
+            html_content, encoding="utf-8"
+        )
+        (custom_layout_dir / custom_css_name).write_text(
+            css_content, encoding="utf-8"
+        )
+
+        monkeypatch.chdir(tmp_path)
+
+        # Act - 実行
+        html_template, css_content_result = load_layout_files(
+            layout_dir="custom_layouts",
+            html_file=custom_html_name,
+            css_file=custom_css_name,
+        )
+
+        # Assert - アサート
+        assert "{chapter_title}" in html_template
+        assert "{css_content}" in html_template
+        assert "{image_filename}" in html_template
+        assert "{caption_html}" in html_template
+        assert "{post_url}" in html_template
+        assert "font-family: custom-font" in css_content_result
+        assert "color: green" in css_content_result
