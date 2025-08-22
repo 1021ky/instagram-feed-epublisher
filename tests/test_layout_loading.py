@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from epubkit.builder import create_epub, _load_layout_files
+from epubkit.builder import _load_layout_files, create_epub
 
 
 class TestLayoutLoading:
