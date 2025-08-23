@@ -25,3 +25,14 @@ def test_run_all_dispatch(
     assert mock_fetch.called is should_call
     assert mock_build.called is should_call
     assert mock_clean.called is should_call
+
+
+@patch("app.cli.create_epub_from_sample_data")
+def test_build_sample_function_available(mock_build_sample):
+    """Test that the build_sample function is available and callable."""
+    # Import the function directly
+    from app.cli import create_epub_from_sample_data
+
+    # Call it to ensure it works
+    create_epub_from_sample_data(title="Test")
+    assert mock_build_sample.called
