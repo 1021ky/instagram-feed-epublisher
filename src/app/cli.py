@@ -1,6 +1,9 @@
 import fire
 
-from app.commands import create_epub_from_saved_data
+from app.commands import (
+    create_epub_from_sample_data,
+    create_epub_from_saved_data,
+)
 from app.config import OUTPUT_EPUB_FILE
 from app.housekeeping import cleanup_temp_files
 from app.utils import default_epub_name, parse_hashtags
@@ -35,6 +38,7 @@ def main():
         {
             "fetch": fetch_instagram_data,
             "build": create_epub_from_saved_data,
+            "build_sample": create_epub_from_sample_data,
             "clean": cleanup_temp_files,
             "all": run_all,
         }

@@ -1,0 +1,42 @@
+[
+  {
+    "caption": "Beautiful sunset over the Scottish Highlands 🏔️ #scotland #sunset #nature #travel #photography",
+    "image_path": "sample/fetch/highlands_sunset.jpg",
+    "post_url": "https://www.instagram.com/p/SC001/",
+    "image_url": "https://example.com/sample1.jpg",
+    "date": "2024-01-15T18:30:00",
+    "shortcode": "SC001"
+  },
+  {
+    "caption": "Morning mist over Loch Ness 🌊 The mysterious waters of Scotland's most famous lake. #lochness #scotland #morning #mist #lake",
+    "image_path": "sample/fetch/loch_ness_mist.jpg", 
+    "post_url": "https://www.instagram.com/p/SC002/",
+    "image_url": "https://example.com/sample2.jpg",
+    "date": "2024-01-16T08:15:00",
+    "shortcode": "SC002"
+  },
+  {
+    "caption": "Edinburgh Castle standing proud against the grey sky ⛅ #edinburgh #castle #scotland #history #architecture",
+    "image_path": "sample/fetch/edinburgh_castle.jpg",
+    "post_url": "https://www.instagram.com/p/SC003/", 
+    "image_url": "https://example.com/sample3.jpg",
+    "date": "2024-01-17T14:45:00",
+    "shortcode": "SC003"
+  },
+  {
+    "caption": "Traditional Scottish Highland cow in the fields 🐄 These adorable creatures are an iconic symbol of Scotland! #highland #cow #scotland #cute #animals",
+    "image_path": "sample/fetch/highland_cow.jpg",
+    "post_url": "https://www.instagram.com/p/SC004/",
+    "image_url": "https://example.com/sample4.jpg", 
+    "date": "2024-01-18T12:20:00",
+    "shortcode": "SC004"
+  },
+  {
+    "caption": "The Isle of Skye's dramatic coastline 🏖️ One of Scotland's most breathtaking landscapes. #isleofskye #scotland #coastline #dramatic #nature",
+    "image_path": "sample/fetch/skye_coastline.jpg",
+    "post_url": "https://www.instagram.com/p/SC005/",
+    "image_url": "https://example.com/sample5.jpg",
+    "date": "2024-01-19T16:00:00", 
+    "shortcode": "SC005"
+  }
+]
