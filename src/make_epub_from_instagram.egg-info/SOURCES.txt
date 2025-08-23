@@ -21,4 +21,5 @@ tests/test_config.py
 tests/test_epub_builder.py
 tests/test_instagram_fetch.py
 tests/test_instagram_to_epub.py
+tests/test_layout_loading.py
 tests/test_utils.py

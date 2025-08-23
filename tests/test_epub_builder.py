@@ -1,3 +1,5 @@
+import sys
+from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
@@ -78,7 +80,7 @@ def test_create_epub_builds_epub(
 @patch("epubkit.builder.Image")
 @patch("epubkit.builder.epub")
 def test_create_epub_uses_date_in_title(mock_epub, mock_image, tmp_path):
-    """Test that chapter titles use formatted date instead of shortcode"""
+    """Test that chapter titles use formatted date"""
     # Arrange
     img_file = tmp_path / "test.jpg"
     img_file.write_bytes(b"\x89JPEGFAKE")
@@ -167,8 +169,12 @@ def test_create_epub_fallback_to_shortcode_on_invalid_date(mock_epub, mock_image
     mock_img = type("_Img", (), {"format": "JPEG"})()
     mock_image.open.return_value = mock_img
 
+    # Capture stderr
+    captured_stderr = StringIO()
+    
     # Act
-    create_epub(posts, output_epub=str(output_file))
+    with patch('sys.stderr', captured_stderr):
+        create_epub(posts, output_epub=str(output_file))
 
     # Assert - check that EpubHtml was called with shortcode fallback titles
     epub_html_calls = mock_epub.EpubHtml.call_args_list
@@ -181,3 +187,8 @@ def test_create_epub_fallback_to_shortcode_on_invalid_date(mock_epub, mock_image
     # Second post: missing date -> fallback to shortcode
     second_call_kwargs = epub_html_calls[1][1]
     assert second_call_kwargs["title"] == "Post 2: MISSING456"
+    
+    # Assert stderr output contains error messages
+    stderr_output = captured_stderr.getvalue()
+    assert "[!] 年月日が不正です。shortcode=FALLBACK123" in stderr_output
+    assert "[!] 年月日が不正です。shortcode=MISSING456" in stderr_output

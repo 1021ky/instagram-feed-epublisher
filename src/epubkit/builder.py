@@ -112,7 +112,9 @@ def create_epub(
             chapter_title = f"Post {i+1}: {formatted_date}"
         except (ValueError, KeyError):
             # Fallback to shortcode if date parsing fails
-            chapter_title = f"Post {i+1}: {post.get('shortcode', 'Unknown')}"
+            shortcode = post.get('shortcode', 'Unknown')
+            print(f"[!] 年月日が不正です。shortcode={shortcode}", file=sys.stderr)
+            chapter_title = f"Post {i+1}: {shortcode}"
         
         chapter_filename = f"chapter_{i+1}.xhtml"
 
