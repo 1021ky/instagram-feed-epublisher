@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 from io import BytesIO
 from typing import List
 
@@ -104,7 +105,17 @@ def create_epub(
             book.set_cover("cover.jpg", f.read())
 
     for i, post in enumerate(posts):
-        chapter_title = f"Post {i+1}: {post['shortcode']}"
+        # Format date from ISO format to YYYY/MM/DD
+        try:
+            post_date = datetime.fromisoformat(post["date"])
+            formatted_date = post_date.strftime("%Y/%m/%d")
+            chapter_title = f"Post {i+1}: {formatted_date}"
+        except (ValueError, KeyError):
+            # Fallback to shortcode if date parsing fails
+            shortcode = post.get('shortcode', 'Unknown')
+            print(f"[!] 年月日が不正です。shortcode={shortcode}", file=sys.stderr)
+            chapter_title = f"Post {i+1}: {shortcode}"
+        
         chapter_filename = f"chapter_{i+1}.xhtml"
 
         try:
