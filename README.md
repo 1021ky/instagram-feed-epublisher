@@ -61,6 +61,25 @@ python instagram_to_epub.py build --title "My Book" --author "Me" --output_epub 
 python instagram_to_epub.py clean
 ```
 
+- サンプルデータからEPUB生成（開発・テスト用）
+
+```sh
+# 専用コマンドを使用
+python instagram_to_epub.py build_sample --title "Sample Book" --author "Author" --output_epub sample.epub
+
+# または --from_sample フラグを使用
+python instagram_to_epub.py build --from_sample True --title "Sample Book" --output_epub sample.epub
+```
+
+### サンプルデータについて
+
+`sample/fetch/` ディレクトリにサンプルデータが配置されています：
+
+- `posts_data.json`: サンプル投稿のメタデータ
+- `*.jpg`: サンプル画像ファイル
+
+このサンプルデータはプルリクエスト作成時にGitHub Actionsで自動的にEPUBが生成され、レビュー用にアーティファクトとして添付されます。
+
 ### 出力ファイル名とメタデータ
 
 - output_epub未指定時は以下の優先で自動決定
