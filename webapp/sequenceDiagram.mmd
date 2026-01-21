@@ -1,0 +1,21 @@
+sequenceDiagram
+    %% @mermaid-chart
+    actor U as User
+    participant FE as WebApp (Next.js)
+    participant BA as BetterAuth
+    participant IG as Instagram Graph API
+    participant EP as epub.js (client)
+    U->>FE: Open app
+    U->>FE: Click Instagram SSO
+    FE->>BA: Start OAuth dance
+    BA-->>FE: Access token
+    FE-->>U: Logged-in session
+    U->>FE: Set hashtag/date range/max count
+    U->>FE: Enter title/author/contact/IG URL
+    FE->>IG: Fetch feed with filters
+    IG-->>FE: Filtered posts
+    FE-->>U: Show summary/confirm
+    FE->>EP: Build EPUB with metadata+images
+    EP-->>FE: Blob URL
+    FE-->>U: Trigger download (EPUB)
+    U->>FE: Logout

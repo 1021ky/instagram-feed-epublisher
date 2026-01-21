@@ -1,0 +1,30 @@
+{
+  "name": "instagram-feed-epublisher-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "auth:migrate": "npx --yes @better-auth/cli@latest migrate --config src/lib/auth.ts --yes",
+    "predev": "pnpm auth:migrate",
+    "dev": "next dev",
+    "dev:https": "pnpm auth:migrate && node scripts/dev-https.mjs",
+    "build": "next build",
+    "prestart": "pnpm auth:migrate",
+    "start": "next start",
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "dependencies": {
+    "@lesjoursfr/html-to-epub": "^2.0.6",
+    "better-auth": "^1.0.0",
+    "better-sqlite3": "^12.0.0",
+    "next": "^15.2.0",
+    "playwright": "^1.52.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
