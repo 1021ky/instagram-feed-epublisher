@@ -1,6 +1,6 @@
 out/
 node_modules/
-server/node_modules/
-server/.next/
-server/public/app/
-server/certs/
+node_modules/
+.next/
+public/app/
+certs/
