@@ -56,7 +56,7 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
     credentials: "include",
   });
   if (!response.ok) {
-    throw new Error("フィード取得に失敗しました");
+    throw new Error("フィード取得に失敗しました", { cause: response });
   }
   const payload = (await response.json()) as { items: InstagramMedia[] };
   return payload.items ?? [];

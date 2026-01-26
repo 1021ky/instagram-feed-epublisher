@@ -1,0 +1,47 @@
+erDiagram
+    %% @mermaid-chart
+    direction LR
+    USER ||--o{ AUTH_SESSION : "has"
+    USER ||--o{ FEED_FILTER : "applies"
+    USER ||--o{ EPUB_DOCUMENT : "downloads"
+    AUTH_SESSION {
+        string provider
+        string access_token
+        datetime expires_at
+    }
+    FEED_FILTER {
+        string hashtag
+        date start_date
+        date end_date
+        int max_count
+    }
+    USER {
+        string instagram_id
+        string display_name
+    }
+    FEED_ITEM {
+        string shortcode PK
+        string caption
+        datetime posted_at
+        string post_url
+    }
+    MEDIA_ASSET {
+        string url
+        string mime_type
+        string filename
+    }
+    EPUB_METADATA {
+        string title
+        string author_name
+        string contact
+        string instagram_url
+        string language
+    }
+    EPUB_DOCUMENT {
+        string file_name
+        datetime generated_at
+    }
+    FEED_FILTER ||--o{ FEED_ITEM : "returns"
+    FEED_ITEM ||--o{ MEDIA_ASSET : "includes"
+    EPUB_METADATA ||--|| EPUB_DOCUMENT : "describes"
+    EPUB_DOCUMENT }o--|| FEED_ITEM : "contains"

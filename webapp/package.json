@@ -1,24 +1,39 @@
 {
-  "name": "ts-pnpm-template",
-  "version": "0.0.0",
+  "name": "instagram-feed-epublisher-webapp",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm --dir server dev",
-    "dev:https": "pnpm --dir server dev:https",
-    "build": "pnpm --dir server build",
-    "start": "pnpm --dir server start",
-    "test": "pnpm --dir server test",
-    "test:e2e": "playwright test"
+    "auth:migrate": "npx --yes @better-auth/cli@latest migrate --config src/lib/auth.ts --yes",
+    "predev": "pnpm auth:migrate",
+    "dev": "pnpm next build && pnpm node scripts/dev-https.mjs",
+    "build": "pnpm next build",
+    "start": "pnpm next start",
+    "test": "pnpm test:unit && pnpm test:e2e",
+    "test:unit": "pnpm vitest run --config vitest.config.ts",
+    "test:e2e": "pnpm playwright test"
   },
   "engines": {
     "node": "24.12.0"
   },
   "packageManager": "pnpm@10.26.0",
-  "dependencies": {},
+  "dependencies": {
+    "@lesjoursfr/html-to-epub": "^2.0.6",
+    "@logtape/adaptor-winston": "^2.0.2",
+    "@logtape/logtape": "^2.0.2",
+    "better-auth": "^1.0.0",
+    "better-sqlite3": "^12.0.0",
+    "next": "^15.2.0",
+    "playwright": "^1.52.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "winston": "^3.19.0"
+  },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.0.3",
+    "@types/react": "19.2.9",
     "typescript": "^5.9.3"
   }
 }

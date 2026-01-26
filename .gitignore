@@ -43,3 +43,8 @@ config.py
 utils.py
 epub_builder.py
 instagram_fetch.py
+
+# NextJS
+node_modules/
+.next/
+

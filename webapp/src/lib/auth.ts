@@ -142,6 +142,7 @@ export const auth = betterAuth({
               id,
               name: payload.username ?? "instagram-user",
               email: `${payload.username ?? id}@instagram.local`,
+              emailVerified: false,
               image: undefined,
             };
           },

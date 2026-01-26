@@ -1,6 +1,39 @@
-out/
+# Dependencies
 node_modules/
-node_modules/
+
+# Build outputs
 .next/
-public/app/
-certs/
+dist/
+build/
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+coverage/
+
+# Database
+*.db
+*.db-journal
+
+# Misc
+.agent/
+.agents/
+.codex/
+.gemini/

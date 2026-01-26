@@ -1,0 +1,12 @@
+flowchart LR
+    %% @mermaid-chart
+    actor((User))
+    login["Instagram SSO login"]
+    filters["ハッシュタグ・期間・最大件数設定"]
+    meta["タイトル/著者/連絡先/IG URL入力"]
+    fetch["フィード取得 (Graph API)"]
+    build["フロントでEPUB生成"]
+    download["EPUBダウンロード"]
+    logout["ログアウト"]
+    actor --> login --> filters --> meta --> fetch --> build --> download
+    login --> logout
