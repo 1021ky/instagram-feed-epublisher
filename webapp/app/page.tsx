@@ -88,9 +88,12 @@ export default function Page() {
     try {
       const items = await fetchInstagramFeed(buildFilter());
       setFeed(items);
+      if (items.length === 0) {
+        setError("フィードが取得できませんでした。指定した条件に該当する投稿がないか、アカウントに投稿がありません。");
+      }
     } catch (e) {
       console.error(e);
-      setError("フィード取得に失敗しました");
+      setError(e instanceof Error ? e.message : "フィード取得に失敗しました");
     } finally {
       setLoadingFeed(false);
     }
@@ -121,7 +124,7 @@ export default function Page() {
       window.URL.revokeObjectURL(url);
     } catch (e) {
       console.error(e);
-      setError("EPUB生成に失敗しました");
+      setError(e instanceof Error ? e.message : "EPUB生成に失敗しました");
     } finally {
       setLoadingEpub(false);
     }
