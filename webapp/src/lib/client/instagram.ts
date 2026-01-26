@@ -108,6 +108,7 @@ export async function requestEpub(request: EpubRequest): Promise<Blob> {
     try {
       const errorJson = JSON.parse(errorText);
       errorMessage = errorJson.error ?? errorText;
+      console.error("[client] epub request error", { error: errorMessage });
     } catch {
       // Not JSON, use text as-is
     }

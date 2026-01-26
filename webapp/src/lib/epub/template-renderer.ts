@@ -5,7 +5,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { InstagramMedia } from "@/lib/instagram/types";
 
-const layoutDir = path.resolve(process.cwd(), "..", "..", "book_layout");
+// book_layout is at repo root (one level up from webapp)
+const layoutDir = path.resolve(process.cwd(), "..", "book_layout");
 const layoutHtmlPath = path.join(layoutDir, "layout.html");
 const layoutCssPath = path.join(layoutDir, "layout.css");
 

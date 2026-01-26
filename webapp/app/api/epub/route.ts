@@ -58,7 +58,8 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "不明なエラー";
-    logger.error("EPUB generation failed", { error: message });
+    const stack = error instanceof Error ? error.stack : undefined;
+    logger.error("EPUB generation failed", { error: message, stack });
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }
