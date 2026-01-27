@@ -6,7 +6,6 @@ build-backend = "setuptools.build_meta"
 name = "make-epub-from-instagram"
 version = "0.1.0"
 description = "Collect Instagram posts by hashtag or user and build an EPUB."
-readme = "README.md"
 authors = [{ name = "Instagram Collector" }]
 requires-python = ">=3.10"
 dependencies = [
@@ -39,7 +38,7 @@ dev = [
 
 [tool.pytest.ini_options]
 addopts = "-q --maxfail=1 --strict-markers"
-pythonpath = [ "src", "tests" ]
+pythonpath = [ ".", "../tests" ]
 
 [tool.black]
 line-length = 79
@@ -48,7 +47,7 @@ target-version = ["py312"]
 [tool.isort]
 profile = "black"
 line_length = 79
-src_paths = [ "src", "tests" ]
+src_paths = [ "app", "epubkit", "instagram", "../tests" ]
 multi_line_output = 3
 include_trailing_comma = true
 combine_as_imports = true
@@ -59,8 +58,6 @@ ignore_missing_imports = true
 warn_unused_ignores = false
 strict_optional = false
 
-[tool.setuptools]
-package-dir = {"" = "src"}
-
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
+include = ["app*", "epubkit*", "instagram*"]
