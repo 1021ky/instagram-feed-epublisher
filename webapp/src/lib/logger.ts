@@ -6,7 +6,9 @@ import { getWinstonSink } from "@logtape/adaptor-winston";
 import winston from "winston";
 import path from "node:path";
 
-const logLevel = (process.env.LOG_LEVEL ?? "info") as
+const isTest = process.env.NODE_ENV === "test";
+
+const logLevel = (process.env.LOG_LEVEL ?? (isTest ? "fatal" : "info")) as
   | "debug"
   | "info"
   | "warning"
@@ -16,30 +18,32 @@ const logLevel = (process.env.LOG_LEVEL ?? "info") as
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 // Winston transports
-const transports: winston.transport[] = [
-  new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.timestamp(),
-      winston.format.colorize(),
-      winston.format.printf(({ timestamp, level, message }) => {
-        return `${timestamp} ${level}: ${message}`;
-      })
-    ),
-  }),
-];
+const transports: winston.transport[] = [];
 
-// Add file transport for development
-if (isDevelopment) {
+// Don't add console transport in test environment
+if (!isTest) {
+  transports.push(
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.colorize(),
+        winston.format.printf(({ timestamp, level, message }) => {
+          return `${timestamp} ${level}: ${message}`;
+        })
+      ),
+    })
+  );
+}
+
+// Add file transport for development (but not test)
+if (isDevelopment && !isTest) {
   const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
   const logFilePath = path.join(process.cwd(), "logs", `${today}.log`);
 
   transports.push(
     new winston.transports.File({
       filename: logFilePath,
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      ),
+      format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
     })
   );
 }
@@ -55,6 +59,27 @@ let isLogTapeConfigured = false;
 
 // Configure LogTape with Winston sink (テスト環境で複数回実行されないように)
 if (!isLogTapeConfigured) {
+  const loggers: Array<{
+    category: string[];
+    lowestLevel: string;
+    sinks: string[];
+  }> = [
+    {
+      category: [],
+      lowestLevel: logLevel,
+      sinks: ["winston"],
+    },
+  ];
+
+  // Suppress LogTape meta logger in test environment
+  if (isTest) {
+    loggers.push({
+      category: ["logtape", "meta"],
+      lowestLevel: "fatal",
+      sinks: ["winston"],
+    });
+  }
+
   await configure({
     sinks: {
       winston: getWinstonSink(winstonLogger, {
@@ -65,13 +90,7 @@ if (!isLogTapeConfigured) {
         },
       }),
     },
-    loggers: [
-      {
-        category: [],
-        lowestLevel: logLevel,
-        sinks: ["winston"],
-      },
-    ],
+    loggers,
   });
   isLogTapeConfigured = true;
 }

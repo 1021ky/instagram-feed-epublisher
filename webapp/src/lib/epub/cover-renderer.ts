@@ -9,10 +9,7 @@ import type { EpubMetadata } from "@/lib/epub/types";
 /**
  * Renders a cover image (JPG) from HTML.
  */
-export async function renderCoverJpg(
-  metadata: EpubMetadata,
-  outputDir: string
-): Promise<string> {
+export async function renderCoverJpg(metadata: EpubMetadata, outputDir: string): Promise<string> {
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1200, height: 1600 } });

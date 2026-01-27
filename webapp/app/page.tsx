@@ -4,6 +4,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { authClient } from "@/lib/auth-client";
 import {
   fetchInstagramFeed,
@@ -89,7 +90,9 @@ export default function Page() {
       const items = await fetchInstagramFeed(buildFilter());
       setFeed(items);
       if (items.length === 0) {
-        setError("フィードが取得できませんでした。指定した条件に該当する投稿がないか、アカウントに投稿がありません。");
+        setError(
+          "フィードが取得できませんでした。指定した条件に該当する投稿がないか、アカウントに投稿がありません。"
+        );
       }
     } catch (e) {
       console.error(e);
@@ -197,11 +200,7 @@ export default function Page() {
               </label>
               <label className="field">
                 <span>終了日</span>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
+                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
               </label>
               <label className="field">
                 <span>最大取得件数（1-500）</span>
@@ -227,11 +226,7 @@ export default function Page() {
             <div className="grid">
               <label className="field">
                 <span>本のタイトル</span>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
+                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
               </label>
               <label className="field">
                 <span>著者名</span>
@@ -284,7 +279,13 @@ export default function Page() {
               <div className="feed">
                 {feed.map((item) => (
                   <article key={item.id} className="feed__item">
-                    <img src={item.media_url} alt={item.caption ?? ""} />
+                    <Image
+                      src={item.media_url}
+                      alt={item.caption ?? ""}
+                      width={500}
+                      height={500}
+                      style={{ objectFit: "cover" }}
+                    />
                     <div className="feed__body">
                       <p className="feed__caption">{item.caption ?? "(キャプションなし)"}</p>
                       <a href={item.permalink} target="_blank" rel="noreferrer">

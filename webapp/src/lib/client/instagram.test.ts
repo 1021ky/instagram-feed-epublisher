@@ -31,9 +31,7 @@ test("fetchInstagramFeed throws on error", async () => {
   } as Response;
   globalThis.fetch = vi.fn().mockResolvedValue(response);
 
-  await expect(fetchInstagramFeed({ maxCount: 10 })).rejects.toThrow(
-    "フィード取得に失敗しました"
-  );
+  await expect(fetchInstagramFeed({ maxCount: 10 })).rejects.toThrow("フィード取得に失敗しました");
 });
 
 test("requestEpub returns blob on success", async () => {

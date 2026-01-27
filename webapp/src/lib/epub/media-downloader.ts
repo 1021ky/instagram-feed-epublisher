@@ -8,10 +8,7 @@ import type { InstagramMedia } from "@/lib/instagram/types";
 /**
  * Downloads an Instagram media item to local storage.
  */
-export async function downloadMedia(
-  item: InstagramMedia,
-  outputDir: string
-): Promise<string> {
+export async function downloadMedia(item: InstagramMedia, outputDir: string): Promise<string> {
   const response = await fetch(item.media_url);
   if (!response.ok) {
     throw new Error(`画像の取得に失敗しました: ${response.status}`);

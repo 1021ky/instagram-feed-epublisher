@@ -30,7 +30,7 @@ https
       cert: fs.readFileSync(certFile),
       key: fs.readFileSync(keyFile),
     },
-    (req, res) => handle(req, res),
+    (req, res) => handle(req, res)
   )
   .listen(port, hostname, () => {
     // eslint-disable-next-line no-console

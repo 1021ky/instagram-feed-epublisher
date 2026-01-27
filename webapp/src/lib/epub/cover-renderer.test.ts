@@ -16,9 +16,7 @@ vi.mock("playwright", () => ({
 }));
 
 vi.mock("node:fs/promises", async () => {
-  const actual = await vi.importActual<typeof import("node:fs/promises")>(
-    "node:fs/promises"
-  );
+  const actual = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
   return {
     ...actual,
     writeFile: vi.fn(),

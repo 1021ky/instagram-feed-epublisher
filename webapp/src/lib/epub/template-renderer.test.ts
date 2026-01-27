@@ -1,7 +1,7 @@
 /**
  * @file Unit tests for EPUB template renderer.
  */
-import { expect, test, vi, describe } from "vitest";
+import { expect, test, describe } from "vitest";
 import {
   mockMediaBasic,
   mockMediaWithSpecialChars,
@@ -65,7 +65,7 @@ describe("renderChapterHtml", () => {
   test("キャプションがない場合デフォルトタイトルを使用する", async () => {
     const { renderChapterHtml } = await import(realModulePath);
     const template = {
-      layoutHtml: '<html><body><h1>{chapter_title}</h1></body></html>',
+      layoutHtml: "<html><body><h1>{chapter_title}</h1></body></html>",
       cssContent: "",
     };
     const html = renderChapterHtml(template, mockMediaNoCaption, "image.jpg");
@@ -76,7 +76,7 @@ describe("renderChapterHtml", () => {
   test("改行を<br />タグに変換する（エスケープ後）", async () => {
     const { renderChapterHtml } = await import(realModulePath);
     const template = {
-      layoutHtml: '<html><body><p>{caption_html}</p></body></html>',
+      layoutHtml: "<html><body><p>{caption_html}</p></body></html>",
       cssContent: "",
     };
     const html = renderChapterHtml(template, mockMediaWithNewlines, "image.jpg");
