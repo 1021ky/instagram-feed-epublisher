@@ -39,16 +39,13 @@ export const auth = betterAuth({
               code,
             });
 
-            const shortResponse = await fetch(
-              "https://api.instagram.com/oauth/access_token",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: form.toString(),
-              }
-            );
+            const shortResponse = await fetch("https://api.instagram.com/oauth/access_token", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: form.toString(),
+            });
 
             if (!shortResponse.ok) {
               const errorText = await shortResponse.text();
@@ -71,10 +68,7 @@ export const auth = betterAuth({
 
             const longUrl = new URL("https://graph.instagram.com/access_token");
             longUrl.searchParams.set("grant_type", "ig_exchange_token");
-            longUrl.searchParams.set(
-              "client_secret",
-              process.env.INSTAGRAM_CLIENT_SECRET ?? ""
-            );
+            longUrl.searchParams.set("client_secret", process.env.INSTAGRAM_CLIENT_SECRET ?? "");
             longUrl.searchParams.set("access_token", shortAccessToken);
 
             const longResponse = await fetch(longUrl.toString());
@@ -96,9 +90,7 @@ export const auth = betterAuth({
 
             return {
               accessToken: longAccessToken,
-              accessTokenExpiresAt: expiresIn
-                ? new Date(Date.now() + expiresIn * 1000)
-                : undefined,
+              accessTokenExpiresAt: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
               scopes: [
                 "instagram_business_basic",
                 "instagram_business_content_publish",
@@ -123,9 +115,7 @@ export const auth = betterAuth({
             const response = await fetch(url.toString());
             if (!response.ok) {
               const errorText = await response.text();
-              throw new Error(
-                `Instagram user info failed: ${response.status} ${errorText}`
-              );
+              throw new Error(`Instagram user info failed: ${response.status} ${errorText}`);
             }
 
             const payload = (await response.json()) as {

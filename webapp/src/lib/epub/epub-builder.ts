@@ -12,24 +12,15 @@ import { downloadMedia } from "@/lib/epub/media-downloader";
 import { renderCoverJpg } from "@/lib/epub/cover-renderer";
 
 function getTemplatesDir(): string {
-  return path.resolve(
-    process.cwd(),
-    "node_modules",
-    "@lesjoursfr",
-    "html-to-epub",
-    "templates"
-  );
+  return path.resolve(process.cwd(), "node_modules", "@lesjoursfr", "html-to-epub", "templates");
 }
 
 /**
  * Builds an EPUB file from Instagram media items.
  */
-export async function buildEpub(
-  input: EpubInput,
-  outputDir: string
-): Promise<string> {
+export async function buildEpub(input: EpubInput, outputDir: string): Promise<string> {
   logger.info("Building EPUB", { itemCount: input.items.length, outputDir });
-  
+
   const template = await loadLayoutTemplate();
   const chapterData: EpubChapter[] = [];
 
@@ -48,7 +39,7 @@ export async function buildEpub(
   logger.debug("Generating cover image");
   const coverPath = await renderCoverJpg(input.metadata, outputDir);
   logger.info("Cover generated", { coverPath });
-  
+
   const outputPath = path.join(outputDir, "instagram-feed.epub");
 
   const templatesDir = getTemplatesDir();

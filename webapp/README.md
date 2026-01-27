@@ -35,7 +35,7 @@
 
 - デフォルトの baseURL: `http://localhost:3000`
 - 本番/ステージングでは `PLAYWRIGHT_BASE_URL` を指定します。
-	- 例: `PLAYWRIGHT_BASE_URL=https://example.com pnpm test:e2e`
+  - 例: `PLAYWRIGHT_BASE_URL=https://example.com pnpm test:e2e`
 - ローカル実行時はテスト前に Next dev サーバが自動起動されます。
 
 ## 環境変数
@@ -56,7 +56,7 @@
 1. Meta DevelopersでInstagramログインを有効化
 2. Instagramビジネス/クリエイターアカウントであることを確認
 3. OAuthリダイレクトURIを設定
-	- `https://localhost:3000/api/auth/callback/instagram`
+   - `https://localhost:3000/api/auth/callback/instagram`
 4. App ID/Secretを `INSTAGRAM_CLIENT_ID` / `INSTAGRAM_CLIENT_SECRET` に設定
 
 使用スコープ:

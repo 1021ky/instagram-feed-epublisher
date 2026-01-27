@@ -6,10 +6,7 @@ import type { FeedFilter, InstagramMedia } from "@/lib/instagram/types";
 /**
  * Applies filter rules to Instagram media items.
  */
-export function applyFeedFilter(
-  items: InstagramMedia[],
-  filter: FeedFilter
-): InstagramMedia[] {
+export function applyFeedFilter(items: InstagramMedia[], filter: FeedFilter): InstagramMedia[] {
   return items
     .filter((item) => {
       if (filter.hashtag) {

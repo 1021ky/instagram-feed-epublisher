@@ -7,9 +7,7 @@ import { downloadMedia } from "./media-downloader";
 const originalFetch = globalThis.fetch;
 
 vi.mock("node:fs/promises", async () => {
-  const actual = await vi.importActual<typeof import("node:fs/promises")>(
-    "node:fs/promises"
-  );
+  const actual = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
   return {
     ...actual,
     writeFile: vi.fn(),

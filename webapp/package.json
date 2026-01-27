@@ -9,6 +9,9 @@
     "dev": "pnpm next build && pnpm node scripts/dev-https.mjs",
     "build": "pnpm next build",
     "start": "pnpm next start",
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "pnpm vitest run --config vitest.config.ts",
     "e2etest": "pnpm playwright test",
     "e2etest:ui": "pnpm playwright test --ui",
@@ -32,10 +35,18 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
     "@playwright/test": "^1.52.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.0.3",
     "@types/react": "19.2.9",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.1.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "vitest": "^3.0.0"
   }
