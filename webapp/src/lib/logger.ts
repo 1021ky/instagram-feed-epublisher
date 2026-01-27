@@ -59,6 +59,27 @@ let isLogTapeConfigured = false;
 
 // Configure LogTape with Winston sink (テスト環境で複数回実行されないように)
 if (!isLogTapeConfigured) {
+  const loggers: Array<{
+    category: string[];
+    lowestLevel: string;
+    sinks: string[];
+  }> = [
+    {
+      category: [],
+      lowestLevel: logLevel,
+      sinks: ["winston"],
+    },
+  ];
+
+  // Suppress LogTape meta logger in test environment
+  if (isTest) {
+    loggers.push({
+      category: ["logtape", "meta"],
+      lowestLevel: "fatal",
+      sinks: ["winston"],
+    });
+  }
+
   await configure({
     sinks: {
       winston: getWinstonSink(winstonLogger, {
@@ -69,19 +90,7 @@ if (!isLogTapeConfigured) {
         },
       }),
     },
-    loggers: [
-      {
-        category: [],
-        lowestLevel: logLevel,
-        sinks: ["winston"],
-      },
-      // Suppress LogTape meta logger in test environment
-      {
-        category: ["logtape", "meta"],
-        lowestLevel: "fatal",
-        sinks: ["winston"],
-      },
-    ],
+    loggers,
   });
   isLogTapeConfigured = true;
 }
