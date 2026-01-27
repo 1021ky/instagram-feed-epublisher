@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "auth:migrate": "npx --yes @better-auth/cli@latest migrate --config src/lib/auth.ts --yes",
+    "auth:migrate": "pnpm dlx @better-auth/cli@latest migrate --config src/lib/auth.ts --yes",
     "predev": "pnpm auth:migrate",
     "dev": "pnpm next build && pnpm node scripts/dev-https.mjs",
     "build": "pnpm next build",
