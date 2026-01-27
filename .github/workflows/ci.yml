@@ -57,6 +57,8 @@ jobs:
   # Webapp Build
   webapp-build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: webapp
@@ -97,6 +99,8 @@ jobs:
   # Webapp Lint
   webapp-lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: webapp
@@ -137,6 +141,8 @@ jobs:
   # Webapp Test
   webapp-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: webapp
@@ -177,6 +183,8 @@ jobs:
   # Webapp E2E Test
   webapp-e2etest:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: webapp
