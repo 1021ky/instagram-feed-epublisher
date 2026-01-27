@@ -9,6 +9,7 @@
     "dev": "pnpm next build && pnpm node scripts/dev-https.mjs",
     "build": "pnpm next build",
     "start": "pnpm next start",
+    "lint": "pnpm tsc --noEmit",
     "test": "pnpm vitest run --config vitest.config.ts",
     "e2etest": "pnpm playwright test",
     "e2etest:ui": "pnpm playwright test --ui",
