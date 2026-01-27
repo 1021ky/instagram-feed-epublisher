@@ -27,7 +27,11 @@ test("fetchGraphMedia throws on missing token", async () => {
 });
 
 test("fetchGraphMedia throws on non-200 response", async () => {
-  const response = { ok: false, status: 500 } as Response;
+  const response = {
+    ok: false,
+    status: 500,
+    text: async () => "error details",
+  } as Response;
   globalThis.fetch = vi.fn().mockResolvedValue(response);
 
   await expect(fetchGraphMedia("token")).rejects.toThrow("Graph API error");

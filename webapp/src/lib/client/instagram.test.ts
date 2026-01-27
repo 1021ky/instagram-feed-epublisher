@@ -24,7 +24,11 @@ test("fetchInstagramFeed returns items on success", async () => {
 });
 
 test("fetchInstagramFeed throws on error", async () => {
-  const response = { ok: false } as Response;
+  const response = {
+    ok: false,
+    status: 500,
+    text: async () => "error message",
+  } as Response;
   globalThis.fetch = vi.fn().mockResolvedValue(response);
 
   await expect(fetchInstagramFeed({ maxCount: 10 })).rejects.toThrow(
@@ -36,8 +40,10 @@ test("requestEpub returns blob on success", async () => {
   const blob = new Blob(["epub"]);
   const response = {
     ok: true,
+    status: 200,
     blob: async () => blob,
-  } as Response;
+    headers: new Headers({ "content-type": "application/epub+zip" }),
+  } as unknown as Response;
   globalThis.fetch = vi.fn().mockResolvedValue(response);
 
   const result = await requestEpub({
@@ -53,7 +59,11 @@ test("requestEpub returns blob on success", async () => {
 });
 
 test("requestEpub throws on error", async () => {
-  const response = { ok: false } as Response;
+  const response = {
+    ok: false,
+    status: 500,
+    text: async () => "error message",
+  } as Response;
   globalThis.fetch = vi.fn().mockResolvedValue(response);
 
   await expect(

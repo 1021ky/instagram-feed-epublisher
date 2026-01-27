@@ -50,25 +50,31 @@ const winstonLogger = winston.createLogger({
   transports,
 });
 
-// Configure LogTape with Winston sink
-await configure({
-  sinks: {
-    winston: getWinstonSink(winstonLogger, {
-      category: {
-        separator: ".",
-        position: "start",
-        decorator: "[]",
-      },
-    }),
-  },
-  loggers: [
-    {
-      category: [],
-      lowestLevel: logLevel,
-      sinks: ["winston"],
+// LogTapeの設定が既に行われているかを追跡するフラグ
+let isLogTapeConfigured = false;
+
+// Configure LogTape with Winston sink (テスト環境で複数回実行されないように)
+if (!isLogTapeConfigured) {
+  await configure({
+    sinks: {
+      winston: getWinstonSink(winstonLogger, {
+        category: {
+          separator: ".",
+          position: "start",
+          decorator: "[]",
+        },
+      }),
     },
-  ],
-});
+    loggers: [
+      {
+        category: [],
+        lowestLevel: logLevel,
+        sinks: ["winston"],
+      },
+    ],
+  });
+  isLogTapeConfigured = true;
+}
 
 /**
  * Get a logger instance for the specified category.
