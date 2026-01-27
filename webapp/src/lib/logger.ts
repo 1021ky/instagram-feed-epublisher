@@ -61,7 +61,7 @@ let isLogTapeConfigured = false;
 if (!isLogTapeConfigured) {
   const loggers: Array<{
     category: string[];
-    lowestLevel: string;
+    lowestLevel: "debug" | "info" | "warning" | "error" | "fatal" | "trace";
     sinks: string[];
   }> = [
     {
