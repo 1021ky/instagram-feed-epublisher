@@ -31,6 +31,50 @@
 
 - Next.js: `pnpm build`
 
+## コード品質
+
+### Pre-commit Hooks
+
+このプロジェクトでは、コミット前に自動でコードフォーマットとlintを実行する pre-commit hooks を設定しています。
+
+#### 自動実行される内容
+
+- **TypeScript/JavaScript ファイル** (`.ts`, `.tsx`, `.js`, `.jsx`):
+  - ESLint による自動修正 (`eslint --fix`)
+  - Prettier によるフォーマット (`prettier --write`)
+
+- **その他のファイル** (`.json`, `.md`, `.css`, `.html`, `.yml`, `.yaml`):
+  - Prettier によるフォーマットのみ (`prettier --write`)
+
+#### セットアップ
+
+初回の `pnpm install` 時に自動でセットアップされます。手動でセットアップする場合:
+
+```bash
+pnpm install
+pnpm run prepare
+```
+
+#### 動作
+
+`git commit` を実行すると、ステージされたファイルに対して自動的にlint/formatが実行されます。
+エラーがある場合は自動修正され、修正後のファイルがコミットに含まれます。
+
+#### 手動実行
+
+pre-commit hook を通さずに手動でlint/formatを実行する場合:
+
+```bash
+# すべてのファイルをlint
+pnpm lint
+
+# すべてのファイルをformat
+pnpm format
+
+# formatのチェックのみ（修正なし）
+pnpm format:check
+```
+
 ## E2E（Playwright）
 
 - デフォルトの baseURL: `http://localhost:3000`
