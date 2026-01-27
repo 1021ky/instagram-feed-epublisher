@@ -33,7 +33,11 @@ dist/
 
 # Project-specific
 auth.json
+# Instaloaderが生成するセッションファイル (session-<username>) を無視
+# ただし、アプリケーションコードの session-service.ts は除外（下記の!で許可）
 session-*
+# session-* パターンが session-service.ts にもマッチしてしまうため、
+# アプリケーションのソースコードとして必要な session-service.ts を明示的に許可
 !webapp/src/lib/auth/session-service.ts
 *.epub
 posts_data.json
