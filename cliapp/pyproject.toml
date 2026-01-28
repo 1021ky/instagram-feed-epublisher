@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
-instagram-to-epub = "app.cli:main"
+instagram-to-epub = "src.cli:main"
 
 [project.optional-dependencies]
 # For tools that understand PEP 621 extras

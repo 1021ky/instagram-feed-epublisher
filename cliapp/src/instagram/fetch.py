@@ -5,8 +5,8 @@ from datetime import datetime
 
 import instaloader
 
-from app.config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
-from app.utils import parse_hashtags
+from config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
+from utils import parse_hashtags
 
 
 def fetch_instagram_data(
