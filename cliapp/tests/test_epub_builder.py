@@ -1,4 +1,3 @@
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -36,18 +35,27 @@ def sample_posts(tmp_path):
 
 @patch("epubkit.builder.Image")
 @patch("epubkit.builder.epub")
-@pytest.mark.parametrize("title, author, output_name", [ (None, None, "out.epub") ])
+@pytest.mark.parametrize(
+    "title, author, output_name", [(None, None, "out.epub")]
+)
 def test_create_epub_fails_gracefully_when_layout_missing(
-    tmp_path, sample_posts, monkeypatch, title, author, output_name  # 引数を追加
+    mock_epub,
+    mock_image,
+    tmp_path,
+    sample_posts,
+    monkeypatch,
+    title,
+    author,
+    output_name,
 ):
     # Arrange: レイアウトファイルが存在しない空のディレクトリへ移動
     empty_dir = tmp_path / "empty_project"
     empty_dir.mkdir()
     monkeypatch.chdir(empty_dir)
-    
+
     output_file = empty_dir / "test.epub"
 
-    # Act: 実行（内部でFileNotFoundErrorが起きるが、create_epubがキャッチしてreturnするはず）
+    # Act: FileNotFoundErrorが起きるが、create_epubがキャッチしてreturnするはず）
     create_epub(sample_posts, output_epub=str(output_file))
 
     # Assert: EPUBファイルが生成されていないことを確認
