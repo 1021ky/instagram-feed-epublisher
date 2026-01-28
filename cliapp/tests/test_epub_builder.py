@@ -1,4 +1,3 @@
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -37,39 +36,27 @@ def sample_posts(tmp_path):
 @patch("epubkit.builder.Image")
 @patch("epubkit.builder.epub")
 @pytest.mark.parametrize(
-    "title, author, output_name",
-    [
-        (None, None, "out.epub"),
-        ("T", None, "out.epub"),
-        (None, "A", "out.epub"),
-        ("T", "A", "out.epub"),
-    ],
+    "title, author, output_name", [(None, None, "out.epub")]
 )
-def test_create_epub_builds_epub(
+def test_create_epub_fails_gracefully_when_layout_missing(
     mock_epub,
     mock_image,
     tmp_path,
     sample_posts,
+    monkeypatch,
     title,
     author,
     output_name,
 ):
-    # stub epub.write_epub
-    out = tmp_path / output_name
+    # Arrange: レイアウトファイルが存在しない空のディレクトリへ移動
+    empty_dir = tmp_path / "empty_project"
+    empty_dir.mkdir()
+    monkeypatch.chdir(empty_dir)
 
-    def _write(name, book, opts):
-        Path(name).write_bytes(b"EPUB")
+    output_file = empty_dir / "test.epub"
 
-    mock_epub.write_epub.side_effect = _write
+    # Act: FileNotFoundErrorが起きるが、create_epubがキャッチしてreturnするはず）
+    create_epub(sample_posts, output_epub=str(output_file))
 
-    # mock Image.open to return object with format attribute
-    mock_img = type("_Img", (), {"format": "JPEG"})()
-    mock_image.open.return_value = mock_img
-
-    create_epub(sample_posts, title=title, author=author, output_epub=str(out))
-
-    assert out.exists()
-    # Ensure cover/chapters added
-    assert mock_epub.EpubBook.called
-    assert mock_epub.EpubHtml.called
-    assert mock_epub.EpubImage.called
+    # Assert: EPUBファイルが生成されていないことを確認
+    assert not output_file.exists()

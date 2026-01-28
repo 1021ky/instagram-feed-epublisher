@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+dist/
+build/
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+*.db-journal
+
+# Test outputs
+coverage/
+test-results/
+
+# Environment
+.env*
+
+# AI agent directories
+.agent/
+.agents/
+.codex/
+.gemini/
