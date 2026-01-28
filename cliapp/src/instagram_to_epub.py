@@ -2,7 +2,7 @@ import os
 import sys
 
 # Ensure src/ is on sys.path when running as a script from repo root
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "cliapp/src"))
 
 from cli import main, run_all  # noqa: E402
 from commands import create_epub_from_saved_data  # noqa: E402
