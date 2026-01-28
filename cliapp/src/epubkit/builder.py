@@ -6,7 +6,7 @@ from typing import List
 from ebooklib import epub
 from PIL import Image
 
-from app.config import (
+from config import (
     DEFAULT_AUTHOR,
     DEFAULT_LAYOUT_CSS_FILE,
     DEFAULT_LAYOUT_DIR,

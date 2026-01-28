@@ -1,10 +1,10 @@
 import fire
 
-from app.commands import create_epub_from_saved_data
-from app.config import OUTPUT_EPUB_FILE
-from app.housekeeping import cleanup_temp_files
-from app.utils import default_epub_name, parse_hashtags
+from commands import create_epub_from_saved_data
+from config import OUTPUT_EPUB_FILE
+from housekeeping import cleanup_temp_files
 from instagram.fetch import fetch_instagram_data
+from utils import default_epub_name, parse_hashtags
 
 
 def run_all(
