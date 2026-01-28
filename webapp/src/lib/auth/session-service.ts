@@ -20,11 +20,11 @@ export async function resolveInstagramAccessToken(request: Request): Promise<str
   }
 
   // Get the account linked to the user for Instagram provider
-  const accounts = await auth.api.listAccounts({
+  const accounts = await auth.api.listUserAccounts({
     headers: request.headers,
   });
 
-  const instagramAccount = accounts.find((account) => account.providerId === "instagram");
+  const instagramAccount = accounts.find((account: { providerId: string; accessToken?: string }) => account.providerId === "instagram");
 
   if (!instagramAccount) {
     throw new Error("Instagram account not linked");
