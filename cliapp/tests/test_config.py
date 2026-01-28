@@ -1,4 +1,4 @@
-from app.config import (
+from config import (
     DEFAULT_AUTHOR,
     OUTPUT_EPUB_FILE,
     POSTS_DATA_FILE,
