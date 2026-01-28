@@ -33,7 +33,10 @@ dist/
 
 # Project-specific
 auth.json
-session-*
+# Instaloaderが生成するセッションファイルを個別に指定
+# ワイルドカード（session-*）だと将来追加される同名の別ファイル（.json、.mdなど）まで
+# 巻き込んで無視してしまうため、既知のファイルのみを明示的に指定
+session-vaivailx
 *.epub
 posts_data.json
 

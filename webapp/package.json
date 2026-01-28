@@ -9,7 +9,7 @@
     "dev": "pnpm next build && pnpm node scripts/dev-https.mjs",
     "build": "pnpm next build",
     "start": "pnpm next start",
-    "lint": "next lint",
+    "lint": "pnpm tsc --noEmit && next lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "pnpm vitest run --config vitest.config.ts",
