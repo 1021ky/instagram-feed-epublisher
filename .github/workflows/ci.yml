@@ -37,18 +37,23 @@ jobs:
             ${{ runner.os }}-uv-
 
       - name: Install dependencies (uv)
+        working-directory: cliapp
         run: |
           uv venv
           uv pip install -e .[dev]
 
       - name: Lint - isort (check)
+        working-directory: cliapp
         run: uv run isort --check --diff .
 
       - name: Lint - black (check)
+        working-directory: cliapp
         run: uv run black --check .
 
       - name: Type check - mypy
+        working-directory: cliapp
         run: uv run mypy .
 
       - name: Run unit tests
+        working-directory: cliapp
         run: uv run pytest -q
