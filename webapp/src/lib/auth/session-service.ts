@@ -1,11 +1,5 @@
 /**
  * @file Better Authのセッションから Instagram アクセストークンを取得するサービス
- * 
- * 注意: このファイル名は "session-service.ts" であり、.gitignore の "session-*" パターンに
- * マッチしてしまいますが、これはアプリケーションの重要なソースコードです。
- * .gitignore では "session-*" パターンで Instaloader が生成するセッションファイルを
- * 除外していますが、このファイルは "!webapp/src/lib/auth/session-service.ts" で
- * 明示的に許可されています。
  */
 import { auth } from "@/lib/auth";
 
