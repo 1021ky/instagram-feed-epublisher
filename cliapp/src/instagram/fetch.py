@@ -152,5 +152,6 @@ def fetch_instagram_data(
         json.dump(posts_data, f, ensure_ascii=False, indent=2)
 
     print(
-        f"\n合計 {len(posts_data)} 件の投稿メタデータを '{POSTS_DATA_FILE}' に保存しました。"
+        f"\n合計 {len(posts_data)} 件の投稿メタデータを"
+        f" '{POSTS_DATA_FILE}' に保存しました。"
     )

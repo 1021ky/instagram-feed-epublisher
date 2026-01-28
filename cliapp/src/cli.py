@@ -3,8 +3,8 @@ import fire
 from commands import create_epub_from_saved_data
 from config import OUTPUT_EPUB_FILE
 from housekeeping import cleanup_temp_files
-from utils import default_epub_name, parse_hashtags
 from instagram.fetch import fetch_instagram_data
+from utils import default_epub_name, parse_hashtags
 
 
 def run_all(
