@@ -1,10 +1,13 @@
 import fire
+from instagram_feed_epublisher.commands import create_epub_from_saved_data
+from instagram_feed_epublisher.config import OUTPUT_EPUB_FILE
+from instagram_feed_epublisher.instagram_client.util import (
+    default_epub_name,
+    parse_hashtags,
+)
 
-from app.commands import create_epub_from_saved_data
-from app.config import OUTPUT_EPUB_FILE
-from app.housekeeping import cleanup_temp_files
-from app.utils import default_epub_name, parse_hashtags
-from instagram.fetch import fetch_instagram_data
+from instagram_feed_epublisher.housekeeping import cleanup_temp_files
+from instagram_feed_epublisher.instagram_client.fetch import fetch_instagram_data
 
 
 def run_all(
@@ -24,9 +27,7 @@ def run_all(
     fetch_instagram_data(
         hashtags=hashtags, login_user=login_user, target_user=target_user
     )
-    create_epub_from_saved_data(
-        title=title, author=author, output_epub=resolved_epub
-    )
+    create_epub_from_saved_data(title=title, author=author, output_epub=resolved_epub)
     cleanup_temp_files()
 
 

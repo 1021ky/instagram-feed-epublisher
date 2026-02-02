@@ -4,9 +4,8 @@ import time
 from datetime import datetime
 
 import instaloader
-
-from app.config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
-from app.utils import parse_hashtags
+from ..config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
+from .util import parse_hashtags
 
 
 def fetch_instagram_data(
@@ -18,9 +17,7 @@ def fetch_instagram_data(
     """Instagramからデータ取得して画像を保存し、メタデータをJSONに書き出す。"""
     normalized_tags = parse_hashtags(hashtags)
     if not normalized_tags and not target_user:
-        print(
-            "[!] ハッシュタグまたはターゲットのユーザー名を指定してください。"
-        )
+        print("[!] ハッシュタグまたはターゲットのユーザー名を指定してください。")
         return
 
     if target_user:
@@ -73,10 +70,7 @@ def fetch_instagram_data(
             condition = (
                 True
                 if target_user
-                else all(
-                    f"#{tag.lower()}" in caption_lower
-                    for tag in normalized_tags
-                )
+                else all(f"#{tag.lower()}" in caption_lower for tag in normalized_tags)
             )
             if not condition:
                 continue
@@ -103,9 +97,7 @@ def fetch_instagram_data(
                 elif os.path.exists(base_path):
                     image_path = base_path
                 else:
-                    image_path = os.path.join(
-                        TEMP_IMAGE_DIR, f"{post.shortcode}.jpg"
-                    )
+                    image_path = os.path.join(TEMP_IMAGE_DIR, f"{post.shortcode}.jpg")
 
                 posts_data.append(
                     {
@@ -138,9 +130,7 @@ def fetch_instagram_data(
         print("\n処理を中断しました。")
 
     if not posts_data:
-        print(
-            "条件に一致する投稿が見つかりませんでした。JSONは書き出しません。"
-        )
+        print("条件に一致する投稿が見つかりませんでした。JSONは書き出しません。")
         return
 
     try:
@@ -152,5 +142,6 @@ def fetch_instagram_data(
         json.dump(posts_data, f, ensure_ascii=False, indent=2)
 
     print(
-        f"\n合計 {len(posts_data)} 件の投稿メタデータを '{POSTS_DATA_FILE}' に保存しました。"
+        f"\n合計 {len(posts_data)} 件の投稿メタデータを"
+        f" '{POSTS_DATA_FILE}' に保存しました。"
     )

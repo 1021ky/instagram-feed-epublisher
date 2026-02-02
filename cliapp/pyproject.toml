@@ -3,10 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "make-epub-from-instagram"
+name = "instagram_feed_epublisher"
 version = "0.1.0"
 description = "Collect Instagram posts by hashtag or user and build an EPUB."
-readme = "README.md"
 authors = [{ name = "Instagram Collector" }]
 requires-python = ">=3.10"
 dependencies = [
@@ -17,7 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
-instagram-to-epub = "app.cli:main"
+instagram-to-epub = "instagram_feed_epublisher.cli:main"
 
 [project.optional-dependencies]
 # For tools that understand PEP 621 extras
@@ -32,35 +31,20 @@ dev = [
 [dependency-groups]
 dev = [
   "pytest>=8.0",
-  "black>=24.0",
-  "isort>=5.12",
   "mypy>=1.8",
+  "ruff>=0.14.14",
 ]
 
 [tool.pytest.ini_options]
 addopts = "-q --maxfail=1 --strict-markers"
-pythonpath = [ "src", "tests" ]
-
-[tool.black]
-line-length = 79
-target-version = ["py312"]
-
-[tool.isort]
-profile = "black"
-line_length = 79
-src_paths = [ "src", "tests" ]
-multi_line_output = 3
-include_trailing_comma = true
-combine_as_imports = true
+pythonpath = [ "src" ]
 
 [tool.mypy]
 python_version = "3.13"
 ignore_missing_imports = true
-warn_unused_ignores = false
-strict_optional = false
-
-[tool.setuptools]
-package-dir = {"" = "src"}
+warn_unused_ignores = true
+strict_optional = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["instagram_feed_epublisher*"]

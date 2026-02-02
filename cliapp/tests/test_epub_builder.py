@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from epubkit.builder import create_epub
+from instagram_feed_epublisher.epubkit.builder import create_epub
 
 
 @pytest.fixture()
@@ -34,8 +34,8 @@ def sample_posts(tmp_path):
     ]
 
 
-@patch("epubkit.builder.Image")
-@patch("epubkit.builder.epub")
+@patch("instagram_feed_epublisher.epubkit.builder.Image")
+@patch("instagram_feed_epublisher.epubkit.builder.epub")
 @pytest.mark.parametrize(
     "title, author, output_name",
     [

@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from app import cli
+from instagram_feed_epublisher import cli
 
 
 @pytest.mark.parametrize(
@@ -15,9 +15,9 @@ from app import cli
         (None, "user", True),
     ],
 )
-@patch("app.cli.create_epub_from_saved_data")
-@patch("app.cli.fetch_instagram_data")
-@patch("app.cli.cleanup_temp_files")
+@patch("instagram_feed_epublisher.cli.create_epub_from_saved_data")
+@patch("instagram_feed_epublisher.cli.fetch_instagram_data")
+@patch("instagram_feed_epublisher.cli.cleanup_temp_files")
 def test_run_all_dispatch(
     mock_clean, mock_fetch, mock_build, hashtags, target_user, should_call
 ):
