@@ -42,6 +42,10 @@ jobs:
         working-directory: cliapp
         run: uv run ruff check
 
+      - name: mypy type check
+        working-directory: cliapp
+        run: uv run mypy cliapp
+
       - name: Run unit tests
         working-directory: cliapp
         run: uv run pytest -q
