@@ -3,7 +3,7 @@ import sys
 from io import BytesIO
 from typing import List
 
-from config import (
+from instagram_feed_epublisher.config import (
     DEFAULT_AUTHOR,
     DEFAULT_LAYOUT_CSS_FILE,
     DEFAULT_LAYOUT_DIR,
@@ -77,9 +77,7 @@ def create_epub(
 ):
     """取得した投稿データからEPUBファイルを生成する関数"""
     resolved_output = output_epub or OUTPUT_EPUB_FILE
-    resolved_title = (
-        title or os.path.splitext(os.path.basename(resolved_output))[0]
-    )
+    resolved_title = title or os.path.splitext(os.path.basename(resolved_output))[0]
     resolved_author = author or DEFAULT_AUTHOR
 
     # レイアウトファイルを読み込み

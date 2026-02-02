@@ -3,8 +3,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from commands import create_epub_from_saved_data
-from config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
+from instagram_feed_epublisher.commands import create_epub_from_saved_data
+from instagram_feed_epublisher.config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
 
 
 @pytest.fixture(autouse=True)
@@ -13,9 +13,9 @@ def _chdir(tmp_path, monkeypatch):
     yield
 
 
-@patch("commands.urlparse")
-@patch("commands.urllib.request.urlretrieve")
-@patch("commands.create_epub")
+@patch("instagram_feed_epublisher.commands.urlparse")
+@patch("instagram_feed_epublisher.commands.urllib.request.urlretrieve")
+@patch("instagram_feed_epublisher.commands.create_epub")
 @pytest.mark.parametrize(
     "has_json, has_images, expect_epub",
     [

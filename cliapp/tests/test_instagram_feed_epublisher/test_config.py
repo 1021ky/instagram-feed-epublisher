@@ -1,4 +1,4 @@
-from config import (
+from instagram_feed_epublisher.config import (
     DEFAULT_AUTHOR,
     OUTPUT_EPUB_FILE,
     POSTS_DATA_FILE,

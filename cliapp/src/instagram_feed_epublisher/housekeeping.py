@@ -1,6 +1,6 @@
 import os
 
-from config import TEMP_IMAGE_DIR
+from .config import TEMP_IMAGE_DIR
 
 
 def cleanup_temp_files():

@@ -1,5 +1,8 @@
 import pytest
-from utils import default_epub_name, parse_hashtags
+from instagram_feed_epublisher.instagram_client.util import (
+    default_epub_name,
+    parse_hashtags,
+)
 
 
 @pytest.mark.parametrize(
