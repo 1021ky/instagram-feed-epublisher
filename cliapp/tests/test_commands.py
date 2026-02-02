@@ -3,7 +3,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from commands import create_epub_from_saved_data
 from config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
 

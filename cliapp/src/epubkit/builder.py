@@ -3,9 +3,6 @@ import sys
 from io import BytesIO
 from typing import List
 
-from ebooklib import epub
-from PIL import Image
-
 from config import (
     DEFAULT_AUTHOR,
     DEFAULT_LAYOUT_CSS_FILE,
@@ -13,6 +10,8 @@ from config import (
     DEFAULT_LAYOUT_HTML_FILE,
     OUTPUT_EPUB_FILE,
 )
+from ebooklib import epub
+from PIL import Image
 
 
 def _load_layout_files(

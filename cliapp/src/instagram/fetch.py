@@ -4,7 +4,6 @@ import time
 from datetime import datetime
 
 import instaloader
-
 from config import POSTS_DATA_FILE, TEMP_IMAGE_DIR
 from utils import parse_hashtags
 
