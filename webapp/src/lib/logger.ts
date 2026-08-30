@@ -1,19 +1,19 @@
 /**
  * @file Logging infrastructure using LogTape + Winston.
  */
-import { configure, getLogger as getLogTapeLogger } from "@logtape/logtape";
+import {
+  configure,
+  getLogger as getLogTapeLogger,
+  type LogLevel,
+  type LoggerConfig,
+} from "@logtape/logtape";
 import { getWinstonSink } from "@logtape/adaptor-winston";
 import winston from "winston";
 import path from "node:path";
 
 const isTest = process.env.NODE_ENV === "test";
 
-const logLevel = (process.env.LOG_LEVEL ?? (isTest ? "fatal" : "info")) as
-  | "debug"
-  | "info"
-  | "warning"
-  | "error"
-  | "fatal";
+const logLevel: LogLevel = (process.env.LOG_LEVEL as LogLevel) ?? (isTest ? "fatal" : "info");
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -59,11 +59,7 @@ let isLogTapeConfigured = false;
 
 // Configure LogTape with Winston sink (テスト環境で複数回実行されないように)
 if (!isLogTapeConfigured) {
-  const loggers: Array<{
-    category: string[];
-    lowestLevel: string;
-    sinks: string[];
-  }> = [
+  const loggers: LoggerConfig<string, string>[] = [
     {
       category: [],
       lowestLevel: logLevel,

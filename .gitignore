@@ -33,9 +33,9 @@ dist/
 
 # Project-specific
 auth.json
-session-*
 *.epub
 posts_data.json
+
 
 # Test compatibility alias modules (auto-generated for testing)
 commands.py

@@ -24,12 +24,12 @@ export const auth = betterAuth({
           clientSecret: process.env.INSTAGRAM_CLIENT_SECRET as string,
           authorizationUrl: "https://www.instagram.com/oauth/authorize",
           tokenUrl: "https://api.instagram.com/oauth/access_token",
-          scopes: [
-            "instagram_business_basic",
-            "instagram_business_content_publish",
-            "instagram_business_manage_comments",
-            "instagram_business_manage_messages",
-          ],
+          scopes: ["instagram_business_basic"],
+          authorizationUrlParams: {
+            enable_fb_login: "0",
+            force_authentication: "1",
+            scope: "instagram_business_basic",
+          },
           getToken: async ({ code, redirectURI }) => {
             const form = new URLSearchParams({
               client_id: process.env.INSTAGRAM_CLIENT_ID ?? "",
