@@ -49,7 +49,7 @@ describe("resolveInstagramAccessToken", () => {
     mockedAuth.api.getSession.mockResolvedValue(null);
 
     await expect(resolveInstagramAccessToken(new Request("http://localhost"))).rejects.toThrow(
-      "未ログインです"
+      "未ログインです",
     );
   });
 
@@ -61,7 +61,7 @@ describe("resolveInstagramAccessToken", () => {
     ]);
 
     await expect(resolveInstagramAccessToken(new Request("http://localhost"))).rejects.toThrow(
-      "Instagram access token not found in session"
+      "Instagram access token not found in session",
     );
   });
 });
