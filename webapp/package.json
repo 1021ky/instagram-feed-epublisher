@@ -6,7 +6,7 @@
   "scripts": {
     "auth:migrate": "pnpm dlx @better-auth/cli@latest migrate --config src/lib/auth.ts --yes",
     "predev": "pnpm auth:migrate",
-    "dev": "pnpm next build && pnpm node scripts/dev-https.mjs",
+    "dev": "node scripts/dev-https.mjs",
     "build": "pnpm next build",
     "start": "pnpm next start",
     "lint": "next lint",
@@ -19,7 +19,7 @@
     "prepare": "cd .. && husky"
   },
   "engines": {
-    "node": "24.12.0"
+    "node": ">=20.0.0"
   },
   "packageManager": "pnpm@10.26.0",
   "dependencies": {
