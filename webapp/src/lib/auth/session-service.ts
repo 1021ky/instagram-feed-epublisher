@@ -25,12 +25,12 @@ export async function resolveInstagramAccessToken(request: Request): Promise<str
       auth.api as unknown as {
         getAccessToken: (options: {
           headers: Headers;
-          params?: { providerId: string };
+          body: { providerId: string };
         }) => Promise<{ accessToken?: string } | null>;
       }
     ).getAccessToken({
       headers: request.headers,
-      params: { providerId: "instagram" },
+      body: { providerId: "instagram" },
     });
     if (tokenResult?.accessToken) {
       return tokenResult.accessToken;

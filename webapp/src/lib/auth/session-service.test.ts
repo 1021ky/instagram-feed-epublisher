@@ -29,8 +29,13 @@ describe("resolveInstagramAccessToken", () => {
     mockedAuth.api.getSession.mockResolvedValue({ user: { id: "1" } });
     mockedAuth.api.getAccessToken.mockResolvedValue({ accessToken: "token_from_get_access_token" });
 
-    const token = await resolveInstagramAccessToken(new Request("http://localhost"));
+    const req = new Request("http://localhost");
+    const token = await resolveInstagramAccessToken(req);
     expect(token).toBe("token_from_get_access_token");
+    expect(mockedAuth.api.getAccessToken).toHaveBeenCalledWith({
+      headers: req.headers,
+      body: { providerId: "instagram" },
+    });
   });
 
   it("resolves access token from listUserAccounts API when getAccessToken returns null", async () => {

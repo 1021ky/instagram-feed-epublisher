@@ -16,27 +16,50 @@ export async function fetchGraphMedia(accessToken: string): Promise<InstagramMed
     throw new Error("アクセストークンがありません");
   }
 
-  const url = `https://graph.instagram.com/me/media?fields=${fields}&access_token=${encodeURIComponent(
-    accessToken
-  )}`;
-  const safeUrl = `https://graph.instagram.com/me/media?fields=${fields}`;
-  logger.debug("Graph API request", {
-    url: safeUrl,
-    accessTokenLength: accessToken.length,
-  });
+  let nextUrl: string | undefined =
+    `https://graph.instagram.com/me/media?fields=${fields}&limit=100&access_token=${encodeURIComponent(
+      accessToken
+    )}`;
+  const allItems: InstagramMedia[] = [];
 
-  const response = await fetch(url);
-  if (!response.ok) {
-    const errorText = await response.text();
-    logger.error("Graph API request failed", {
-      status: response.status,
-      body: errorText,
+  while (nextUrl) {
+    const safeUrl = nextUrl.replace(/access_token=[^&]+/, "access_token=***");
+    logger.info("Graph API request started", { url: safeUrl });
+
+    const response = await fetch(nextUrl);
+    if (!response.ok) {
+      const errorText = await response.text();
+      logger.error("Graph API request failed", {
+        status: response.status,
+        body: errorText,
+      });
+      throw new Error(`Graph API error: ${response.status}`);
+    }
+
+    const payload = (await response.json()) as {
+      data?: InstagramMedia[];
+      paging?: { next?: string };
+    };
+    const items = Array.isArray(payload.data) ? payload.data : [];
+    allItems.push(...items);
+
+    logger.info("Graph API page received", {
+      pageCount: items.length,
+      accumulatedCount: allItems.length,
+      hasNextPage: Boolean(payload.paging?.next),
+      itemsPreview: items.map((i) => ({
+        id: i.id,
+        timestamp: i.timestamp,
+        caption: i.caption ? i.caption.slice(0, 60) : "(no caption)",
+      })),
     });
-    throw new Error(`Graph API error: ${response.status}`);
+
+    nextUrl = payload.paging?.next;
+    if (allItems.length >= 1000) {
+      break;
+    }
   }
 
-  const payload = (await response.json()) as { data?: InstagramMedia[] };
-  const items = Array.isArray(payload.data) ? payload.data : [];
-  logger.info("Graph API response received", { count: items.length });
-  return items;
+  logger.info("Graph API fetch completed", { totalCount: allItems.length });
+  return allItems;
 }
