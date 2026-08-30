@@ -9,46 +9,40 @@ on:
       - main
 
 jobs:
-  ci:
+  webapp:
     runs-on: ubuntu-latest
-    # For pushes to main, run only when commit message starts with "Merge"
-    if: >
-      github.event_name != 'push' || github.ref != 'refs/heads/main' ||
-      startsWith(github.event.head_commit.message, 'Merge')
+    defaults:
+      run:
+        working-directory: webapp
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          python-version: '3.13'
+          version: 10.26.0
 
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v2
-
-      - name: Cache uv
-        uses: actions/cache@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          path: ~/.cache/uv
-          key: ${{ runner.os }}-uv-${{ hashFiles('**/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-uv-
+          node-version: 24
+          cache: 'pnpm'
+          cache-dependency-path: webapp/pnpm-lock.yaml
 
-      - name: Install dependencies (uv)
-        run: |
-          uv venv
-          uv pip install -e .[dev]
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Lint - isort (check)
-        run: uv run isort --check --diff .
+      - name: Format check
+        run: pnpm format:check
 
-      - name: Lint - black (check)
-        run: uv run black --check .
+      - name: Lint
+        run: pnpm lint
 
-      - name: Type check - mypy
-        run: uv run mypy .
+      - name: Type check
+        run: pnpm exec tsc --noEmit
 
       - name: Run unit tests
-        run: uv run pytest -q
+        run: pnpm test
+
