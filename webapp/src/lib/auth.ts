@@ -24,12 +24,26 @@ export const auth = betterAuth({
           clientSecret: process.env.INSTAGRAM_CLIENT_SECRET as string,
           authorizationUrl: "https://www.instagram.com/oauth/authorize",
           tokenUrl: "https://api.instagram.com/oauth/access_token",
-          scopes: [
-            "instagram_business_basic",
-            "instagram_business_content_publish",
-            "instagram_business_manage_comments",
-            "instagram_business_manage_messages",
-          ],
+          scopes: ["instagram_business_basic"],
+          authorizationUrlParams: {
+            /**
+             * Facebook ログインへの自動リダイレクト・誘導を無効化し、
+             * Instagram 単体のログイン・認可画面を確実に表示させるための設定。
+             */
+            enable_fb_login: "0",
+            /**
+             * ブラウザにキャッシュされたセッションでの自動ログインを防ぎ、
+             * 常に Instagram の再認証・確認画面を明示的に表示させるための設定。
+             * （別アカウントへの切り替えや確実な同意取得のため）
+             */
+            force_authentication: "1",
+            /**
+             * Better Auth のデフォルトではスコープがスペース区切り（OAuth2標準）で渡されるが、
+             * Instagram の認可エンドポイントはカンマ区切り（または単一指定）を期待するため、
+             * スコープ文字列を明示的に指定して「このページはご利用いただけません」エラーを防ぐ。
+             */
+            scope: "instagram_business_basic",
+          },
           getToken: async ({ code, redirectURI }) => {
             const form = new URLSearchParams({
               client_id: process.env.INSTAGRAM_CLIENT_ID ?? "",

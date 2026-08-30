@@ -6,7 +6,7 @@
   "scripts": {
     "auth:migrate": "pnpm dlx @better-auth/cli@latest migrate --config src/lib/auth.ts --yes",
     "predev": "pnpm auth:migrate",
-    "dev": "pnpm next build && pnpm node scripts/dev-https.mjs",
+    "dev": "node scripts/dev-https.mjs",
     "build": "pnpm next build",
     "start": "pnpm next start",
     "lint": "oxlint .",
