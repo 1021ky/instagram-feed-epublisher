@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-cd webapp && PNPM_CONFIG_ENGINE_STRICT=false corepack pnpm exec lint-staged
+cd webapp && corepack pnpm exec lint-staged
