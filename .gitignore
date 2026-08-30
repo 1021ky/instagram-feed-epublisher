@@ -32,10 +32,10 @@ dist/
 .ipynb_checkpoints/
 
 # Project-specific
-auth.json
-session-*
+/auth.json
+/session-*
 *.epub
-posts_data.json
+/posts_data.json
 
 # Test compatibility alias modules (auto-generated for testing)
 commands.py
