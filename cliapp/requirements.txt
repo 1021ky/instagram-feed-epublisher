@@ -1,4 +1,0 @@
-instaloader
-EbookLib
-Pillow
-fire
