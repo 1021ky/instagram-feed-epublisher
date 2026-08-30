@@ -38,6 +38,7 @@ import { buildEpub } from "./epub-builder";
 const items = [
   {
     id: "1",
+    media_type: "IMAGE" as const,
     media_url: "x",
     permalink: "p",
     timestamp: "t",
