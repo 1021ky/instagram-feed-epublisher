@@ -23,7 +23,7 @@ describe("renderChapterHtml", () => {
         permalink: "p",
         timestamp: "t",
       },
-      "file:///tmp/a.jpg"
+      "file:///tmp/a.jpg",
     );
     expect(html).toContain("Hello");
     expect(html).toContain("file:///tmp/a.jpg");

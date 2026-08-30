@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       logger.error("No posts found for EPUB generation", { filter: payload.filter });
       return NextResponse.json(
         { error: "投稿が見つかりません。フィルター条件を確認してください。" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 

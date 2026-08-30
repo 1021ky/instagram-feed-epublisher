@@ -91,7 +91,7 @@ export default function Page() {
       setFeed(items);
       if (items.length === 0) {
         setError(
-          "フィードが取得できませんでした。指定した条件に該当する投稿がないか、アカウントに投稿がありません。"
+          "フィードが取得できませんでした。指定した条件に該当する投稿がないか、アカウントに投稿がありません。",
         );
       }
     } catch (e) {
