@@ -8,9 +8,19 @@
 export type InstagramMedia = {
   id: string;
   caption?: string;
-  media_url: string;
+  media_type: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
+  media_url?: string;
+  thumbnail_url?: string;
   permalink: string;
   timestamp: string;
+  children?: {
+    data: {
+      id: string;
+      media_type: "IMAGE" | "VIDEO";
+      media_url?: string;
+      thumbnail_url?: string;
+    }[];
+  };
 };
 
 /**
@@ -21,6 +31,7 @@ export type FeedFilter = {
   startDate?: string;
   endDate?: string;
   maxCount: number;
+  sortOrder?: "asc" | "desc";
 };
 
 /**
@@ -51,6 +62,7 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
   if (filter.hashtag) params.set("hashtag", filter.hashtag);
   if (filter.startDate) params.set("startDate", filter.startDate);
   if (filter.endDate) params.set("endDate", filter.endDate);
+  if (filter.sortOrder) params.set("sortOrder", filter.sortOrder);
 
   const url = `/api/instagram/media?${params.toString()}`;
   console.debug("[client] feed request", { filter });

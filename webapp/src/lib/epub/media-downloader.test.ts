@@ -27,7 +27,13 @@ test("downloadMedia writes file on success", async () => {
   globalThis.fetch = vi.fn().mockResolvedValue(response);
 
   const filePath = await downloadMedia(
-    { id: "1", media_url: "http://example.com/x.jpg", permalink: "p", timestamp: "t" },
+    {
+      id: "1",
+      media_type: "IMAGE",
+      media_url: "http://example.com/x.jpg",
+      permalink: "p",
+      timestamp: "t",
+    },
     "/tmp"
   );
   expect(filePath).toBe("/tmp/1.jpg");
@@ -39,7 +45,13 @@ test("downloadMedia throws on fetch error", async () => {
 
   await expect(
     downloadMedia(
-      { id: "1", media_url: "http://example.com/x.jpg", permalink: "p", timestamp: "t" },
+      {
+        id: "1",
+        media_type: "IMAGE",
+        media_url: "http://example.com/x.jpg",
+        permalink: "p",
+        timestamp: "t",
+      },
       "/tmp"
     )
   ).rejects.toThrow("画像の取得に失敗しました");

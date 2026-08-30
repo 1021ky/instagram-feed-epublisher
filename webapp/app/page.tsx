@@ -38,6 +38,7 @@ export default function Page() {
   const [startDate, setStartDate] = useState(defaultDates.start);
   const [endDate, setEndDate] = useState(defaultDates.end);
   const [maxCount, setMaxCount] = useState(defaultMaxCount);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [title, setTitle] = useState("私のInstagramフィード");
   const [author, setAuthor] = useState("");
   const [contact, setContact] = useState("");
@@ -77,6 +78,7 @@ export default function Page() {
     startDate,
     endDate,
     maxCount,
+    sortOrder,
   });
 
   const handleFetch = async () => {
@@ -212,6 +214,16 @@ export default function Page() {
                   onChange={(e) => setMaxCount(Number(e.target.value))}
                 />
               </label>
+              <label className="field">
+                <span>並び順</span>
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
+                >
+                  <option value="asc">古い順（本としておすすめ）</option>
+                  <option value="desc">新しい順</option>
+                </select>
+              </label>
             </div>
           </section>
         )}
@@ -277,24 +289,51 @@ export default function Page() {
 
             {feed.length > 0 && (
               <div className="feed">
-                {feed.map((item) => (
-                  <article key={item.id} className="feed__item">
-                    <Image
-                      src={item.media_url}
-                      alt={item.caption ?? ""}
-                      width={500}
-                      height={500}
-                      style={{ objectFit: "cover" }}
-                    />
-                    <div className="feed__body">
-                      <p className="feed__caption">{item.caption ?? "(キャプションなし)"}</p>
-                      <a href={item.permalink} target="_blank" rel="noreferrer">
-                        Instagramで見る
-                      </a>
-                      <small>{new Date(item.timestamp).toLocaleString()}</small>
-                    </div>
-                  </article>
-                ))}
+                {feed.map((item) => {
+                  let src = item.media_url;
+                  if (item.media_type === "VIDEO") src = item.thumbnail_url;
+                  if (item.media_type === "CAROUSEL_ALBUM" && item.children?.data?.length) {
+                    const firstChild = item.children.data[0];
+                    src =
+                      firstChild.media_type === "VIDEO"
+                        ? firstChild.thumbnail_url
+                        : firstChild.media_url;
+                  }
+
+                  return (
+                    <article key={item.id} className="feed__item">
+                      {src ? (
+                        <Image
+                          src={src}
+                          alt={item.caption ?? ""}
+                          width={500}
+                          height={500}
+                          style={{ objectFit: "cover" }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: 500,
+                            height: 500,
+                            backgroundColor: "#eee",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          画像なし
+                        </div>
+                      )}
+                      <div className="feed__body">
+                        <p className="feed__caption">{item.caption ?? "(キャプションなし)"}</p>
+                        <a href={item.permalink} target="_blank" rel="noreferrer">
+                          Instagramで見る
+                        </a>
+                        <small>{new Date(item.timestamp).toLocaleString()}</small>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             )}
           </section>

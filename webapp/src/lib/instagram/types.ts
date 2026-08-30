@@ -10,6 +10,7 @@ export type FeedFilter = {
   startDate?: string;
   endDate?: string;
   maxCount: number;
+  sortOrder?: "asc" | "desc"; // asc: oldest first, desc: newest first
 };
 
 /**
@@ -18,7 +19,17 @@ export type FeedFilter = {
 export type InstagramMedia = {
   id: string;
   caption?: string;
-  media_url: string;
+  media_type: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
+  media_url?: string;
+  thumbnail_url?: string;
   permalink: string;
   timestamp: string;
+  children?: {
+    data: {
+      id: string;
+      media_type: "IMAGE" | "VIDEO";
+      media_url?: string;
+      thumbnail_url?: string;
+    }[];
+  };
 };
