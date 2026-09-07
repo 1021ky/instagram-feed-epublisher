@@ -53,10 +53,12 @@
 - 取得データをフィルタ → EPUB生成
 
 ### 4.3 モジュール構成
-- 認証: `webapp/server/src/lib/auth.ts`
-- セッション解決: `webapp/server/src/lib/auth/session-service.ts`
-- Graph API: `webapp/server/src/lib/instagram/graph-client.ts`
-- UI: `webapp/server/app/page.tsx`
+- 認証設定: `webapp/src/lib/auth.ts`（Better Auth 設定、SQLite `better-auth.db`）
+- 認証Route Handler: `webapp/app/api/auth/[...all]/route.ts`
+- クライアント認証: `webapp/src/lib/auth-client.ts`
+- セッション解決: `webapp/src/lib/auth/session-service.ts`
+- Graph API: `webapp/src/lib/instagram/graph-client.ts`
+- UI: `webapp/app/page.tsx`
 
 ## 5. 設計の経緯
 - Vite SPA構成は同一オリジン要件と相性が悪く、Next単体構成へ移行。
@@ -81,19 +83,22 @@
 - `/#filters` はOAuthで無効。
 - 対策: `/?scroll=filters` などクエリで遷移。
 
+### 6.5 Better Auth CLI のパッケージ移行
+- `@better-auth/cli` パッケージが公式にて非推奨（deprecated）となったため、公式の新パッケージ `auth` に移行。
+- 開発時の高速化と安定性のため、`auth` を `devDependencies` に追加し、`auth migrate --config src/lib/auth.ts --yes` でマイグレーションを実行。
+
 ## 7. 運用・テスト
 
 ### 7.1 起動
-- HTTP: `pnpm dev`
-- HTTPS: `pnpm dev:https`
+- `pnpm dev`（HTTPS で起動。起動前フック `predev` で `pnpm auth:migrate` が自動実行される）
 
 ### 7.2 環境変数
 - `BETTER_AUTH_URL` はHTTPSを指定
 - `INSTAGRAM_CLIENT_ID` / `INSTAGRAM_CLIENT_SECRET`
 
 ### 7.3 テスト
-- ユニット: `pnpm --dir webapp/server test`
-- E2E: `pnpm --dir webapp test:e2e`
+- ユニット: `pnpm test`（または `pnpm --dir webapp test`）
+- E2E: `pnpm --dir webapp e2etest`
 
 ### 7.4 トラブルシュート
 - OAuthエラーはリダイレクトURI/アプリIDの一致を最優先で確認

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "auth:migrate": "pnpm dlx @better-auth/cli@latest migrate --config src/lib/auth.ts --yes",
+    "auth:migrate": "auth migrate --config src/lib/auth.ts --yes",
     "predev": "pnpm auth:migrate",
     "dev": "node scripts/dev-https.mjs",
     "build": "pnpm next build",
@@ -43,6 +43,7 @@
     "@types/react": "19.2.9",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
+    "auth": "^1.7.3",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.1.5",
     "eslint-config-prettier": "^10.1.8",

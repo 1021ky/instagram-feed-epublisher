@@ -30,6 +30,14 @@ Instagram OAuth はローカル開発でも HTTPS が必須となります。
 - 既定の証明書パスは `webapp/certs/localhost.pem` と `webapp/certs/localhost-key.pem` です。
 - 証明書パスを変更したい場合は `HTTPS_CERT_FILE` / `HTTPS_KEY_FILE` / `HTTPS_PORT` / `HTTPS_HOST` を指定可能です。
 
+### データベースと認証マイグレーション（Better Auth）
+
+本アプリは認証情報（ユーザー・セッション・OAuthトークン）の保存に SQLite（`webapp/better-auth.db`）を使用しています。
+
+- **自動実行**: `pnpm dev` 実行時に `predev` フック経由で `pnpm auth:migrate` が自動実行され、必要なテーブルの作成・差分更新が適用されます。
+- **手動実行**: `pnpm auth:migrate`
+- **CLI パッケージ**: Better Auth 公式の CLI パッケージ `auth`（`devDependencies` に導入済み）を使用しています（※旧 `@better-auth/cli` は公式にて非推奨化）。
+
 ## ビルド
 
 - Next.js: `pnpm build`
