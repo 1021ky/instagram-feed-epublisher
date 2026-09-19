@@ -17,7 +17,7 @@ export async function fetchGraphMedia(accessToken: string): Promise<InstagramMed
   }
 
   const url = `https://graph.instagram.com/me/media?fields=${fields}&access_token=${encodeURIComponent(
-    accessToken
+    accessToken,
   )}`;
   const safeUrl = `https://graph.instagram.com/me/media?fields=${fields}`;
   logger.debug("Graph API request", {

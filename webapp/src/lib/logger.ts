@@ -29,9 +29,9 @@ if (!isTest) {
         winston.format.colorize(),
         winston.format.printf(({ timestamp, level, message }) => {
           return `${timestamp} ${level}: ${message}`;
-        })
+        }),
       ),
-    })
+    }),
   );
 }
 
@@ -44,7 +44,7 @@ if (isDevelopment && !isTest) {
     new winston.transports.File({
       filename: logFilePath,
       format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
-    })
+    }),
   );
 }
 

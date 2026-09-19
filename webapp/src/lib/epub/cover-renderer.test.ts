@@ -43,7 +43,7 @@ test("escapeHtml escapes unsafe characters", () => {
 test("renderCoverJpg returns cover path", async () => {
   const path = await renderCoverJpg(
     { title: "t", author: "a", contact: "", instagramUrl: "" },
-    "/tmp"
+    "/tmp",
   );
   expect(path).toBe("/tmp/cover.jpg");
 });
@@ -51,10 +51,10 @@ test("renderCoverJpg returns cover path", async () => {
 test("renderCoverJpg throws when Playwright fails", async () => {
   const { chromium } = await import("playwright");
   (chromium.launch as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-    new Error("launch error")
+    new Error("launch error"),
   );
 
   await expect(
-    renderCoverJpg({ title: "t", author: "a", contact: "", instagramUrl: "" }, "/tmp")
+    renderCoverJpg({ title: "t", author: "a", contact: "", instagramUrl: "" }, "/tmp"),
   ).rejects.toThrow("launch error");
 });

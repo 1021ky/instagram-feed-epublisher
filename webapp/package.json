@@ -9,19 +9,15 @@
     "dev": "node scripts/dev-https.mjs",
     "build": "pnpm next build",
     "start": "pnpm next start",
-    "lint": "next lint",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "lint": "oxlint .",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
     "test": "pnpm vitest run --config vitest.config.ts",
     "e2etest": "pnpm playwright test",
     "e2etest:ui": "pnpm playwright test --ui",
     "e2etest:debug": "pnpm playwright test --debug",
     "prepare": "cd .. && husky"
   },
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "packageManager": "pnpm@10.26.0",
   "dependencies": {
     "@lesjoursfr/html-to-epub": "^2.0.6",
     "@logtape/adaptor-winston": "^2.0.2",
@@ -36,30 +32,25 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.3",
     "@playwright/test": "^1.52.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.0.3",
     "@types/react": "19.2.9",
-    "@typescript-eslint/eslint-plugin": "^8.54.0",
-    "@typescript-eslint/parser": "^8.54.0",
-    "eslint": "^9.39.2",
-    "eslint-config-next": "^16.1.5",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.5",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "prettier": "^3.8.1",
+    "oxfmt": "^0.65.0",
+    "oxlint": "^1.80.0",
     "typescript": "^5.9.3",
     "vitest": "^3.0.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,css,html,yml,yaml}": [
-      "prettier --write"
+      "oxlint --fix",
+      "oxfmt --write"
     ]
-  }
+  },
+  "engines": {
+    "node": ">=24.12.0"
+  },
+  "packageManager": "pnpm@10.26.0"
 }

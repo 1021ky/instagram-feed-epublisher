@@ -43,11 +43,8 @@ Instagram OAuth はローカル開発でも HTTPS が必須となります。
 #### 自動実行される内容
 
 - **TypeScript/JavaScript ファイル** (`.ts`, `.tsx`, `.js`, `.jsx`):
-  - ESLint による自動修正 (`eslint --fix`)
-  - Prettier によるフォーマット (`prettier --write`)
-
-- **その他のファイル** (`.json`, `.md`, `.css`, `.html`, `.yml`, `.yaml`):
-  - Prettier によるフォーマットのみ (`prettier --write`)
+  - oxlint による自動修正 (`oxlint --fix`)
+  - oxfmt によるフォーマット (`oxfmt --write`)
 
 #### セットアップ
 

@@ -72,7 +72,7 @@ function validateXhtml(html: string): boolean {
 export function renderChapterHtml(
   template: { layoutHtml: string; cssContent: string },
   item: InstagramMedia,
-  imagePath: string
+  imagePath: string,
 ): string {
   // 重要: 改行を<br />に変換する前にXMLエスケープを行う
   // これにより<br />タグ自体がエスケープされることを防ぐ

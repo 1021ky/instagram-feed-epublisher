@@ -64,7 +64,7 @@ export const auth = betterAuth({
             if (!shortResponse.ok) {
               const errorText = await shortResponse.text();
               throw new Error(
-                `Instagram token exchange failed: ${shortResponse.status} ${errorText}`
+                `Instagram token exchange failed: ${shortResponse.status} ${errorText}`,
               );
             }
 
@@ -89,7 +89,7 @@ export const auth = betterAuth({
             if (!longResponse.ok) {
               const errorText = await longResponse.text();
               throw new Error(
-                `Instagram long-lived token exchange failed: ${longResponse.status} ${errorText}`
+                `Instagram long-lived token exchange failed: ${longResponse.status} ${errorText}`,
               );
             }
 

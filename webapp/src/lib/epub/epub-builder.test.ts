@@ -63,7 +63,7 @@ describe("buildEpub", () => {
           instagramUrl: "url",
         },
       },
-      "/tmp"
+      "/tmp",
     );
     expect(output).toBe("/tmp/instagram-feed.epub");
   });
@@ -83,8 +83,8 @@ describe("buildEpub", () => {
             instagramUrl: "url",
           },
         },
-        "/tmp"
-      )
+        "/tmp",
+      ),
     ).rejects.toThrow("render error");
   });
 
@@ -96,7 +96,7 @@ describe("buildEpub", () => {
     // テスト用のダミー画像パスを取得
     const fixtureImagePath = path.resolve(
       process.cwd(),
-      "src/__fixtures__/images/feed_img_sample01.png"
+      "src/__fixtures__/images/feed_img_sample01.png",
     );
 
     // downloadMediaモックをダミー画像パスを返すように設定

@@ -73,6 +73,6 @@ test("requestEpub throws on error", async () => {
         contact: "c",
         instagramUrl: "u",
       },
-    })
+    }),
   ).rejects.toThrow("EPUB生成に失敗しました");
 });
