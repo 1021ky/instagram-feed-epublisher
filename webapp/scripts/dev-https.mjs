@@ -35,9 +35,10 @@ export function registerGracefulShutdown({
   clearTimeoutRef = clearTimeout,
   consoleRef = console,
   closeServerRef = closeServer,
-  exitRef = processRef.exit.bind(processRef),
+  exitRef,
 }) {
   let isShuttingDown = false;
+  const resolvedExitRef = exitRef ?? processRef.exit.bind(processRef);
 
   const shutdown = async (signal) => {
     if (isShuttingDown) {
@@ -52,7 +53,7 @@ export function registerGracefulShutdown({
       didTimeout = true;
       consoleRef.error(`Graceful shutdown timed out after ${timeoutMs}ms.`);
       server.closeAllConnections?.();
-      exitRef(1);
+      resolvedExitRef(1);
     }, timeoutMs);
 
     try {
@@ -62,14 +63,14 @@ export function registerGracefulShutdown({
         return;
       }
       clearTimeoutRef(timeoutId);
-      exitRef(0);
+      resolvedExitRef(0);
     } catch (error) {
       if (didTimeout) {
         return;
       }
       clearTimeoutRef(timeoutId);
       consoleRef.error("Failed to shut down HTTPS dev server gracefully.", error);
-      exitRef(1);
+      resolvedExitRef(1);
     }
   };
 
