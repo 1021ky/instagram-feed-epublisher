@@ -43,4 +43,3 @@ jobs:
             run: pnpm check:mermaid
             env:
               PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
-
