@@ -1,5 +1,5 @@
 /**
- * @file Root page for the Next.js UI.
+ * @file メインページコンポーネント
  */
 "use client";
 
@@ -18,7 +18,7 @@ const defaultMaxCount = 100;
 const dateISO = (d: Date) => d.toISOString().slice(0, 10);
 
 /**
- * Default date range for filters.
+ * フィルター用のデフォルト日付範囲を算出するフック。
  */
 function useDefaultDates() {
   return useMemo(() => {
@@ -30,7 +30,7 @@ function useDefaultDates() {
 }
 
 /**
- * Root application component.
+ * メインページコンポーネント。
  */
 export default function Page() {
   const defaultDates = useDefaultDates();
@@ -144,7 +144,7 @@ export default function Page() {
   return (
     <div className="page">
       <header className="hero">
-        <div className="badge">Prototype</div>
+        <div className="badge bg-zinc-100 text-zinc-800">Prototype</div>
         <p className="eyebrow">Instagramフィード → EPUB</p>
         <h1>SSOでログインして電子書籍を作ろう</h1>
         <p className="lede">
@@ -159,7 +159,7 @@ export default function Page() {
           </button>
         </div>
         {isLoggedIn && <p className="status">ログイン済み</p>}
-        {error && <p className="error">{error}</p>}
+        {error && <p className="error text-rose-500">{error}</p>}
       </header>
 
       <main className="panel">
@@ -301,7 +301,7 @@ export default function Page() {
         )}
       </main>
 
-      <footer className="footer">
+      <footer className="footer pb-safe">
         <small>Better Auth + Instagram Graph API + html-to-epub + Playwright</small>
       </footer>
     </div>

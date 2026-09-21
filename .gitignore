@@ -48,3 +48,6 @@ instagram_fetch.py
 node_modules/
 .next/
 
+# Database
+*.db
+*.db-journal

@@ -31,6 +31,10 @@ describe("resolveInstagramAccessToken", () => {
 
     const token = await resolveInstagramAccessToken(new Request("http://localhost"));
     expect(token).toBe("token_from_get_access_token");
+    expect(mockedAuth.api.getAccessToken).toHaveBeenCalledWith({
+      headers: expect.any(Headers),
+      body: { providerId: "instagram" },
+    });
   });
 
   it("resolves access token from listUserAccounts API when getAccessToken returns null", async () => {
@@ -43,6 +47,17 @@ describe("resolveInstagramAccessToken", () => {
 
     const token = await resolveInstagramAccessToken(new Request("http://localhost"));
     expect(token).toBe("instagram_token");
+  });
+
+  it("resolves access token from listUserAccounts API when getAccessToken throws an error", async () => {
+    mockedAuth.api.getSession.mockResolvedValue({ user: { id: "1" } });
+    mockedAuth.api.getAccessToken.mockRejectedValue(new Error("API Error"));
+    mockedAuth.api.listUserAccounts.mockResolvedValue([
+      { providerId: "instagram", accessToken: "instagram_token_fallback" },
+    ]);
+
+    const token = await resolveInstagramAccessToken(new Request("http://localhost"));
+    expect(token).toBe("instagram_token_fallback");
   });
 
   it("throws error when session is missing", async () => {

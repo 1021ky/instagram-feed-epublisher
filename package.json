@@ -3,7 +3,9 @@
   "private": true,
   "scripts": {
     "dev": "pnpm --filter instagram-feed-epublisher-webapp dev",
+    "clean": "pnpm --filter instagram-feed-epublisher-webapp clean",
     "build": "pnpm --filter instagram-feed-epublisher-webapp build",
+    "build:clean": "pnpm --filter instagram-feed-epublisher-webapp build:clean",
     "start": "pnpm --filter instagram-feed-epublisher-webapp start",
     "lint": "pnpm --filter instagram-feed-epublisher-webapp lint",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" \"#**/.next/**\"",

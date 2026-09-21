@@ -7,7 +7,9 @@
     "auth:migrate": "pnpm dlx @better-auth/cli@latest migrate --config src/lib/auth.ts --yes",
     "predev": "pnpm auth:migrate",
     "dev": "node scripts/dev-https.mjs",
+    "clean": "node scripts/clean.mjs",
     "build": "pnpm next build",
+    "build:clean": "pnpm clean && pnpm build",
     "start": "pnpm next start",
     "lint": "oxlint .",
     "format": "oxfmt --write .",
@@ -25,6 +27,7 @@
     "better-auth": "1.4.14",
     "better-sqlite3": "12.11.1",
     "linkedom": "0.18.13",
+    "lucide-react": "1.47.0",
     "next": "15.5.25",
     "playwright": "1.63.0",
     "react": "19.3.0",
@@ -34,6 +37,7 @@
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "11.17.0",
     "@playwright/test": "1.63.0",
+    "@tailwindcss/postcss": "4.3.3",
     "@types/better-sqlite3": "7.6.13",
     "@types/node": "25.9.8",
     "@types/react": "19.2.9",
@@ -42,6 +46,7 @@
     "markdownlint-cli2": "0.23.3",
     "oxfmt": "0.65.0",
     "oxlint": "1.83.0",
+    "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
     "vitest": "3.2.7"
   },
