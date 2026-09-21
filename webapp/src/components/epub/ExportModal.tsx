@@ -1,5 +1,5 @@
 /**
- * @file Export progress modal and post-download guide.
+ * @file エクスポート進捗モーダルとダウンロード後ガイド
  */
 import * as React from "react";
 import type { ExportProgress } from "@/types/ui";
@@ -12,7 +12,7 @@ type ExportModalProps = {
 };
 
 /**
- * Displays EPUB export progress and reading guidance after completion.
+ * EPUB エクスポートの進捗と完了後の利用ガイドを表示する。
  */
 export function ExportModal({ progress, isOpen, onClose, onDownload }: ExportModalProps) {
   if (!isOpen || progress.status === "idle") {

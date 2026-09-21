@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for cover renderer.
+ * @file 表紙レンダラーの単体テスト
  */
 import { expect, test, vi } from "vitest";
 

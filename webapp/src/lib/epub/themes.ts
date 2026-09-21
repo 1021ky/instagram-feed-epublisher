@@ -1,5 +1,5 @@
 /**
- * @file Shared EPUB cover theme definitions.
+ * @file 共有 EPUB 表紙テーマ定義
  */
 import type { CoverTheme, CoverThemeId } from "@/types/ui";
 
@@ -57,7 +57,7 @@ export const COVER_THEMES: CoverTheme[] = [
 ];
 
 /**
- * Resolves a cover theme by id with a stable navy fallback.
+ * テーマ ID から表紙テーマを解決し、見つからない場合は濃紺テーマを返す。
  */
 export function getCoverTheme(themeId: CoverThemeId = "navy") {
   return COVER_THEMES.find((theme) => theme.id === themeId) ?? COVER_THEMES[0]!;

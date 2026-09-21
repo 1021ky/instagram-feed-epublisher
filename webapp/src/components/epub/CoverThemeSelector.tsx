@@ -1,5 +1,5 @@
 /**
- * @file EPUB cover theme selector.
+ * @file EPUB 表紙テーマセレクター
  */
 import * as React from "react";
 import { COVER_THEMES } from "@/lib/epub/themes";
@@ -11,7 +11,7 @@ type CoverThemeSelectorProps = {
 };
 
 /**
- * Renders a visual selector for EPUB cover themes.
+ * EPUB 表紙テーマの視覚的な選択 UI を表示する。
  */
 export function CoverThemeSelector({ selectedTheme, onChange }: CoverThemeSelectorProps) {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, currentIndex: number) => {

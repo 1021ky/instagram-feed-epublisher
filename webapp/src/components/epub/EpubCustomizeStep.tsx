@@ -1,5 +1,5 @@
 /**
- * @file EPUB customization step UI.
+ * @file EPUB 装丁設定ステップ UI
  */
 import * as React from "react";
 import { CoverThemeSelector } from "@/components/epub/CoverThemeSelector";
@@ -12,7 +12,7 @@ type EpubCustomizeStepProps = {
 };
 
 /**
- * Renders the Step 3 customization form for EPUB export.
+ * EPUB 書き出し向けの Step 3 装丁設定フォームを表示する。
  */
 export function EpubCustomizeStep({ settings, onChange, defaultTitle }: EpubCustomizeStepProps) {
   const update = <Key extends keyof EpubCustomSettings>(

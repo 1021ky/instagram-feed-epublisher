@@ -1,10 +1,10 @@
 /**
- * @file Client-side API wrappers for Instagram and EPUB.
+ * @file Instagram / EPUB 向けクライアント API ラッパー
  */
 import type { CoverThemeId, EpubSortOrder } from "@/types/ui";
 
 /**
- * Instagram media item.
+ * Instagram メディア項目。
  */
 export type InstagramMedia = {
   id: string;
@@ -15,7 +15,7 @@ export type InstagramMedia = {
 };
 
 /**
- * Feed filter for API requests.
+ * API リクエスト用のフィード絞り込み条件。
  */
 export type FeedFilter = {
   hashtag?: string;
@@ -26,7 +26,7 @@ export type FeedFilter = {
 };
 
 /**
- * EPUB metadata payload.
+ * EPUB メタデータのペイロード。
  */
 export type EpubMetadata = {
   title: string;
@@ -38,7 +38,7 @@ export type EpubMetadata = {
 };
 
 /**
- * EPUB request payload.
+ * EPUB 生成リクエストのペイロード。
  */
 export type EpubRequest = {
   filter: FeedFilter;
@@ -46,7 +46,7 @@ export type EpubRequest = {
 };
 
 /**
- * Fetches filtered Instagram media from the backend.
+ * バックエンドから条件に合致する Instagram メディアを取得する。
  */
 export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramMedia[]> {
   const params = new URLSearchParams({
@@ -70,7 +70,7 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
       const errorJson = JSON.parse(errorText);
       errorMessage = errorJson.error ?? errorText;
     } catch {
-      // Not JSON, use text as-is
+      // JSON でなければテキストをそのまま利用する
     }
     console.error("[client] feed request failed", {
       status: response.status,
@@ -89,7 +89,7 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
 }
 
 /**
- * Requests EPUB generation from the backend.
+ * バックエンドへ EPUB 生成を依頼する。
  */
 export async function requestEpub(request: EpubRequest): Promise<Blob> {
   console.debug("[client] epub request", {
@@ -114,7 +114,7 @@ export async function requestEpub(request: EpubRequest): Promise<Blob> {
       errorMessage = errorJson.error ?? errorText;
       console.error("[client] epub request error", { error: errorMessage });
     } catch {
-      // Not JSON, use text as-is
+      // JSON でなければテキストをそのまま利用する
     }
     console.error("[client] epub request failed", {
       status: response.status,

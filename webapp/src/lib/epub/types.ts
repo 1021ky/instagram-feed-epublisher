@@ -1,11 +1,11 @@
 /**
- * @file Types for EPUB generation.
+ * @file EPUB 生成向け型定義
  */
 import type { InstagramMedia } from "@/lib/instagram/types";
 import type { CoverThemeId } from "@/types/ui";
 
 /**
- * EPUB metadata provided by the user.
+ * ユーザーが指定する EPUB メタデータ。
  */
 export type EpubMetadata = {
   title: string;
@@ -18,7 +18,7 @@ export type EpubMetadata = {
 };
 
 /**
- * Prepared EPUB chapter data.
+ * 生成前に整形した EPUB 章データ。
  */
 export type EpubChapter = {
   title: string;
@@ -27,7 +27,7 @@ export type EpubChapter = {
 };
 
 /**
- * Input for EPUB generation.
+ * EPUB 生成処理への入力。
  */
 export type EpubInput = {
   metadata: EpubMetadata;

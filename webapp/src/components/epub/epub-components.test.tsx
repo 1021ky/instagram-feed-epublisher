@@ -1,5 +1,5 @@
 /**
- * @file Static render tests for EPUB UI components.
+ * @file EPUB UI コンポーネントの静的レンダリングテスト
  */
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";

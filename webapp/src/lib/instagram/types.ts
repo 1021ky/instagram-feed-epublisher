@@ -1,10 +1,10 @@
 /**
- * @file Types for Instagram Graph API and filters.
+ * @file Instagram Graph API と絞り込み条件の型定義
  */
 import type { EpubSortOrder } from "@/types/ui";
 
 /**
- * Feed filter options.
+ * フィードの絞り込み条件。
  */
 export type FeedFilter = {
   hashtag?: string;
@@ -15,7 +15,7 @@ export type FeedFilter = {
 };
 
 /**
- * Normalized Instagram media item.
+ * 正規化済みの Instagram メディア項目。
  */
 export type InstagramMedia = {
   id: string;

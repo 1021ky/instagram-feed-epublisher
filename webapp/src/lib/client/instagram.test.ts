@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for client API helpers.
+ * @file クライアント API ヘルパーの単体テスト
  */
 import { afterEach, expect, test, vi } from "vitest";
 import { fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";

@@ -1,10 +1,10 @@
 /**
- * @file Shared EPUB sort helpers.
+ * @file 共有 EPUB 並び順ユーティリティ
  */
 import type { EpubSortOrder } from "@/types/ui";
 
 /**
- * Sorts timestamped items into the requested EPUB reading order.
+ * タイムスタンプを持つ項目を、指定された EPUB の読書順に並び替える。
  */
 export function sortItemsByTimestamp<T extends { timestamp: string }>(
   items: T[],
