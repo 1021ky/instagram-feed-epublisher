@@ -85,14 +85,42 @@ function prepareItems(
   sortOrder: EpubInput["sortOrder"] = "desc",
 ): InstagramMedia[] {
   const selectedIds = selectedMediaIds?.length ? new Set(selectedMediaIds) : null;
+  const preparedEntries = items
+    .map((item, index) => ({
+      item,
+      index,
+      timestamp: Date.parse(item.timestamp),
+    }))
+    .filter(({ item }) => (selectedIds ? selectedIds.has(item.id) : true));
 
-  return [...items]
-    .filter((item) => (selectedIds ? selectedIds.has(item.id) : true))
-    .sort((left, right) => {
-      const timeLeft = Date.parse(left.timestamp);
-      const timeRight = Date.parse(right.timestamp);
-      const delta =
-        (Number.isNaN(timeLeft) ? 0 : timeLeft) - (Number.isNaN(timeRight) ? 0 : timeRight);
-      return sortOrder === "asc" ? delta : -delta;
+  const invalidTimestampCount = preparedEntries.filter(({ timestamp }) =>
+    Number.isNaN(timestamp),
+  ).length;
+  if (invalidTimestampCount > 0) {
+    logger.debug("Some EPUB items had invalid timestamps; preserving input order for those items", {
+      invalidTimestampCount,
     });
+  }
+
+  return preparedEntries
+    .sort((left, right) => {
+      const leftValid = !Number.isNaN(left.timestamp);
+      const rightValid = !Number.isNaN(right.timestamp);
+
+      if (!leftValid && !rightValid) {
+        return left.index - right.index;
+      }
+
+      if (!leftValid) {
+        return 1;
+      }
+
+      if (!rightValid) {
+        return -1;
+      }
+
+      const delta = left.timestamp - right.timestamp;
+      return sortOrder === "asc" ? delta : -delta;
+    })
+    .map(({ item }) => item);
 }
