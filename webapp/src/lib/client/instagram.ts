@@ -55,7 +55,6 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
   if (filter.endDate) params.set("endDate", filter.endDate);
 
   const url = `/api/instagram/media?${params.toString()}`;
-  console.debug("[client] feed request", { filter });
 
   const response = await fetch(url, {
     credentials: "include",
@@ -70,19 +69,10 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
     } catch {
       // Not JSON, use text as-is
     }
-    console.error("[client] feed request failed", {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText,
-    });
     throw new Error(`フィード取得に失敗しました: ${response.status} - ${errorMessage}`);
   }
 
   const payload = (await response.json()) as { items: InstagramMedia[] };
-  console.info("[client] feed request succeeded", {
-    status: response.status,
-    count: payload.items?.length ?? 0,
-  });
   return payload.items ?? [];
 }
 
@@ -90,12 +80,6 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
  * Requests EPUB generation from the backend.
  */
 export async function requestEpub(request: EpubRequest): Promise<Blob> {
-  console.debug("[client] epub request", {
-    demoMode: request.demoMode ?? false,
-    filter: request.filter,
-    title: request.metadata.title,
-  });
-
   const response = await fetch(request.demoMode ? "/api/epub/demo" : "/api/epub", {
     method: "POST",
     headers: {
@@ -111,21 +95,11 @@ export async function requestEpub(request: EpubRequest): Promise<Blob> {
     try {
       const errorJson = JSON.parse(errorText);
       errorMessage = errorJson.error ?? errorText;
-      console.error("[client] epub request error", { error: errorMessage });
     } catch {
       // Not JSON, use text as-is
     }
-    console.error("[client] epub request failed", {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText,
-    });
     throw new Error(`EPUB生成に失敗しました: ${response.status} - ${errorMessage}`);
   }
 
-  console.info("[client] epub request succeeded", {
-    status: response.status,
-    contentType: response.headers.get("content-type"),
-  });
   return response.blob();
 }

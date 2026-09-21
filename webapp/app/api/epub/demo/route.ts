@@ -2,7 +2,7 @@
  * @file Demo EPUB generation API.
  */
 import { NextResponse } from "next/server";
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
@@ -15,11 +15,13 @@ import { getLogger } from "@/lib/logger";
 const logger = getLogger("api.epub.demo");
 const sampleDemoItemsById = new Map(sampleDemoFeedData.posts.map((item) => [item.id, item]));
 
+class DemoValidationError extends Error {}
+
 function resolveAllowedDemoItems(items: InstagramMedia[]) {
   return items.map((item) => {
     const sampleItem = sampleDemoItemsById.get(item.id);
     if (!sampleItem) {
-      throw new Error("許可されていないデモデータです。");
+      throw new DemoValidationError("許可されていないデモデータです。");
     }
 
     if (
@@ -28,7 +30,7 @@ function resolveAllowedDemoItems(items: InstagramMedia[]) {
       sampleItem.timestamp !== item.timestamp ||
       sampleItem.caption !== item.caption
     ) {
-      throw new Error("許可されていないデモデータです。");
+      throw new DemoValidationError("許可されていないデモデータです。");
     }
 
     return sampleItem;
@@ -41,6 +43,8 @@ export const runtime = "nodejs";
  * Builds an EPUB from the bundled demo dataset.
  */
 export async function POST(request: Request) {
+  let workDir: string | undefined;
+
   try {
     const payload = (await request.json()) as {
       filter: FeedFilter;
@@ -65,7 +69,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const workDir = await mkdtemp(path.join(os.tmpdir(), "epub-demo-"));
+    workDir = await mkdtemp(path.join(os.tmpdir(), "epub-demo-"));
     const epubPath = await buildEpub({ items: filtered, metadata: payload.metadata }, workDir);
 
     logger.info("Demo EPUB generation completed", { itemCount: filtered.length, path: epubPath });
@@ -80,7 +84,12 @@ export async function POST(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "不明なエラー";
     const stack = error instanceof Error ? error.stack : undefined;
-    logger.error("Demo EPUB generation failed", { error: message, stack });
-    return NextResponse.json({ error: message }, { status: 400 });
+    const status = error instanceof DemoValidationError ? 400 : 500;
+    logger.error("Demo EPUB generation failed", { error: message, stack, status });
+    return NextResponse.json({ error: message }, { status });
+  } finally {
+    if (workDir) {
+      await rm(workDir, { recursive: true, force: true });
+    }
   }
 }
