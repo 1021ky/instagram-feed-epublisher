@@ -6,6 +6,7 @@ import { mkdtemp, readFile } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { getLogger } from "@/lib/logger";
+import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 
 const logger = getLogger("api.epub");
 import type { FeedFilter } from "@/lib/instagram/types";
@@ -18,8 +19,26 @@ import type { InstagramMedia } from "@/lib/instagram/types";
 
 export const runtime = "nodejs";
 
-function hasSafeClientMediaUrl(mediaUrl: string) {
-  return mediaUrl.startsWith("data:image/");
+const sampleDemoItemsById = new Map(sampleDemoFeedData.posts.map((item) => [item.id, item]));
+
+function resolveAllowedDemoItems(items: InstagramMedia[]) {
+  return items.map((item) => {
+    const sampleItem = sampleDemoItemsById.get(item.id);
+    if (!sampleItem) {
+      throw new Error("許可されていないデモデータです。");
+    }
+
+    if (
+      sampleItem.media_url !== item.media_url ||
+      sampleItem.permalink !== item.permalink ||
+      sampleItem.timestamp !== item.timestamp ||
+      sampleItem.caption !== item.caption
+    ) {
+      throw new Error("許可されていないデモデータです。");
+    }
+
+    return sampleItem;
+  });
 }
 
 /**
@@ -38,20 +57,13 @@ export async function POST(request: Request) {
       title: payload.metadata.title,
     });
 
-    const clientItems = payload.items?.length
-      ? payload.items.map((item) => {
-          if (!hasSafeClientMediaUrl(item.media_url)) {
-            throw new Error("許可されていないデモ画像形式です。");
-          }
-          return item;
-        })
-      : undefined;
-    const items =
-      clientItems ??
-      (await (async () => {
-        const accessToken = await resolveInstagramAccessToken(request);
-        return fetchGraphMedia(accessToken);
-      })());
+    let items: InstagramMedia[];
+    if (payload.items?.length) {
+      items = resolveAllowedDemoItems(payload.items);
+    } else {
+      const accessToken = await resolveInstagramAccessToken(request);
+      items = await fetchGraphMedia(accessToken);
+    }
     const filtered = applyFeedFilter(items, payload.filter);
 
     if (filtered.length === 0) {
