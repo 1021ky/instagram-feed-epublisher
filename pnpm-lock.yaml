@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@lesjoursfr/html-to-epub':
+    hash: 7881645ac099c07529e30e70b68e536806ca0da4564760db8f38c441a27f9400
+    path: patches/@lesjoursfr__html-to-epub.patch
+
 importers:
 
   .:
@@ -31,7 +36,7 @@ importers:
     dependencies:
       '@lesjoursfr/html-to-epub':
         specifier: 2.2.2
-        version: 2.2.2
+        version: 2.2.2(patch_hash=7881645ac099c07529e30e70b68e536806ca0da4564760db8f38c441a27f9400)
       '@logtape/adaptor-winston':
         specifier: 2.3.6
         version: 2.3.6(@logtape/logtape@2.3.6)(winston@3.19.0)
@@ -3596,7 +3601,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@lesjoursfr/html-to-epub@2.2.2':
+  '@lesjoursfr/html-to-epub@2.2.2(patch_hash=7881645ac099c07529e30e70b68e536806ca0da4564760db8f38c441a27f9400)':
     dependencies:
       archiver: 5.3.2
       axios: 0.27.2

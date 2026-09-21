@@ -1,0 +1,43 @@
+diff --git a/lib/index.js b/lib/index.js
+index 892227b8a645d07cfc59298579f7ac6645cfa488..0e62f28302bde60ef2279f4de24d5a1007ba5ba9 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -313,9 +313,11 @@ class EPub {
+             const id = `item_${index}`;
+             const dir = (0, path_1.dirname)(filePath);
+             // Parse the content
+-            const $ = (0, cheerio_1.load)(content.data, {
++            const bodyHtml = content.data.includes("<body") ? content.data : `<body>${content.data}</body>`;
++            const $ = (0, cheerio_1.load)(bodyHtml, {
+                 lowerCaseTags: true,
+                 recognizeSelfClosing: true,
++                xmlMode: true,
+             });
+             $($("body > *").get().reverse()).each((idx, elem) => {
+                 const attrs = elem.attribs;
+@@ -382,7 +384,7 @@ class EPub {
+                 id: id,
+                 href: href,
+                 title: content.title,
+-                data: $.html("body > *", { xmlMode: true }),
++                data: $.xml("body > *"),
+                 url: content.url ?? null,
+                 author: content.author ? (typeof content.author === "string" ? [content.author] : content.author) : [],
+                 filePath: filePath,
+@@ -596,7 +598,7 @@ class EPub {
+             archive.directory(cwd + "/META-INF", "META-INF");
+             archive.directory(cwd + "/OEBPS", "OEBPS");
+             archive.pipe(output);
+-            archive.on("end", () => {
++            output.on("close", () => {
+                 if (this.verbose) {
+                     console.log("Done zipping, clearing temp dir...");
+                 }
+@@ -605,6 +607,7 @@ class EPub {
+             });
+             // eslint-disable-next-line @typescript-eslint/no-explicit-any
+             archive.on("error", (err) => reject(err));
++            output.on("error", (err) => reject(err));
+             archive.finalize();
+         });
+     }
