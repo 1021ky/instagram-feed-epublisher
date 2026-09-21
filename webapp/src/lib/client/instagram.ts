@@ -37,6 +37,7 @@ export type EpubMetadata = {
  * EPUB request payload.
  */
 export type EpubRequest = {
+  demoMode?: boolean;
   filter: FeedFilter;
   metadata: EpubMetadata;
   items?: InstagramMedia[];
@@ -90,11 +91,12 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
  */
 export async function requestEpub(request: EpubRequest): Promise<Blob> {
   console.debug("[client] epub request", {
+    demoMode: request.demoMode ?? false,
     filter: request.filter,
     title: request.metadata.title,
   });
 
-  const response = await fetch("/api/epub", {
+  const response = await fetch(request.demoMode ? "/api/epub/demo" : "/api/epub", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

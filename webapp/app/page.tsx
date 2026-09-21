@@ -92,7 +92,7 @@ export default function Page() {
     });
   }, []);
 
-  const resetDemoState = () => {
+  const resetDemoState = useCallback(() => {
     setAppMode("real");
     setHashtag("");
     setStartDate(defaultDates.start);
@@ -104,7 +104,7 @@ export default function Page() {
     setInstagramUrl("");
     setFeed([]);
     setError(null);
-  };
+  }, [defaultDates.end, defaultDates.start]);
 
   const handleLogin = async () => {
     setLoadingLogin(true);
@@ -138,6 +138,7 @@ export default function Page() {
   });
 
   const buildEpubRequest = (items?: InstagramMedia[]): EpubRequest => ({
+    demoMode: isDemoMode,
     filter: buildFilter(),
     metadata: {
       title,

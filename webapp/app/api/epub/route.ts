@@ -6,7 +6,6 @@ import { mkdtemp, readFile } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { getLogger } from "@/lib/logger";
-import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 
 const logger = getLogger("api.epub");
 import type { FeedFilter } from "@/lib/instagram/types";
@@ -15,31 +14,7 @@ import { applyFeedFilter } from "@/lib/instagram/filter-service";
 import { resolveInstagramAccessToken } from "@/lib/auth/session-service";
 import { buildEpub } from "@/lib/epub/epub-builder";
 import type { EpubMetadata } from "@/lib/epub/types";
-import type { InstagramMedia } from "@/lib/instagram/types";
-
 export const runtime = "nodejs";
-
-const sampleDemoItemsById = new Map(sampleDemoFeedData.posts.map((item) => [item.id, item]));
-
-function resolveAllowedDemoItems(items: InstagramMedia[]) {
-  return items.map((item) => {
-    const sampleItem = sampleDemoItemsById.get(item.id);
-    if (!sampleItem) {
-      throw new Error("許可されていないデモデータです。");
-    }
-
-    if (
-      sampleItem.media_url !== item.media_url ||
-      sampleItem.permalink !== item.permalink ||
-      sampleItem.timestamp !== item.timestamp ||
-      sampleItem.caption !== item.caption
-    ) {
-      throw new Error("許可されていないデモデータです。");
-    }
-
-    return sampleItem;
-  });
-}
 
 /**
  * Builds an EPUB from the user's Instagram feed.
@@ -48,7 +23,6 @@ export async function POST(request: Request) {
   try {
     const payload = (await request.json()) as {
       filter: FeedFilter;
-      items?: InstagramMedia[];
       metadata: EpubMetadata;
     };
 
@@ -57,13 +31,8 @@ export async function POST(request: Request) {
       title: payload.metadata.title,
     });
 
-    let items: InstagramMedia[];
-    if (payload.items?.length) {
-      items = resolveAllowedDemoItems(payload.items);
-    } else {
-      const accessToken = await resolveInstagramAccessToken(request);
-      items = await fetchGraphMedia(accessToken);
-    }
+    const accessToken = await resolveInstagramAccessToken(request);
+    const items = await fetchGraphMedia(accessToken);
     const filtered = applyFeedFilter(items, payload.filter);
 
     if (filtered.length === 0) {
