@@ -4,54 +4,8 @@
 import { chromium } from "playwright";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
+import { getCoverTheme } from "@/lib/epub/themes";
 import type { EpubMetadata } from "@/lib/epub/types";
-
-const coverThemeStyles: Record<
-  NonNullable<EpubMetadata["coverTheme"]>,
-  {
-    pageBackground: string;
-    cardBackground: string;
-    textColor: string;
-    metaColor: string;
-    accentColor: string;
-  }
-> = {
-  navy: {
-    pageBackground: "#0f172a",
-    cardBackground: "linear-gradient(160deg, #1e3a8a, #0f172a)",
-    textColor: "#f8fafc",
-    metaColor: "#cbd5f5",
-    accentColor: "#f59e0b",
-  },
-  slate: {
-    pageBackground: "#111827",
-    cardBackground: "linear-gradient(160deg, #334155, #111827)",
-    textColor: "#f8fafc",
-    metaColor: "#cbd5e1",
-    accentColor: "#38bdf8",
-  },
-  ivory: {
-    pageBackground: "#f5efe2",
-    cardBackground: "linear-gradient(160deg, #fffaf0, #efe5d0)",
-    textColor: "#3f2d1d",
-    metaColor: "#7c5a3c",
-    accentColor: "#c2410c",
-  },
-  white: {
-    pageBackground: "#f8fafc",
-    cardBackground: "linear-gradient(160deg, #ffffff, #eef2f7)",
-    textColor: "#0f172a",
-    metaColor: "#475569",
-    accentColor: "#0f172a",
-  },
-  purple: {
-    pageBackground: "#1e1b4b",
-    cardBackground: "linear-gradient(160deg, #581c87, #1e1b4b)",
-    textColor: "#f5f3ff",
-    metaColor: "#ddd6fe",
-    accentColor: "#c4b5fd",
-  },
-};
 
 /**
  * Renders a cover image (JPG) from HTML.
@@ -81,7 +35,7 @@ export function buildCoverHtml(metadata: EpubMetadata): string {
   const subtitle = metadata.subtitle || "";
   const author = metadata.author || "";
   const instagramUrl = metadata.instagramUrl || "";
-  const theme = coverThemeStyles[metadata.coverTheme ?? "navy"];
+  const theme = getCoverTheme(metadata.coverTheme ?? "navy");
 
   return `
     <!doctype html>

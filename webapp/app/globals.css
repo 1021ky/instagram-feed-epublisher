@@ -313,56 +313,6 @@ h1 {
   opacity: 0.92;
 }
 
-.theme-card--navy {
-  background: linear-gradient(160deg, #1e3a8a, #0f172a);
-}
-
-.theme-card--slate {
-  background: linear-gradient(160deg, #334155, #111827);
-}
-
-.theme-card--ivory {
-  background: linear-gradient(160deg, #fffaf0, #efe5d0);
-}
-
-.theme-card--white {
-  background: linear-gradient(160deg, #ffffff, #e2e8f0);
-}
-
-.theme-card--purple {
-  background: linear-gradient(160deg, #581c87, #1e1b4b);
-}
-
-.theme-card__title--light,
-.theme-card__body.theme-card__title--light {
-  color: #f8fafc;
-}
-
-.theme-card__title--dark,
-.theme-card__body.theme-card__title--dark {
-  color: #0f172a;
-}
-
-.theme-card__accent--gold {
-  background: #f59e0b;
-}
-
-.theme-card__accent--sky {
-  background: #38bdf8;
-}
-
-.theme-card__accent--copper {
-  background: #c2410c;
-}
-
-.theme-card__accent--ink {
-  background: #0f172a;
-}
-
-.theme-card__accent--violet {
-  background: #c4b5fd;
-}
-
 .modal-backdrop {
   position: fixed;
   inset: 0;

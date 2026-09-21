@@ -2,60 +2,8 @@
  * @file EPUB cover theme selector.
  */
 import * as React from "react";
-import type { CoverTheme, CoverThemeId } from "@/types/ui";
-
-export const COVER_THEMES: CoverTheme[] = [
-  {
-    id: "navy",
-    name: "濃紺: チャレンジ",
-    description: "挑戦の記録に似合う、芯のあるクラシックネイビー",
-    bgClass: "theme-card--navy",
-    textClass: "theme-card__title--light",
-    accentClass: "theme-card__accent--gold",
-    previewBg: "#0f172a",
-    previewAccent: "#f59e0b",
-  },
-  {
-    id: "slate",
-    name: "スレート: モダン",
-    description: "都会的で引き締まった、モダンなスレートグレー",
-    bgClass: "theme-card--slate",
-    textClass: "theme-card__title--light",
-    accentClass: "theme-card__accent--sky",
-    previewBg: "#1f2937",
-    previewAccent: "#38bdf8",
-  },
-  {
-    id: "ivory",
-    name: "アイボリー: エディトリアル",
-    description: "雑誌のように上品で柔らかな、エディトリアル調",
-    bgClass: "theme-card--ivory",
-    textClass: "theme-card__title--dark",
-    accentClass: "theme-card__accent--copper",
-    previewBg: "#f8f3e8",
-    previewAccent: "#c2410c",
-  },
-  {
-    id: "white",
-    name: "白: ミニマル",
-    description: "写真を主役にしたいときの、余白を活かすミニマル構成",
-    bgClass: "theme-card--white",
-    textClass: "theme-card__title--dark",
-    accentClass: "theme-card__accent--ink",
-    previewBg: "#ffffff",
-    previewAccent: "#0f172a",
-  },
-  {
-    id: "purple",
-    name: "紫: ダーク",
-    description: "夜景やムードのある投稿に映える、深いダークパープル",
-    bgClass: "theme-card--purple",
-    textClass: "theme-card__title--light",
-    accentClass: "theme-card__accent--violet",
-    previewBg: "#2e1065",
-    previewAccent: "#c4b5fd",
-  },
-];
+import { COVER_THEMES } from "@/lib/epub/themes";
+import type { CoverThemeId } from "@/types/ui";
 
 type CoverThemeSelectorProps = {
   selectedTheme: CoverThemeId;
@@ -106,13 +54,16 @@ export function CoverThemeSelector({ selectedTheme, onChange }: CoverThemeSelect
             role="radio"
             aria-checked={isSelected}
             tabIndex={isSelected ? 0 : -1}
-            className={`theme-card ${theme.bgClass} ${isSelected ? "theme-card--selected" : ""}`}
+            className={`theme-card ${isSelected ? "theme-card--selected" : ""}`}
+            style={{ background: theme.cardBackground, color: theme.textColor }}
             onClick={() => onChange(theme.id)}
             onKeyDown={(event) => handleKeyDown(event, index)}
           >
-            <span className={`theme-card__accent ${theme.accentClass}`} />
-            <span className={`theme-card__title ${theme.textClass}`}>{theme.name}</span>
-            <span className={`theme-card__body ${theme.textClass}`}>{theme.description}</span>
+            <span className="theme-card__accent" style={{ background: theme.accentColor }} />
+            <span className="theme-card__title">{theme.name}</span>
+            <span className="theme-card__body" style={{ color: theme.metaColor }}>
+              {theme.description}
+            </span>
           </button>
         );
       })}

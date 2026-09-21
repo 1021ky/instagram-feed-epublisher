@@ -46,7 +46,14 @@ export function ExportModal({ progress, isOpen, onClose, onDownload }: ExportMod
           <div className="progress-panel">
             <div className="spinner" aria-hidden="true" />
             <div>
-              <div className="progress-bar" aria-label="EPUB生成進捗">
+              <div
+                className="progress-bar"
+                role="progressbar"
+                aria-label="EPUB生成進捗"
+                aria-valuenow={progress.progress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
                 <span style={{ width: `${progress.progress}%` }} />
               </div>
               <small>{progress.progress}%</small>
