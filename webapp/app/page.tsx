@@ -384,7 +384,7 @@ export default function Page() {
       </main>
 
       <footer className="footer pb-safe">
-        <small>Better Auth + Instagram Graph API + html-to-epub + Playwright</small>
+        <small>© FeedsToBook</small>
       </footer>
     </div>
   );
