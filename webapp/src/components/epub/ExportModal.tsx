@@ -33,7 +33,11 @@ export function ExportModal({ progress, isOpen, onClose, onDownload }: ExportMod
         <div className="card__header">
           <span className="tag">{isCompleted ? "完了" : isError ? "エラー" : "書き出し中"}</span>
           <h2 id="export-modal-title">
-            {isCompleted ? "EPUBの準備ができました" : "EPUBを書き出しています"}
+            {isCompleted
+              ? "EPUBの準備ができました"
+              : isError
+                ? "エラーが発生しました"
+                : "EPUBを書き出しています"}
           </h2>
           <p>{progress.message}</p>
         </div>
