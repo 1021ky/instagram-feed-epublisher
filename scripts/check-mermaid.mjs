@@ -9,6 +9,17 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
 const webappDir = join(repoRoot, "webapp");
 
+// Candidate browser executable paths (Linux CI, macOS, custom env)
+const candidatePaths = [
+  process.env.PUPPETEER_EXECUTABLE_PATH,
+  "/usr/bin/google-chrome",
+  "/usr/bin/chromium-browser",
+  "/usr/bin/chromium",
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+];
+
+const executablePath = candidatePaths.find((p) => p && existsSync(p));
+
 // Puppeteer config with sandbox args for CI/Docker compatibility
 const tempConfigDir = join(tmpdir(), `mermaid-check-${Date.now()}`);
 mkdirSync(tempConfigDir, { recursive: true });
@@ -17,6 +28,7 @@ writeFileSync(
   puppeteerConfigPath,
   JSON.stringify({
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    ...(executablePath ? { executablePath } : {}),
   }),
 );
 

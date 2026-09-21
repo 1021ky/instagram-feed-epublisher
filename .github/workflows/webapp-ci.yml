@@ -31,9 +31,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install browser for Mermaid CLI
-        run: pnpm --filter instagram-feed-epublisher-webapp exec puppeteer browsers install chrome-headless-shell
-
       - parallel:
           - name: Lint code
             run: pnpm lint
@@ -49,6 +46,8 @@ jobs:
 
           - name: Check Mermaid diagrams
             run: pnpm check:mermaid
+            env:
+              PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
 
           - name: Unit tests
             run: pnpm test
