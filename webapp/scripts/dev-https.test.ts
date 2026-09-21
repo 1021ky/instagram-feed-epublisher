@@ -87,6 +87,7 @@ describe("registerGracefulShutdown", () => {
 
     expect(server.closeAllConnections).toHaveBeenCalledTimes(1);
     expect(exitRef).toHaveBeenCalledWith(1);
+    expect(exitRef).not.toHaveBeenCalledWith(0);
     expect(consoleRef.error).toHaveBeenCalledWith("Graceful shutdown timed out after 5000ms.");
     expect(app.close).not.toHaveBeenCalled();
   });
