@@ -68,3 +68,13 @@
 - [x] `Webapp check`: Code lint, Type check, Unit tests
 - [x] コミット & プッシュ作成
 - [x] PR #38 の CI 通過確認 (`Document check`: 29s, `Webapp check`: 28s)
+
+---
+
+## 追加タスク: CIワークフローファイルの分割
+
+- [x] `.github/workflows/document-ci.yml` 作成（Document check専任）
+- [x] `.github/workflows/webapp-ci.yml` 更新（Webapp check専任）
+- [x] ローカル全検証確認
+- [x] コミット & プッシュ作成
+- [ ] PR #38 の CI 通過確認（Document CI / Webapp CI の両ワークフロー）
