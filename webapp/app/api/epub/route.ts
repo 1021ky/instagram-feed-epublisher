@@ -50,11 +50,10 @@ export async function POST(request: Request) {
     const workDir = await mkdtemp(path.join(os.tmpdir(), "epub-"));
     const epubPath = await buildEpub(
       {
-        items: filtered,
+        items: selectedItems,
         metadata: payload.metadata,
         coverTheme: payload.coverTheme,
         sortOrder: payload.sortOrder,
-        selectedMediaIds: selectedItems.map((item) => item.id),
       },
       workDir,
     );
