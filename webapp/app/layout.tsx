@@ -1,5 +1,5 @@
 /**
- * @file Root layout for the Next.js App Router.
+ * @file Next.js App Router ルートレイアウト
  */
 import type { ReactNode } from "react";
 import "./globals.css";
@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 /**
- * Root layout component.
+ * ルートレイアウトコンポーネント。
  */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

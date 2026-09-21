@@ -1,5 +1,5 @@
 /**
- * @file Root page for the Next.js UI.
+ * @file メインページコンポーネント
  */
 "use client";
 
@@ -18,7 +18,7 @@ const defaultMaxCount = 100;
 const dateISO = (d: Date) => d.toISOString().slice(0, 10);
 
 /**
- * Default date range for filters.
+ * フィルター用のデフォルト日付範囲を算出するフック。
  */
 function useDefaultDates() {
   return useMemo(() => {
@@ -30,7 +30,7 @@ function useDefaultDates() {
 }
 
 /**
- * Root application component.
+ * メインページコンポーネント。
  */
 export default function Page() {
   const defaultDates = useDefaultDates();

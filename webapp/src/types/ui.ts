@@ -1,168 +1,167 @@
 /**
- * @file Common UI types for Instagram Feed Epublisher (v2 Design Renewal).
- * Provides shared types for step management, filter forms, post selection,
- * EPUB custom settings, cover themes, and demo mode.
+ * @file UI共通型定義
+ * ステップ管理、フィード絞り込み条件、投稿選択、EPUB装丁設定、表紙テーマ、デモデータ等の型を提供します。
  */
 
 /**
- * Wizard step numbers (1: Filter, 2: Post Selection, 3: EPUB Customization).
+ * ウィザードのステップ番号（1: 絞り込み, 2: 投稿選択, 3: 装丁設定）。
  */
 export type StepNumber = 1 | 2 | 3;
 
 /**
- * Wizard step identifiers.
+ * ウィザードのステップ識別子。
  */
 export type StepId = "filter" | "select" | "customize";
 
 /**
- * Application operating modes.
- * - `real`: Authenticated via Instagram SSO, fetching real Graph API feed.
- * - `demo`: Interactive demo mode using bundled sample challenge data without login.
+ * アプリケーションの動作モード。
+ * - `real`: Instagram SSO で認証し、実際の Graph API からフィードを取得。
+ * - `demo`: ログイン不要で、あらかじめ用意されたサンプルデータを使用して体験。
  */
 export type AppMode = "real" | "demo";
 
 /**
- * Date range preset options for the feed filter.
+ * 期間指定プリセットオプション。
  */
 export type DatePreset = "100days" | "30days" | "all" | "custom";
 
 /**
- * Options for filtering Instagram feed posts in Step 1.
+ * フィード絞り込みフォームの入力条件。
  */
 export interface FeedFilterOptions {
-  /** Target hashtag (with or without '#' prefix) */
+  /** 絞り込み対象のハッシュタグ（'#' の有無は問わない） */
   hashtag?: string;
-  /** ISO format start date (YYYY-MM-DD) */
+  /** 開始日（YYYY-MM-DD 形式） */
   startDate?: string;
-  /** ISO format end date (YYYY-MM-DD) */
+  /** 終了日（YYYY-MM-DD 形式） */
   endDate?: string;
-  /** Maximum number of posts to retrieve (1 - 500) */
+  /** 最大取得件数（1〜500） */
   maxCount: number;
 }
 
 /**
- * UI-extended Instagram feed item representation for Step 2 selection.
- * Note: `like_count` is exclusively for in-app UI display/sorting and is
- * strictly excluded from EPUB output per product policy.
+ * 投稿選択画面用のフィードアイテム表現。
+ * ※ like_count（いいね数）はアプリ内の確認・並び替え表示専用であり、
+ *   プロダクトポリシーに基づき EPUB 書籍本文には出力されません。
  */
 export interface FeedPostItem {
-  /** Unique Instagram media ID */
+  /** Instagram メディア ID */
   id: string;
-  /** Image or media display URL */
+  /** メディア（画像・動画サムネイル）の表示 URL */
   media_url: string;
-  /** Instagram web permalink */
+  /** Instagram の投稿パーマリンク */
   permalink: string;
-  /** Post caption text */
+  /** キャプション本文 */
   caption?: string;
-  /** Publication timestamp in ISO 8601 format */
+  /** 投稿日時（ISO 8601 形式） */
   timestamp: string;
-  /** Number of likes (UI preview only, excluded from EPUB) */
+  /** いいね数（UI表示専用、EPUBには含めない） */
   like_count?: number;
-  /** Number of comments (UI preview only, excluded from EPUB) */
+  /** コメント数（UI表示専用、EPUBには含めない） */
   comments_count?: number;
-  /** Selection flag indicating whether this post is included in the EPUB */
+  /** EPUB への収録対象フラグ */
   selected?: boolean;
 }
 
 /**
- * EPUB chapter sorting order.
- * - `asc`: Chronological order (Day 1 → Day 100, recommended for challenges).
- * - `desc`: Reverse chronological order (latest first).
+ * EPUB 内の章（投稿）の掲載順序。
+ * - `asc`: 日付の古い順（Day 1 → Day 100 等の時系列表示に推奨）。
+ * - `desc`: 日付の新しい順。
  */
 export type EpubSortOrder = "asc" | "desc";
 
 /**
- * Available cover color theme identifiers.
+ * 表紙カラーテーマの識別子。
  */
 export type CoverThemeId = "navy" | "slate" | "ivory" | "white" | "purple";
 
 /**
- * Visual design theme definition for EPUB cover generation.
+ * 表紙カラーテーマの定義情報。
  */
 export interface CoverTheme {
-  /** Unique theme identifier */
+  /** テーマの一意識別子 */
   id: CoverThemeId;
-  /** Human-readable display label (e.g. "濃紺: チャレンジ") */
+  /** 画面表示用のテーマ名（例: "濃紺: チャレンジ"） */
   name: string;
-  /** Design concept description */
+  /** デザインコンセプトの説明 */
   description: string;
-  /** Tailwind background color class */
+  /** 背景色の Tailwind クラス名 */
   bgClass: string;
-  /** Tailwind text color class */
+  /** 文字色の Tailwind クラス名 */
   textClass: string;
-  /** Tailwind accent/highlight color class */
+  /** アクセント枠線等の Tailwind クラス名 */
   accentClass: string;
-  /** Primary hex color code for preview swatch */
+  /** プレビュー用の背景カラーコード (HEX) */
   previewBg: string;
-  /** Accent hex color code for preview swatch */
+  /** プレビュー用のアクセントカラーコード (HEX) */
   previewAccent: string;
 }
 
 /**
- * EPUB customization and styling settings configured in Step 3.
+ * EPUB 装丁・出力設定。
  */
 export interface EpubCustomSettings {
-  /** Book title displayed on the cover and EPUB metadata */
+  /** 書籍タイトル（表紙およびメタデータに設定） */
   title: string;
-  /** Optional subtitle or challenge description */
+  /** サブタイトルまたは説明文 */
   subtitle?: string;
-  /** Author name / handle */
+  /** 著者名・アカウント名 */
   author: string;
-  /** Selected cover design theme */
+  /** 選択された表紙カラーテーマ */
   coverTheme: CoverThemeId;
-  /** Content sorting order */
+  /** 投稿の並び順（昇順 / 降順） */
   sortOrder: EpubSortOrder;
-  /** Contact information (e.g. email or social handle) */
+  /** 連絡先（メールアドレス等） */
   contact?: string;
-  /** Author's Instagram profile URL */
+  /** 著者の Instagram プロフィール URL */
   instagramUrl?: string;
 }
 
 /**
- * Structure of bundled demo feed data for instant preview mode.
+ * デモ体験モード用のサンプルフィードデータ構造。
  */
 export interface DemoFeedData {
-  /** Instagram username of the demo account */
+  /** デモアカウントのユーザー名 */
   username: string;
-  /** Account avatar image URL */
+  /** アバター画像の URL */
   avatarUrl: string;
-  /** Demo challenge hashtag (e.g. "#100日チャレンジ") */
+  /** デモの対象ハッシュタグ（例: "#100日チャレンジ"） */
   hashtag: string;
-  /** Array of mock feed posts */
+  /** サンプル投稿リスト */
   posts: FeedPostItem[];
 }
 
 /**
- * User account profile information for UI headers.
+ * ヘッダー等に表示するユーザープロフィール情報。
  */
 export interface UserProfile {
-  /** User identifier */
+  /** ユーザー ID */
   id: string;
-  /** Instagram username (without '@') */
+  /** Instagram ユーザーネーム（'@' なし） */
   username?: string;
-  /** Display name */
+  /** 表示名 */
   displayName?: string;
-  /** Profile picture URL */
+  /** アバター画像 URL */
   avatarUrl?: string;
 }
 
 /**
- * Status of the EPUB generation and download process.
+ * EPUB 生成・ダウンロードの進行状態。
  */
 export type ExportStatus = "idle" | "generating" | "completed" | "error";
 
 /**
- * Export modal state for tracking progress and errors.
+ * エクスポートモーダルの状態管理情報。
  */
 export interface ExportProgress {
-  /** Current operation status */
+  /** 現在の処理ステータス */
   status: ExportStatus;
-  /** Numeric progress indicator (0 - 100) */
+  /** 進行度（0〜100） */
   progress: number;
-  /** Status description message */
+  /** 状態説明メッセージ */
   message: string;
-  /** Error message if generation failed */
+  /** エラー発生時のメッセージ */
   error?: string;
-  /** Generated EPUB download URL (object URL) */
+  /** 生成完了した EPUB のダウンロード URL（Blob URL） */
   downloadUrl?: string;
 }

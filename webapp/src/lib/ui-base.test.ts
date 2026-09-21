@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for UI foundation, Lucide icons import, and shared types.
+ * @file UI基盤、Lucideアイコン、共通型定義の単体テスト
  */
 import { createElement } from "react";
 import {
@@ -25,8 +25,8 @@ import type {
   StepNumber,
 } from "@/types/ui";
 
-describe("Lucide Icons Integration", () => {
-  it("successfully imports and instantiates Lucide icon components", () => {
+describe("Lucide アイコンの統合", () => {
+  it("主要アイコンコンポーネントが正常にインポートされインスタンス化できること", () => {
     const icons = [
       BookOpen,
       Calendar,
@@ -48,14 +48,14 @@ describe("Lucide Icons Integration", () => {
   });
 });
 
-describe("Shared UI Types", () => {
-  it("validates FeedPostItem structure", () => {
+describe("共通UI型定義", () => {
+  it("FeedPostItem の構造とプロパティを検証できること", () => {
     const post: FeedPostItem = {
       id: "media-101",
       media_url: "https://example.com/image.jpg",
       permalink: "https://instagram.com/p/example",
       timestamp: "2026-09-21T00:00:00.000Z",
-      caption: "Day 1 #100日チャレンジ",
+      caption: "サンプル投稿のキャプション",
       like_count: 42,
       comments_count: 5,
       selected: true,
@@ -66,14 +66,14 @@ describe("Shared UI Types", () => {
     expect(post.like_count).toBe(42);
   });
 
-  it("validates EpubCustomSettings and CoverTheme structure", () => {
+  it("EpubCustomSettings および CoverTheme の構造を検証できること", () => {
     const themeId: CoverThemeId = "navy";
     const sortOrder: EpubSortOrder = "asc";
 
     const settings: EpubCustomSettings = {
-      title: "100日チャレンジの記録",
-      subtitle: "Day 1 - Day 100",
-      author: "creator",
+      title: "Instagram投稿記録集",
+      subtitle: "日々の活動ログ",
+      author: "クリエイター",
       coverTheme: themeId,
       sortOrder,
     };
@@ -81,7 +81,7 @@ describe("Shared UI Types", () => {
     const theme: CoverTheme = {
       id: "navy",
       name: "濃紺: チャレンジ",
-      description: "挑戦と誠実さを表現するクラシックネイビー",
+      description: "誠実さと落ち着きを表現するクラシックネイビー",
       bgClass: "bg-slate-900",
       textClass: "text-amber-300",
       accentClass: "border-amber-400",
@@ -94,18 +94,18 @@ describe("Shared UI Types", () => {
     expect(theme.id).toBe("navy");
   });
 
-  it("validates DemoFeedData and AppMode", () => {
+  it("DemoFeedData および AppMode の構造を検証できること", () => {
     const mode: AppMode = "demo";
     const step: StepNumber = 1;
     const filter: FeedFilterOptions = {
-      hashtag: "100日チャレンジ",
+      hashtag: "travel",
       maxCount: 100,
     };
 
     const demoData: DemoFeedData = {
       username: "demo_creator",
       avatarUrl: "https://example.com/avatar.jpg",
-      hashtag: "#100日チャレンジ",
+      hashtag: "#travel",
       posts: [
         {
           id: "demo-1",
@@ -119,7 +119,7 @@ describe("Shared UI Types", () => {
 
     expect(mode).toBe("demo");
     expect(step).toBe(1);
-    expect(filter.hashtag).toBe("100日チャレンジ");
+    expect(filter.hashtag).toBe("travel");
     expect(demoData.posts).toHaveLength(1);
   });
 });
