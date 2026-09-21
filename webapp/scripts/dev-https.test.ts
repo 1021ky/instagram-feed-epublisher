@@ -126,4 +126,40 @@ describe("registerGracefulShutdown", () => {
       expect(exitRef).toHaveBeenCalledWith(0);
     });
   });
+
+  it("closes all connections and exits with code 1 when shutdown cleanup fails", async () => {
+    const processRef = new EventEmitter();
+    const server = {
+      closeAllConnections: vi.fn(),
+    };
+    const closeServerRef = vi.fn(async () => {
+      throw new Error("close failed");
+    });
+    const exitRef = vi.fn();
+    const consoleRef = {
+      log: vi.fn(),
+      error: vi.fn(),
+    };
+
+    registerGracefulShutdown({
+      app: { close: vi.fn() },
+      server,
+      processRef: processRef as typeof process,
+      closeServerRef,
+      exitRef,
+      consoleRef,
+    });
+
+    processRef.emit("SIGTERM");
+
+    await vi.waitFor(() => {
+      expect(exitRef).toHaveBeenCalledWith(1);
+    });
+
+    expect(server.closeAllConnections).toHaveBeenCalledTimes(1);
+    expect(consoleRef.error).toHaveBeenCalledWith(
+      "Failed to shut down HTTPS dev server gracefully.",
+      expect.any(Error),
+    );
+  });
 });

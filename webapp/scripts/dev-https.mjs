@@ -35,7 +35,7 @@ export function registerGracefulShutdown({
   clearTimeoutRef = clearTimeout,
   consoleRef = console,
   closeServerRef = closeServer,
-  exitRef,
+  exitRef = undefined,
 }) {
   let isShuttingDown = false;
   const resolvedExitRef = exitRef ?? processRef.exit.bind(processRef);
@@ -74,6 +74,7 @@ export function registerGracefulShutdown({
         resolvedExitRef(1);
         return;
       }
+      server.closeAllConnections?.();
       consoleRef.error("Failed to shut down HTTPS dev server gracefully.", error);
       resolvedExitRef(1);
     }
