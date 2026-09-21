@@ -59,16 +59,16 @@ export function registerGracefulShutdown({
     try {
       await closeServerRef(server);
       await app.close?.();
+      clearTimeoutRef(timeoutId);
       if (didTimeout) {
         return;
       }
-      clearTimeoutRef(timeoutId);
       resolvedExitRef(0);
     } catch (error) {
+      clearTimeoutRef(timeoutId);
       if (didTimeout) {
         return;
       }
-      clearTimeoutRef(timeoutId);
       consoleRef.error("Failed to shut down HTTPS dev server gracefully.", error);
       resolvedExitRef(1);
     }
