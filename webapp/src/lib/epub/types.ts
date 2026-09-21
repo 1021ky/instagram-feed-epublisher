@@ -2,6 +2,7 @@
  * @file Types for EPUB generation.
  */
 import type { InstagramMedia } from "@/lib/instagram/types";
+import type { CoverThemeId } from "@/types/ui";
 
 /**
  * EPUB metadata provided by the user.
@@ -13,7 +14,7 @@ export type EpubMetadata = {
   instagramUrl: string;
   language?: string;
   subtitle?: string;
-  coverTheme?: "navy" | "slate" | "ivory" | "white" | "purple";
+  coverTheme?: CoverThemeId;
 };
 
 /**

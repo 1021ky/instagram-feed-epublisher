@@ -1,6 +1,7 @@
 /**
  * @file Types for Instagram Graph API and filters.
  */
+import type { EpubSortOrder } from "@/types/ui";
 
 /**
  * Feed filter options.
@@ -10,7 +11,7 @@ export type FeedFilter = {
   startDate?: string;
   endDate?: string;
   maxCount: number;
-  sortOrder?: "asc" | "desc";
+  sortOrder?: EpubSortOrder;
 };
 
 /**

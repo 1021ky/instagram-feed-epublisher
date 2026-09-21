@@ -13,20 +13,10 @@ import { fetchGraphMedia } from "@/lib/instagram/graph-client";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";
 import { resolveInstagramAccessToken } from "@/lib/auth/session-service";
 import { buildEpub } from "@/lib/epub/epub-builder";
+import { sortItemsByTimestamp } from "@/lib/epub/sort";
 import type { EpubMetadata } from "@/lib/epub/types";
 
 export const runtime = "nodejs";
-
-function sortItemsByTimestamp<T extends { timestamp: string }>(
-  items: T[],
-  sortOrder: "asc" | "desc" = "asc",
-) {
-  return [...items].sort((left, right) => {
-    const leftTs = new Date(left.timestamp).getTime();
-    const rightTs = new Date(right.timestamp).getTime();
-    return sortOrder === "asc" ? leftTs - rightTs : rightTs - leftTs;
-  });
-}
 
 /**
  * Builds an EPUB from the user's Instagram feed.

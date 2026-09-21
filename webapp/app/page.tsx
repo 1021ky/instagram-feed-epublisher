@@ -8,6 +8,7 @@ import Image from "next/image";
 import { authClient } from "@/lib/auth-client";
 import { EpubCustomizeStep } from "@/components/epub/EpubCustomizeStep";
 import { ExportModal } from "@/components/epub/ExportModal";
+import { sortItemsByTimestamp } from "@/lib/epub/sort";
 import {
   fetchInstagramFeed,
   requestEpub,
@@ -67,14 +68,10 @@ export default function Page() {
   const username = session.data?.user?.name?.replace(/^@/, "") ?? "";
   const recommendedTitle = username ? `@${username}の投稿記録` : defaultBookTitle;
 
-  const sortedFeed = useMemo(() => {
-    const items = [...feed];
-    return items.sort((left, right) => {
-      const leftTs = new Date(left.timestamp).getTime();
-      const rightTs = new Date(right.timestamp).getTime();
-      return customSettings.sortOrder === "asc" ? leftTs - rightTs : rightTs - leftTs;
-    });
-  }, [feed, customSettings.sortOrder]);
+  const sortedFeed = useMemo(
+    () => sortItemsByTimestamp(feed, customSettings.sortOrder),
+    [feed, customSettings.sortOrder],
+  );
 
   const triggerDownload = (url: string) => {
     const anchor = document.createElement("a");

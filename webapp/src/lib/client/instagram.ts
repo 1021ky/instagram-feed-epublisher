@@ -1,6 +1,7 @@
 /**
  * @file Client-side API wrappers for Instagram and EPUB.
  */
+import type { CoverThemeId, EpubSortOrder } from "@/types/ui";
 
 /**
  * Instagram media item.
@@ -21,7 +22,7 @@ export type FeedFilter = {
   startDate?: string;
   endDate?: string;
   maxCount: number;
-  sortOrder?: "asc" | "desc";
+  sortOrder?: EpubSortOrder;
 };
 
 /**
@@ -33,7 +34,7 @@ export type EpubMetadata = {
   contact: string;
   instagramUrl: string;
   subtitle?: string;
-  coverTheme?: "navy" | "slate" | "ivory" | "white" | "purple";
+  coverTheme?: CoverThemeId;
 };
 
 /**
