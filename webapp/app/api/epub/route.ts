@@ -173,7 +173,7 @@ function optionalString(value: unknown): string | undefined {
 }
 
 function optionalStringArray(value: unknown, fieldName: string): string[] | undefined {
-  if (value === undefined) {
+  if (value === undefined || value === null) {
     return undefined;
   }
 
@@ -181,5 +181,6 @@ function optionalStringArray(value: unknown, fieldName: string): string[] | unde
     throw new Error(`${fieldName} は文字列配列で指定してください`);
   }
 
-  return [...new Set(value)];
+  const normalized = [...new Set(value)];
+  return normalized.length > 0 ? normalized : undefined;
 }

@@ -186,4 +186,47 @@ describe("POST /api/epub", () => {
     });
     expect(buildEpub).not.toHaveBeenCalled();
   });
+
+  it("treats null and empty selection arrays as omitted", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: { maxCount: 10 },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+          },
+          selectedMediaIds: null,
+          excludedMediaIds: [],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(buildEpub).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: [
+          {
+            id: "1",
+            media_url: "https://example.com/1.jpg",
+            permalink: "https://instagram.com/p/1",
+            timestamp: "2026-09-01T00:00:00.000Z",
+          },
+          {
+            id: "2",
+            media_url: "https://example.com/2.jpg",
+            permalink: "https://instagram.com/p/2",
+            timestamp: "2026-09-02T00:00:00.000Z",
+          },
+        ],
+      }),
+      "/tmp/epub-workdir",
+    );
+  });
 });
