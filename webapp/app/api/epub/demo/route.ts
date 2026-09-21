@@ -1,5 +1,5 @@
 /**
- * @file Demo EPUB generation API.
+ * @file デモ用EPUB生成API
  */
 import { NextResponse } from "next/server";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
@@ -40,7 +40,7 @@ function resolveAllowedDemoItems(items: InstagramMedia[]) {
 export const runtime = "nodejs";
 
 /**
- * Builds an EPUB from the bundled demo dataset.
+ * 同梱のデモデータセットからEPUBを生成します。
  */
 export async function POST(request: Request) {
   let workDir: string | undefined;

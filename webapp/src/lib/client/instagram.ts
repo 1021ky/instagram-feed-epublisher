@@ -1,9 +1,9 @@
 /**
- * @file Client-side API wrappers for Instagram and EPUB.
+ * @file Instagram / EPUB 用クライアント側 API ラッパー
  */
 
 /**
- * Instagram media item.
+ * Instagramメディア項目。
  */
 export type InstagramMedia = {
   id: string;
@@ -14,7 +14,7 @@ export type InstagramMedia = {
 };
 
 /**
- * Feed filter for API requests.
+ * APIリクエスト用のフィード絞り込み条件。
  */
 export type FeedFilter = {
   hashtag?: string;
@@ -24,7 +24,7 @@ export type FeedFilter = {
 };
 
 /**
- * EPUB metadata payload.
+ * EPUBメタデータのペイロード。
  */
 export type EpubMetadata = {
   title: string;
@@ -34,7 +34,7 @@ export type EpubMetadata = {
 };
 
 /**
- * EPUB request payload.
+ * EPUB生成リクエストのペイロード。
  */
 export type EpubRequest = {
   demoMode?: boolean;
@@ -44,7 +44,7 @@ export type EpubRequest = {
 };
 
 /**
- * Fetches filtered Instagram media from the backend.
+ * 絞り込み条件付きのInstagramメディアをバックエンドから取得します。
  */
 export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramMedia[]> {
   const params = new URLSearchParams({
@@ -67,7 +67,7 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
       const errorJson = JSON.parse(errorText);
       errorMessage = errorJson.error ?? errorText;
     } catch {
-      // Not JSON, use text as-is
+      // JSON でなければそのままエラーテキストを使う
     }
     throw new Error(`フィード取得に失敗しました: ${response.status} - ${errorMessage}`);
   }
@@ -77,7 +77,7 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
 }
 
 /**
- * Requests EPUB generation from the backend.
+ * バックエンドにEPUB生成を依頼します。
  */
 export async function requestEpub(request: EpubRequest): Promise<Blob> {
   const response = await fetch(request.demoMode ? "/api/epub/demo" : "/api/epub", {
@@ -96,7 +96,7 @@ export async function requestEpub(request: EpubRequest): Promise<Blob> {
       const errorJson = JSON.parse(errorText);
       errorMessage = errorJson.error ?? errorText;
     } catch {
-      // Not JSON, use text as-is
+      // JSON でなければそのままエラーテキストを使う
     }
     throw new Error(`EPUB生成に失敗しました: ${response.status} - ${errorMessage}`);
   }

@@ -1,5 +1,5 @@
 /**
- * @file EPUB generation API.
+ * @file EPUB生成API
  */
 import { NextResponse } from "next/server";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
@@ -17,7 +17,7 @@ import type { EpubMetadata } from "@/lib/epub/types";
 export const runtime = "nodejs";
 
 /**
- * Builds an EPUB from the user's Instagram feed.
+ * ユーザーのInstagramフィードからEPUBを生成します。
  */
 export async function POST(request: Request) {
   let workDir: string | undefined;
