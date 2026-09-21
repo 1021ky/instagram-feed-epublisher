@@ -169,7 +169,10 @@ pnpm dev
 # 開発サーバー起動 (HTTPS: https://localhost:3000)
 pnpm dev
 
-# 本番用ビルド
+# Next.js ビルドキャッシュ (.next) の削除
+pnpm clean
+
+# 本番用ビルド（クリーンビルドは pnpm build:clean）
 pnpm build
 
 # コードの Lint 実行 (oxlint)

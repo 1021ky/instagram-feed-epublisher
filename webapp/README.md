@@ -15,7 +15,9 @@ Next.js (App Router) + TypeScript + Better Auth を採用しています。
 | コマンド             | 説明                                                         |
 | :------------------- | :----------------------------------------------------------- |
 | `pnpm dev`           | 開発サーバー起動（ローカル HTTPS: `https://localhost:3000`） |
+| `pnpm clean`         | Next.js ビルドキャッシュ（`.next`）の削除                    |
 | `pnpm build`         | Next.js 本番用ビルド                                         |
+| `pnpm build:clean`   | ビルドキャッシュ削除後のクリーンビルド                       |
 | `pnpm start`         | ビルド済みアプリケーションの起動                             |
 | `pnpm lint`          | oxlint による静的解析                                        |
 | `pnpm format`        | oxfmt によるコードフォーマット                               |
