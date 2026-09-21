@@ -126,3 +126,21 @@
   - [x] `webapp/src/components/feed/feed-components.test.tsx` 作成 (17テスト)
   - [x] 受入基準の検証
   - [x] ビルド、リント、フォーマット確認
+
+---
+
+## PR #49: Step 1 / Step 2 UI コンポーネントと認証・デモモードの統合
+
+- [x] `webapp/app/page.tsx` の UI 統合
+  - [x] `FeedFilterStep` の統合（フィルター状態管理、自動折りたたみ・再展開）
+  - [x] `PostListStep` の統合（投稿一覧、単一トグル、全選択/全解除、検索）
+  - [x] `StickyActionBar` の統合（選択中件数、下部固定、本の設定へのスクロール導線）
+  - [x] デモ体験モード（`handleDemo`）と Step 1 / Step 2 の連携（自動プリロード、サマリー折りたたみ、Step 2 遷移）
+  - [x] EPUB 生成リクエスト（`requestEpub`）における選択中アイテムの連携
+- [x] スタイル・レイアウトの確認と調整
+  - [x] `StickyActionBar` 表示時の下部 Safe Area およびパディング調整
+- [x] 自動テスト・品質ゲートの検証
+  - [x] `pnpm test`
+  - [x] `pnpm lint` && `pnpm format:check` && `pnpm check:mermaid`
+  - [x] `pnpm build`
+- [x] 動作確認 & PR 更新
