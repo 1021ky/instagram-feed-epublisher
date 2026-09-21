@@ -292,22 +292,15 @@ export default function Page() {
         onLogout={canUseApp ? handleLogout : undefined}
         disabled={loadingLogin || loadingFeed || loadingEpub}
       />
-      <header className="hero">
-        <p className="eyebrow font-semibold text-blue-600">Instagram Feeds to E-Book</p>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-          FeedsToBook
-        </h1>
-        <p className="text-sm font-semibold text-slate-700 mt-1">
-          流れるフィードを、ずっと手元に残る一冊に。
-        </p>
-        <p className="lede text-slate-600 max-w-xl">
-          日々の投稿や100日チャレンジをまとめて、Kindleや電子書籍リーダーで読める本に仕立てます。
-        </p>
-        {canUseApp && (
-          <p className="status">{isDemoMode ? "デモデータで体験中" : "Instagram にログイン済み"}</p>
-        )}
-        {error && <p className="error text-rose-500 mt-2">{error}</p>}
-      </header>
+      {error && (
+        <div
+          role="alert"
+          className="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-start gap-2"
+        >
+          <span className="font-bold">✕</span>
+          <p className="flex-1">{error}</p>
+        </div>
+      )}
 
       <main className="panel space-y-6">
         {!canUseApp && (

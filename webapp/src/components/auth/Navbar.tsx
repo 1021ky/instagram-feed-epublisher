@@ -22,10 +22,22 @@ export function Navbar({ disabled = false, isDemoMode = false, onLogout, user }:
     <nav className="navbar">
       <div className="navbar__brand">
         <div>
-          <p className="navbar__eyebrow">Instagramフィード → EPUB</p>
-          <strong>FeedsToBook</strong>
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <p className="eyebrow font-semibold text-blue-600 text-xs sm:text-sm m-0">
+              Instagram Feeds to E-Book
+            </p>
+            <span className="badge navbar__badge">Kindle対応</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 m-0">
+            FeedsToBook
+          </h1>
+          <p className="text-sm font-semibold text-slate-700 mt-1 mb-0">
+            流れるフィードを、ずっと手元に残る一冊に。
+          </p>
+          <p className="text-xs sm:text-sm text-slate-600 max-w-xl mt-1 mb-0 leading-relaxed">
+            日々の投稿や100日チャレンジをまとめて、Kindleや電子書籍リーダーで読める本に仕立てます。
+          </p>
         </div>
-        <span className="badge navbar__badge">Kindle対応</span>
       </div>
 
       {user && onLogout ? (

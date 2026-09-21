@@ -90,13 +90,13 @@ body {
 .navbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
-  padding: 14px 18px;
-  margin-bottom: 16px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
   border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.88);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(18px);
 }
 
