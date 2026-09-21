@@ -58,3 +58,13 @@
 - [x] ローカル全検証（Mermaid, Markdown, oxlint, oxfmt, Vitest, tsc）パス確認
 - [x] コミット & プッシュ作成
 - [x] PR #38 の CI 通過確認 (Checks passing)
+
+---
+
+## 追加タスク: CIジョブの分割・名称改善
+
+- [x] `webapp-ci.yml` の `quality` ジョブを `Document check` と `Webapp check` の2つに分割
+- [x] `Document check`: Markdown lint, Format check, Mermaid check
+- [x] `Webapp check`: Code lint, Type check, Unit tests
+- [x] コミット & プッシュ作成
+- [x] PR #38 の CI 通過確認 (`Document check`: 29s, `Webapp check`: 28s)
