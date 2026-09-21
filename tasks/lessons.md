@@ -9,3 +9,4 @@
 ## 開発ツール・フォーマッター
 - **oxfmt の Markdown 対象**:
   - リポジトリの `oxfmt` は Markdown ファイル（`README.md` 等）もフォーマット対象としているため、ドキュメント編集後は `pnpm format`（または `pnpm format:check`）を実行して差分を整えること。
+

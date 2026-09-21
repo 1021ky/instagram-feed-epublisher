@@ -41,7 +41,6 @@ webapp/
 ├── certs/                # ローカル HTTPS 用証明書 (mkcert)
 ├── e2e/                  # Playwright E2E テスト
 ├── scripts/              # 開発サーバー実行スクリプト (dev-https.mjs)
-├── sequenceDiagram.mmd   # 認証・データフローのシーケンス図
 └── src/
     └── lib/              # 共通ライブラリ・ロジック
         ├── auth/         # Better Auth 設定・セッションサービス

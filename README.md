@@ -21,15 +21,15 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 ├── .github/              # GitHub Actions ワークフロー定義 (CI)
 ├── book_layout/          # EPUB 生成時の HTML / CSS レイアウトテンプレート
 ├── designdoc/            # 設計ドキュメント・Mermaid 図面
-│   ├── webapp/           # Webapp 詳細設計書
+│   ├── designDoc.md      # Webapp 詳細設計書
 │   ├── erDiagram.mmd     # データモデル・ER図
-│   └── flowchart LR.mmd  # ユーザーフロー図
+│   ├── flowchart LR.mmd  # ユーザーフロー図
+│   └── sequenceDiagram.mmd # 認証・API連携シーケンス図
 └── webapp/               # Next.js Web アプリケーション本体
     ├── app/              # App Router (UI / API Route Handlers)
     ├── certs/            # ローカル HTTPS 用証明書配置先 (mkcert)
     ├── e2e/              # Playwright E2E テストコード
     ├── scripts/          # 開発サーバー等の実行スクリプト
-    ├── sequenceDiagram.mmd # 認証・API連携シーケンス図
     └── src/lib/          # 認証、Instagram API クライアント、EPUB 生成ロジック等
 ```
 
@@ -39,13 +39,13 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 
 システムの設計思想、データモデル、認証・通信フローの詳細は以下のドキュメントを参照してください：
 
-- 📘 [Webapp 詳細設計書](designdoc/webapp/designDoc.md)
+- 📘 [Webapp 詳細設計書](designdoc/designDoc.md)
   - 目的・要件、モジュール構成、技術選定の経緯（Vite から Next.js への移行、Instagram Login 対応）、トラブルシューティング。
 - 🔀 [ユーザーフロー図 (Mermaid)](designdoc/flowchart%20LR.mmd)
   - ログインから条件指定、フィード取得、EPUB ダウンロードまでの全体フロー。
 - 🗂 [データモデル・ER図 (Mermaid)](designdoc/erDiagram.mmd)
   - ユーザー、アカウント、セッション、Instagram メディア等の関連図。
-- 🔄 [処理シーケンス図 (Mermaid)](webapp/sequenceDiagram.mmd)
+- 🔄 [処理シーケンス図 (Mermaid)](designdoc/sequenceDiagram.mmd)
   - Next.js フロントエンド、Better Auth、Instagram Graph API 間の認証・データ取得シーケンス。
 
 ---
