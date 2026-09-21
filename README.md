@@ -34,7 +34,10 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
     ├── certs/            # ローカル HTTPS 用証明書配置先 (mkcert)
     ├── e2e/              # Playwright E2E テストコード
     ├── scripts/          # 開発サーバー等の実行スクリプト
-    └── src/lib/          # 認証、Instagram API クライアント、EPUB 生成ロジック等
+    └── src/
+        ├── components/   # UI コンポーネント (auth, feed, epub, common)
+        ├── lib/          # 認証、Instagram API クライアント、EPUB 生成ロジック等
+        └── types/        # UI・ドメイン共通型定義
 ```
 
 ---

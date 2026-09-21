@@ -42,10 +42,12 @@ webapp/
 ├── e2e/                  # Playwright E2E テスト
 ├── scripts/              # 開発サーバー実行スクリプト (dev-https.mjs)
 └── src/
-    └── lib/              # 共通ライブラリ・ロジック
-        ├── auth/         # Better Auth 設定・セッションサービス
-        ├── epub/         # EPUB ビルダー・レンダラー
-        └── instagram/    # Instagram Graph API クライアント
+    ├── components/       # UI コンポーネント (auth, feed, epub, common)
+    ├── lib/              # 共通ライブラリ・ロジック
+    │   ├── auth/         # Better Auth 設定・セッションサービス
+    │   ├── epub/         # EPUB ビルダー・レンダラー
+    │   └── instagram/    # Instagram Graph API クライアント
+    └── types/            # UI・ドメイン共通型定義 (ui.ts 等)
 ```
 
 ---

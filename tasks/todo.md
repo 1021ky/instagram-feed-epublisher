@@ -89,4 +89,11 @@
 - [x] `docs/designdoc/designDoc.md` へのプロダクトポリシー反映
 - [x] 並列開発可能な 7 つの Issue 仕様書の作成 (`tasks/design-renewal-issues.md`)
 - [x] GitHub Issue 起票（#39 〜 #45）
-- [ ] Issue #1 (#39) の実装着手（Tailwind CSS v4 & Lucide 導入）
+- [x] Issue #1 (#39) の実装着手（Tailwind CSS v4 & Lucide 導入）
+  - [x] パッケージ追加 (Exact Version): `lucide-react`, `@tailwindcss/postcss`, `tailwindcss`
+  - [x] `webapp/postcss.config.mjs` 作成
+  - [x] `webapp/app/globals.css` に Tailwind v4 インポート及び Safe Area / dvh ユーティリティ定義
+  - [x] 共通型定義 `webapp/src/types/ui.ts` 作成
+  - [x] コンポーネント雛形ディレクトリ作成 (`auth`, `feed`, `epub`, `common`)
+  - [x] 単体テスト `webapp/src/lib/ui-base.test.ts` 追加 & 検証パス
+  - [x] `pnpm build` による Tailwind CSS v4 コンパイル・受入基準検証通過
