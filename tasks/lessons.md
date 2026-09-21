@@ -32,3 +32,13 @@
   - Tailwind v4 のオンデマンドコンパイラは、ソースコード内で実際に使用されたユーティリティクラスのみを CSS バンドルに出力するため、出力検証時はクラスの適用状態を意識する必要がある。
 - **アイコンライブラリの選定と注意点 (Lucide Icons)**:
   - `lucide-react` は UI/ナビゲーション用の汎用アイコン（`BookOpen`, `Filter`, `Check` 等）が充実している一方、Instagram や Facebook 等の企業/ブランドロゴは意図的に含まれていないため、ブランドアイコンにはカスタム SVG コンポーネントを用意するなどの使い分けが適している。
+
+## 認証・バックエンド連携
+
+- **Better Auth API のリクエストスキーマ**:
+  - `auth.api.getAccessToken` をサーバー側で呼び出す際は、クエリパラメータ（`params`）ではなく `{ body: { providerId: string } }` の形式でプロバイダIDを渡す必要がある。スキーマと異なる引数を渡すとバリデーションエラーとなり、API呼び出しが失敗する。
+
+## ネイティブアドオンと Node.js バージョン整合性
+
+- **ABI 不一致とリビルド**:
+  - `better-sqlite3` などのネイティブアドオンを含む場合、ビルド時と実行時の Node.js バージョン（ABI）が異なると `ERR_DLOPEN_FAILED` が発生する。複数の Node.js バージョンが共存する環境では、`.node-version` に合致した環境（nodenv shims 等）で明示的に `pnpm rebuild` を実行して整合性を保つ必要がある。

@@ -97,3 +97,6 @@
   - [x] コンポーネント雛形ディレクトリ作成 (`auth`, `feed`, `epub`, `common`)
   - [x] 単体テスト `webapp/src/lib/ui-base.test.ts` 追加 & 検証パス
   - [x] `pnpm build` による Tailwind CSS v4 コンパイル・受入基準検証通過
+  - [x] クリーンビルド用コマンドの追加 (`pnpm clean`, `pnpm build:clean`)
+  - [x] セッション解決時の `getAccessToken` リクエスト形式修正 (`body` 指定)
+  - [x] ルート `.gitignore` への SQLite ファイル除外設定追加
