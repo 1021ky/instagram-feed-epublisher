@@ -101,8 +101,15 @@ export async function startDevHttpsServer() {
 
   registerGracefulShutdown({ app, server });
 
-  await new Promise((resolve) => {
+  await new Promise((resolve, reject) => {
+    const handleError = (error) => {
+      server.off("error", handleError);
+      reject(error);
+    };
+
+    server.once("error", handleError);
     server.listen(port, hostname, () => {
+      server.off("error", handleError);
       console.log(`HTTPS dev server: https://${hostname}:${port}`);
       resolve();
     });
