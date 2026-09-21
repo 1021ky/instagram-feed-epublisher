@@ -3,7 +3,7 @@
  */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { authClient } from "@/lib/auth-client";
 import { EpubCustomizeStep } from "@/components/epub/EpubCustomizeStep";
@@ -62,6 +62,7 @@ export default function Page() {
     message: "",
   });
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const downloadUrlRef = useRef<string | null>(null);
 
   const session = authClient.useSession();
   const isLoggedIn = Boolean(session.data);
@@ -138,6 +139,10 @@ export default function Page() {
     }
     setError(null);
     setIsExportModalOpen(true);
+    if (downloadUrlRef.current) {
+      window.URL.revokeObjectURL(downloadUrlRef.current);
+      downloadUrlRef.current = null;
+    }
     setExportProgress({
       status: "generating",
       progress: 20,
@@ -161,6 +166,7 @@ export default function Page() {
         message: "EPUBを書き出しました。ダウンロードを開始しています…",
       });
       const url = window.URL.createObjectURL(epubBlob);
+      downloadUrlRef.current = url;
       triggerDownload(url);
       setExportProgress({
         status: "completed",
@@ -215,152 +221,167 @@ export default function Page() {
 
   useEffect(() => {
     return () => {
-      if (exportProgress.downloadUrl) {
-        window.URL.revokeObjectURL(exportProgress.downloadUrl);
+      if (downloadUrlRef.current) {
+        window.URL.revokeObjectURL(downloadUrlRef.current);
       }
     };
-  }, [exportProgress.downloadUrl]);
+  }, []);
+
+  const closeExportModal = () => {
+    setIsExportModalOpen(false);
+    if (downloadUrlRef.current) {
+      window.URL.revokeObjectURL(downloadUrlRef.current);
+      downloadUrlRef.current = null;
+    }
+    setExportProgress((current) => ({
+      ...current,
+      downloadUrl: undefined,
+    }));
+  };
 
   return (
     <div className="page">
-      <header className="hero">
-        <div className="badge bg-zinc-100 text-zinc-800">Prototype</div>
-        <p className="eyebrow">Instagramフィード → EPUB</p>
-        <h1>SSOでログインして電子書籍を作ろう</h1>
-        <p className="lede">
-          ログイン → フィード取得条件を入力 → EPUBをサーバで生成。タイトルや著者情報も埋め込み可能。
-        </p>
-        <div className="actions">
-          <button className="primary" onClick={handleLogin} disabled={loadingLogin}>
-            {loadingLogin ? "移動中..." : "Instagramでログイン"}
-          </button>
-          <button className="ghost" onClick={handleLogout} disabled={!isLoggedIn}>
-            ログアウト
-          </button>
-        </div>
-        {isLoggedIn && <p className="status">ログイン済み</p>}
-        {error && <p className="error text-rose-500">{error}</p>}
-      </header>
+      <div aria-hidden={isExportModalOpen} inert={isExportModalOpen}>
+        <header className="hero">
+          <div className="badge bg-zinc-100 text-zinc-800">Prototype</div>
+          <p className="eyebrow">Instagramフィード → EPUB</p>
+          <h1>SSOでログインして電子書籍を作ろう</h1>
+          <p className="lede">
+            ログイン → フィード取得条件を入力 →
+            EPUBをサーバで生成。タイトルや著者情報も埋め込み可能。
+          </p>
+          <div className="actions">
+            <button className="primary" onClick={handleLogin} disabled={loadingLogin}>
+              {loadingLogin ? "移動中..." : "Instagramでログイン"}
+            </button>
+            <button className="ghost" onClick={handleLogout} disabled={!isLoggedIn}>
+              ログアウト
+            </button>
+          </div>
+          {isLoggedIn && <p className="status">ログイン済み</p>}
+          {error && <p className="error text-rose-500">{error}</p>}
+        </header>
 
-      <main className="panel">
-        {!isLoggedIn && (
-          <section className="card">
-            <div className="card__header">
-              <span className="tag">ログイン</span>
-              <h2>続行するにはログインが必要です</h2>
-              <p>Instagramでログイン後にフィード条件とEPUB生成が利用できます。</p>
-            </div>
-          </section>
-        )}
-
-        {isLoggedIn && (
-          <section className="card" id="filters">
-            <div className="card__header">
-              <span className="tag">フィルタ</span>
-              <h2>フィード条件</h2>
-              <p>AND条件でハッシュタグ・期間・最大件数を指定</p>
-            </div>
-            <div className="grid">
-              <label className="field">
-                <span>ハッシュタグ（1件）</span>
-                <input
-                  type="text"
-                  placeholder="#travel"
-                  value={hashtag}
-                  onChange={(e) => setHashtag(e.target.value)}
-                />
-              </label>
-              <label className="field">
-                <span>開始日</span>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </label>
-              <label className="field">
-                <span>終了日</span>
-                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-              </label>
-              <label className="field">
-                <span>最大取得件数（1-500）</span>
-                <input
-                  type="number"
-                  min={1}
-                  max={500}
-                  value={maxCount}
-                  onChange={(e) => setMaxCount(Number(e.target.value))}
-                />
-              </label>
-            </div>
-          </section>
-        )}
-
-        {isLoggedIn && (
-          <EpubCustomizeStep
-            settings={customSettings}
-            onChange={setCustomSettings}
-            defaultTitle={recommendedTitle}
-          />
-        )}
-
-        {isLoggedIn && (
-          <section className="card">
-            <div className="card__header">
-              <span className="tag">アクション</span>
-              <h2>フィード取得 → EPUB生成</h2>
-              <p>ログイン後にフィード取得・EPUB生成が利用できます。</p>
-            </div>
-            <div className="actions">
-              <button className="primary" onClick={handleFetch} disabled={loadingFeed}>
-                {loadingFeed ? "取得中..." : "フィードを取得"}
-              </button>
-              <button
-                className="ghost"
-                onClick={handleGenerate}
-                disabled={exportProgress.status === "generating"}
-              >
-                {exportProgress.status === "generating" ? "生成中..." : "EPUBをダウンロード"}
-              </button>
-            </div>
-
-            {sortedFeed.length > 0 && (
-              <div className="feed">
-                {sortedFeed.map((item) => (
-                  <article key={item.id} className="feed__item">
-                    <Image
-                      src={item.media_url}
-                      alt={item.caption ?? ""}
-                      width={500}
-                      height={500}
-                      style={{ objectFit: "cover" }}
-                    />
-                    <div className="feed__body">
-                      <p className="feed__caption">{item.caption ?? "(キャプションなし)"}</p>
-                      <a href={item.permalink} target="_blank" rel="noreferrer">
-                        Instagramで見る
-                      </a>
-                      <small>{new Date(item.timestamp).toLocaleString()}</small>
-                    </div>
-                  </article>
-                ))}
+        <main className="panel">
+          {!isLoggedIn && (
+            <section className="card">
+              <div className="card__header">
+                <span className="tag">ログイン</span>
+                <h2>続行するにはログインが必要です</h2>
+                <p>Instagramでログイン後にフィード条件とEPUB生成が利用できます。</p>
               </div>
-            )}
-          </section>
-        )}
-      </main>
+            </section>
+          )}
 
-      <footer className="footer pb-safe">
-        <small>Better Auth + Instagram Graph API + html-to-epub + Playwright</small>
-      </footer>
+          {isLoggedIn && (
+            <section className="card" id="filters">
+              <div className="card__header">
+                <span className="tag">フィルタ</span>
+                <h2>フィード条件</h2>
+                <p>AND条件でハッシュタグ・期間・最大件数を指定</p>
+              </div>
+              <div className="grid">
+                <label className="field">
+                  <span>ハッシュタグ（1件）</span>
+                  <input
+                    type="text"
+                    placeholder="#travel"
+                    value={hashtag}
+                    onChange={(e) => setHashtag(e.target.value)}
+                  />
+                </label>
+                <label className="field">
+                  <span>開始日</span>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                </label>
+                <label className="field">
+                  <span>終了日</span>
+                  <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                </label>
+                <label className="field">
+                  <span>最大取得件数（1-500）</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={500}
+                    value={maxCount}
+                    onChange={(e) => setMaxCount(Number(e.target.value))}
+                  />
+                </label>
+              </div>
+            </section>
+          )}
+
+          {isLoggedIn && (
+            <EpubCustomizeStep
+              settings={customSettings}
+              onChange={setCustomSettings}
+              defaultTitle={recommendedTitle}
+            />
+          )}
+
+          {isLoggedIn && (
+            <section className="card">
+              <div className="card__header">
+                <span className="tag">アクション</span>
+                <h2>フィード取得 → EPUB生成</h2>
+                <p>ログイン後にフィード取得・EPUB生成が利用できます。</p>
+              </div>
+              <div className="actions">
+                <button className="primary" onClick={handleFetch} disabled={loadingFeed}>
+                  {loadingFeed ? "取得中..." : "フィードを取得"}
+                </button>
+                <button
+                  className="ghost"
+                  onClick={handleGenerate}
+                  disabled={exportProgress.status === "generating"}
+                >
+                  {exportProgress.status === "generating" ? "生成中..." : "EPUBをダウンロード"}
+                </button>
+              </div>
+
+              {sortedFeed.length > 0 && (
+                <div className="feed">
+                  {sortedFeed.map((item) => (
+                    <article key={item.id} className="feed__item">
+                      <Image
+                        src={item.media_url}
+                        alt={item.caption ?? ""}
+                        width={500}
+                        height={500}
+                        style={{ objectFit: "cover" }}
+                      />
+                      <div className="feed__body">
+                        <p className="feed__caption">{item.caption ?? "(キャプションなし)"}</p>
+                        <a href={item.permalink} target="_blank" rel="noreferrer">
+                          Instagramで見る
+                        </a>
+                        <small>{new Date(item.timestamp).toLocaleString()}</small>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+        </main>
+
+        <footer className="footer pb-safe">
+          <small>Better Auth + Instagram Graph API + html-to-epub + Playwright</small>
+        </footer>
+      </div>
 
       <ExportModal
         progress={exportProgress}
         isOpen={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
+        onClose={closeExportModal}
         onDownload={() => {
-          if (exportProgress.downloadUrl) {
-            triggerDownload(exportProgress.downloadUrl);
+          if (downloadUrlRef.current) {
+            triggerDownload(downloadUrlRef.current);
           }
         }}
       />
