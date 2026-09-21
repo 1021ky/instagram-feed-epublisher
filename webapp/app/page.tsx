@@ -144,11 +144,15 @@ export default function Page() {
   return (
     <div className="page">
       <header className="hero">
-        <div className="badge bg-zinc-100 text-zinc-800">Prototype</div>
-        <p className="eyebrow">Instagramフィード → EPUB</p>
-        <h1>SSOでログインして電子書籍を作ろう</h1>
-        <p className="lede">
-          ログイン → フィード取得条件を入力 → EPUBをサーバで生成。タイトルや著者情報も埋め込み可能。
+        <p className="eyebrow font-semibold text-blue-600">Instagram Feeds to E-Book</p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          FeedsToBook
+        </h1>
+        <p className="text-sm font-semibold text-slate-700 mt-1">
+          流れるフィードを、ずっと手元に残る一冊に。
+        </p>
+        <p className="lede text-slate-600">
+          日々の投稿や100日チャレンジをまとめて、Kindleや電子書籍リーダーで読める本に仕立てます。
         </p>
         <div className="actions">
           <button className="primary" onClick={handleLogin} disabled={loadingLogin}>
