@@ -19,21 +19,25 @@ export async function resolveInstagramAccessToken(request: Request): Promise<str
     throw new Error("未ログインです");
   }
 
-  // If getAccessToken API is available on auth.api, check it first
+  // getAccessToken API が利用可能な場合はアクセストークンを直接取得
   if (typeof (auth.api as Record<string, unknown>).getAccessToken === "function") {
-    const tokenResult = await (
-      auth.api as unknown as {
-        getAccessToken: (options: {
-          headers: Headers;
-          params?: { providerId: string };
-        }) => Promise<{ accessToken?: string } | null>;
+    try {
+      const tokenResult = await (
+        auth.api as unknown as {
+          getAccessToken: (options: {
+            headers: Headers;
+            body: { providerId: string };
+          }) => Promise<{ accessToken?: string } | null>;
+        }
+      ).getAccessToken({
+        headers: request.headers,
+        body: { providerId: "instagram" },
+      });
+      if (tokenResult?.accessToken) {
+        return tokenResult.accessToken;
       }
-    ).getAccessToken({
-      headers: request.headers,
-      params: { providerId: "instagram" },
-    });
-    if (tokenResult?.accessToken) {
-      return tokenResult.accessToken;
+    } catch {
+      // 取得失敗時は後続の listUserAccounts を試行
     }
   }
 

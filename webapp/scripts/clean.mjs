@@ -13,3 +13,4 @@ if (existsSync(targetDir)) {
 } else {
   console.info("ℹ️ .next ディレクトリは存在しません。");
 }
+
