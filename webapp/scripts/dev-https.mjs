@@ -35,7 +35,7 @@ export function registerGracefulShutdown({
   clearTimeoutRef = clearTimeout,
   consoleRef = console,
   closeServerRef = closeServer,
-  exitRef = (code) => process.exit(code),
+  exitRef = processRef.exit.bind(processRef),
 }) {
   let isShuttingDown = false;
 
@@ -50,7 +50,6 @@ export function registerGracefulShutdown({
     let didTimeout = false;
     const timeoutId = setTimeoutRef(() => {
       didTimeout = true;
-      clearTimeoutRef(timeoutId);
       consoleRef.error(`Graceful shutdown timed out after ${timeoutMs}ms.`);
       server.closeAllConnections?.();
       exitRef(1);
