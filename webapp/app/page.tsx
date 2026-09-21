@@ -8,16 +8,11 @@ import { authClient } from "@/lib/auth-client";
 import { InAppBrowserAlert } from "@/components/auth/InAppBrowserAlert";
 import { LoginCard } from "@/components/auth/LoginCard";
 import { Navbar } from "@/components/auth/Navbar";
-import {
-  type EpubRequest,
-  fetchInstagramFeed,
-  requestEpub,
-  type FeedFilter,
-  type InstagramMedia,
-} from "@/lib/client/instagram";
+import { FeedFilterStep, PostListStep, StickyActionBar } from "@/components/feed";
+import { fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";
-import type { AppMode, UserProfile } from "@/types/ui";
+import type { AppMode, FeedFilterOptions, FeedPostItem, UserProfile } from "@/types/ui";
 
 const defaultMaxCount = 100;
 
@@ -40,16 +35,20 @@ function useDefaultDates() {
  */
 export default function Page() {
   const defaultDates = useDefaultDates();
-  const [hashtag, setHashtag] = useState("");
-  const [startDate, setStartDate] = useState(defaultDates.start);
-  const [endDate, setEndDate] = useState(defaultDates.end);
-  const [maxCount, setMaxCount] = useState(defaultMaxCount);
+  const [filter, setFilter] = useState<FeedFilterOptions>({
+    hashtag: "",
+    startDate: defaultDates.start,
+    endDate: defaultDates.end,
+    maxCount: defaultMaxCount,
+  });
+  const [isFilterCollapsed, setIsFilterCollapsed] = useState(false);
+
   const [title, setTitle] = useState("私のInstagramフィード");
   const [author, setAuthor] = useState("");
   const [contact, setContact] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
 
-  const [feed, setFeed] = useState<InstagramMedia[]>([]);
+  const [feed, setFeed] = useState<FeedPostItem[]>([]);
   const [loadingLogin, setLoadingLogin] = useState(false);
   const [loadingFeed, setLoadingFeed] = useState(false);
   const [loadingEpub, setLoadingEpub] = useState(false);
@@ -94,15 +93,18 @@ export default function Page() {
 
   const resetDemoState = useCallback(() => {
     setAppMode("real");
-    setHashtag("");
-    setStartDate(defaultDates.start);
-    setEndDate(defaultDates.end);
-    setMaxCount(defaultMaxCount);
+    setFilter({
+      hashtag: "",
+      startDate: defaultDates.start,
+      endDate: defaultDates.end,
+      maxCount: defaultMaxCount,
+    });
     setTitle("私のInstagramフィード");
     setAuthor("");
     setContact("");
     setInstagramUrl("");
     setFeed([]);
+    setIsFilterCollapsed(false);
     setError(null);
   }, [defaultDates.end, defaultDates.start]);
 
@@ -128,41 +130,53 @@ export default function Page() {
     }
     await authClient.signOut();
     setFeed([]);
+    setIsFilterCollapsed(false);
   };
 
-  const buildFilter = (): FeedFilter => ({
-    hashtag: hashtag ? hashtag.replace(/^#/, "") : undefined,
-    startDate,
-    endDate,
-    maxCount,
-  });
+  // 選択中の投稿一覧
+  const selectedPosts = useMemo(() => {
+    return feed.filter((item) => item.selected !== false);
+  }, [feed]);
 
-  const buildEpubRequest = (items?: InstagramMedia[]): EpubRequest => ({
-    demoMode: isDemoMode,
-    filter: buildFilter(),
-    metadata: {
-      title,
-      author,
-      contact,
-      instagramUrl,
-    },
-    items,
-  });
+  // 単一投稿の選択トグル
+  const handleToggleSelect = useCallback((postId: string) => {
+    setFeed((prev) =>
+      prev.map((item) =>
+        item.id === postId ? { ...item, selected: item.selected === false } : item,
+      ),
+    );
+  }, []);
+
+  // すべて選択
+  const handleSelectAll = useCallback(() => {
+    setFeed((prev) => prev.map((item) => ({ ...item, selected: true })));
+  }, []);
+
+  // 選択解除
+  const handleDeselectAll = useCallback(() => {
+    setFeed((prev) => prev.map((item) => ({ ...item, selected: false })));
+  }, []);
 
   const handleDemo = () => {
     const demoStartDate = sampleDemoFeedData.posts[0]?.timestamp.slice(0, 10) ?? defaultDates.start;
     const demoEndDate = sampleDemoFeedData.posts.at(-1)?.timestamp.slice(0, 10) ?? defaultDates.end;
     setAppMode("demo");
     setError(null);
-    setHashtag("100日チャレンジ");
-    setStartDate(demoStartDate);
-    setEndDate(demoEndDate);
-    setMaxCount(100);
+    setFilter({
+      hashtag: "100日チャレンジ",
+      startDate: demoStartDate,
+      endDate: demoEndDate,
+      maxCount: 100,
+    });
     setTitle("100日チャレンジの記録");
     setAuthor(`@${sampleDemoFeedData.username}`);
     setInstagramUrl(`https://www.instagram.com/${sampleDemoFeedData.username}/`);
-    setFeed(sampleDemoFeedData.posts);
-    scrollToSection("feed-results");
+
+    // デモ投稿を初期全選択状態でセット
+    setFeed(sampleDemoFeedData.posts.map((p) => ({ ...p, selected: true })));
+    // Step 1 を自動折りたたみ、Step 2 へスクロール
+    setIsFilterCollapsed(true);
+    scrollToSection("post-list");
   };
 
   const handleFetch = async () => {
@@ -173,16 +187,32 @@ export default function Page() {
     setLoadingFeed(true);
     setError(null);
     try {
-      const items = isDemoMode
-        ? applyFeedFilter(sampleDemoFeedData.posts, buildFilter())
-        : await fetchInstagramFeed(buildFilter());
+      const cleanFilter = {
+        hashtag: filter.hashtag ? filter.hashtag.replace(/^#/, "") : undefined,
+        startDate: filter.startDate,
+        endDate: filter.endDate,
+        maxCount: filter.maxCount,
+      };
+
+      const items: FeedPostItem[] = isDemoMode
+        ? applyFeedFilter(sampleDemoFeedData.posts, cleanFilter).map((item) => ({
+            ...item,
+            selected: true,
+          }))
+        : (await fetchInstagramFeed(cleanFilter)).map((item) => ({
+            ...item,
+            selected: true,
+          }));
+
       setFeed(items);
       if (items.length === 0) {
         setError(
           "フィードが取得できませんでした。指定した条件に該当する投稿がないか、アカウントに投稿がありません。",
         );
+      } else {
+        setIsFilterCollapsed(true);
+        scrollToSection("post-list");
       }
-      scrollToSection("feed-results");
     } catch (e) {
       console.error(e);
       setError(e instanceof Error ? e.message : "フィード取得に失敗しました");
@@ -196,22 +226,46 @@ export default function Page() {
       setError("先にログインしてください");
       return;
     }
+    if (selectedPosts.length === 0) {
+      setError("収録する投稿が1件も選択されていません。投稿を選択してください。");
+      return;
+    }
+
     setLoadingEpub(true);
     setError(null);
     try {
-      const demoItems =
-        isDemoMode && feed.length === 0
-          ? applyFeedFilter(sampleDemoFeedData.posts, buildFilter())
-          : undefined;
-      let itemsForEpub: InstagramMedia[] | undefined;
-      if (isDemoMode) {
-        itemsForEpub = feed.length > 0 ? feed : demoItems;
-      }
-      const epubBlob = await requestEpub(buildEpubRequest(itemsForEpub));
+      // EPUB生成対象の投稿（選択されたもののみ）
+      const itemsForEpub = selectedPosts.map((p) => ({
+        id: p.id,
+        media_url: p.media_url,
+        permalink: p.permalink,
+        caption: p.caption,
+        timestamp: p.timestamp,
+      }));
+
+      const cleanFilter = {
+        hashtag: filter.hashtag ? filter.hashtag.replace(/^#/, "") : undefined,
+        startDate: filter.startDate,
+        endDate: filter.endDate,
+        maxCount: filter.maxCount,
+      };
+
+      const epubBlob = await requestEpub({
+        demoMode: isDemoMode,
+        filter: cleanFilter,
+        metadata: {
+          title,
+          author,
+          contact,
+          instagramUrl,
+        },
+        items: isDemoMode ? itemsForEpub : undefined,
+      });
+
       const url = window.URL.createObjectURL(epubBlob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = "instagram-feed.epub";
+      anchor.download = isDemoMode ? "instagram-feed-demo.epub" : "instagram-feed.epub";
       anchor.click();
       window.URL.revokeObjectURL(url);
     } catch (e) {
@@ -230,7 +284,7 @@ export default function Page() {
   }, [scrollToSection]);
 
   return (
-    <div className="page">
+    <div className={`page ${feed.length > 0 ? "pb-28 sm:pb-32" : ""}`}>
       <InAppBrowserAlert />
       <Navbar
         user={activeProfile}
@@ -252,134 +306,111 @@ export default function Page() {
         {error && <p className="error text-rose-500">{error}</p>}
       </header>
 
-      <main className="panel">
+      <main className="panel space-y-6">
         {!canUseApp && (
           <LoginCard loadingLogin={loadingLogin} onLogin={handleLogin} onDemo={handleDemo} />
         )}
 
         {canUseApp && (
-          <section className="card" id="filters">
-            <div className="card__header">
-              <span className="tag">フィルタ</span>
-              <h2>フィード条件</h2>
-              <p>AND条件でハッシュタグ・期間・最大件数を指定</p>
-            </div>
-            <div className="grid">
-              <label className="field">
-                <span>ハッシュタグ（1件）</span>
-                <input
-                  type="text"
-                  placeholder="#travel"
-                  value={hashtag}
-                  onChange={(e) => setHashtag(e.target.value)}
-                />
-              </label>
-              <label className="field">
-                <span>開始日</span>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </label>
-              <label className="field">
-                <span>終了日</span>
-                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-              </label>
-              <label className="field">
-                <span>最大取得件数（1-500）</span>
-                <input
-                  type="number"
-                  min={1}
-                  max={500}
-                  value={maxCount}
-                  onChange={(e) => setMaxCount(Number(e.target.value))}
-                />
-              </label>
-            </div>
-          </section>
-        )}
-
-        {canUseApp && (
-          <section className="card">
-            <div className="card__header">
-              <span className="tag">メタデータ</span>
-              <h2>本の情報</h2>
-              <p>EPUBに埋め込むタイトル・著者情報を入力</p>
-            </div>
-            <div className="grid">
-              <label className="field">
-                <span>本のタイトル</span>
-                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
-              </label>
-              <label className="field">
-                <span>著者名</span>
-                <input
-                  type="text"
-                  placeholder="Your Name"
-                  value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
-                />
-              </label>
-              <label className="field">
-                <span>連絡先（メールなど）</span>
-                <input
-                  type="text"
-                  placeholder="you@example.com"
-                  value={contact}
-                  onChange={(e) => setContact(e.target.value)}
-                />
-              </label>
-              <label className="field">
-                <span>Instagram URL</span>
-                <input
-                  type="url"
-                  placeholder="https://instagram.com/your_account"
-                  value={instagramUrl}
-                  onChange={(e) => setInstagramUrl(e.target.value)}
-                />
-              </label>
-            </div>
-          </section>
-        )}
-
-        {canUseApp && (
-          <section className="card">
-            <div className="card__header">
-              <span className="tag">アクション</span>
-              <h2>フィード取得 → EPUB生成</h2>
-              <p>
-                {isDemoMode
-                  ? "デモデータを再絞り込みして、そのまま EPUB 生成まで試せます。"
-                  : "ログイン後にフィード取得・EPUB生成が利用できます。"}
-              </p>
-            </div>
-            <div className="actions">
-              <button className="primary" onClick={handleFetch} disabled={loadingFeed}>
-                {loadingFeed ? "取得中..." : "フィードを取得"}
-              </button>
-              <button className="ghost" onClick={handleGenerate} disabled={loadingEpub}>
-                {loadingEpub ? "生成中..." : "EPUBを生成してダウンロード"}
-              </button>
+          <>
+            {/* Step 1: フィード絞り込みフォーム */}
+            <div id="filters">
+              <FeedFilterStep
+                filter={filter}
+                onFilterChange={setFilter}
+                onSubmit={handleFetch}
+                isLoading={loadingFeed}
+                error={error}
+                fetchedCount={feed.length > 0 ? feed.length : undefined}
+                isCollapsed={isFilterCollapsed}
+                onToggleCollapse={() => setIsFilterCollapsed((prev) => !prev)}
+                disabled={loadingEpub}
+              />
             </div>
 
+            {/* Step 2: 投稿確認・選択リスト */}
             {feed.length > 0 && (
-              <div className="feed" id="feed-results">
-                {feed.map((item) => (
-                  <article key={item.id} className="feed__item">
-                    <img src={item.media_url} alt={item.caption ?? ""} loading="lazy" />
-                    <div className="feed__body">
-                      <p className="feed__caption">{item.caption ?? "(キャプションなし)"}</p>
-                      <a href={item.permalink} target="_blank" rel="noreferrer">
-                        Instagramで見る
-                      </a>
-                      <small>{new Date(item.timestamp).toLocaleString()}</small>
-                    </div>
-                  </article>
-                ))}
+              <div id="post-list">
+                <PostListStep
+                  posts={feed}
+                  onToggleSelect={handleToggleSelect}
+                  onSelectAll={handleSelectAll}
+                  onDeselectAll={handleDeselectAll}
+                />
               </div>
             )}
-          </section>
+
+            {/* Step 3: 本の設定・メタデータ */}
+            <section className="card" id="book-settings">
+              <div className="card__header">
+                <span className="tag">Step 3: メタデータ</span>
+                <h2>本の設定・情報</h2>
+                <p>EPUBに埋め込むタイトル・著者情報を入力し、電子書籍を生成します</p>
+              </div>
+              <div className="grid">
+                <label className="field">
+                  <span>本のタイトル</span>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="私のInstagramフィード"
+                  />
+                </label>
+                <label className="field">
+                  <span>著者名</span>
+                  <input
+                    type="text"
+                    placeholder="Your Name"
+                    value={author}
+                    onChange={(e) => setAuthor(e.target.value)}
+                  />
+                </label>
+                <label className="field">
+                  <span>連絡先（メールなど）</span>
+                  <input
+                    type="text"
+                    placeholder="you@example.com"
+                    value={contact}
+                    onChange={(e) => setContact(e.target.value)}
+                  />
+                </label>
+                <label className="field">
+                  <span>Instagram URL</span>
+                  <input
+                    type="url"
+                    placeholder="https://instagram.com/your_account"
+                    value={instagramUrl}
+                    onChange={(e) => setInstagramUrl(e.target.value)}
+                  />
+                </label>
+              </div>
+
+              <div className="actions pt-4">
+                <button
+                  type="button"
+                  className="primary"
+                  onClick={handleGenerate}
+                  disabled={loadingEpub || (feed.length > 0 && selectedPosts.length === 0)}
+                >
+                  {loadingEpub
+                    ? "EPUB生成中..."
+                    : `EPUBを生成してダウンロード (${selectedPosts.length}件収録)`}
+                </button>
+              </div>
+            </section>
+
+            {/* 画面下部固定アクションバー */}
+            {feed.length > 0 && (
+              <StickyActionBar
+                selectedCount={selectedPosts.length}
+                totalCount={feed.length}
+                onNext={() => scrollToSection("book-settings")}
+                nextLabel="本の設定に進む"
+                disabled={loadingEpub || selectedPosts.length === 0}
+              />
+            )}
+          </>
         )}
       </main>
 
