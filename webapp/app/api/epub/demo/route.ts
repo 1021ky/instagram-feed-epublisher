@@ -52,13 +52,15 @@ export async function POST(request: Request) {
       metadata: EpubMetadata;
     };
 
-    logger.info("Demo EPUB generation started", {
+    logger.debug("Demo EPUB generation requested", {
       filter: payload.filter,
       title: payload.metadata.title,
       itemCount: payload.items?.length ?? 0,
     });
 
-    const items = resolveAllowedDemoItems(payload.items ?? []);
+    const items = payload.items?.length
+      ? resolveAllowedDemoItems(payload.items)
+      : sampleDemoFeedData.posts;
     const filtered = applyFeedFilter(items, payload.filter);
 
     if (filtered.length === 0) {
