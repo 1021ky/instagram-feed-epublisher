@@ -13,7 +13,7 @@ import { fetchGraphMedia } from "@/lib/instagram/graph-client";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";
 import { resolveInstagramAccessToken } from "@/lib/auth/session-service";
 import { buildEpub } from "@/lib/epub/epub-builder";
-import { DEFAULT_COVER_THEME_ID } from "@/lib/epub/themes";
+import { COVER_THEMES, DEFAULT_COVER_THEME_ID } from "@/lib/epub/themes";
 import type { CoverThemeId, EpubMetadata, EpubSortOrder } from "@/lib/epub/types";
 
 export const runtime = "nodejs";
@@ -149,13 +149,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
 }
 
 function isCoverThemeId(value: unknown): value is CoverThemeId {
-  return (
-    value === "navy" ||
-    value === "slate" ||
-    value === "ivory" ||
-    value === "white" ||
-    value === "purple"
-  );
+  return typeof value === "string" && value in COVER_THEMES;
 }
 
 function isSortOrder(value: unknown): value is EpubSortOrder {

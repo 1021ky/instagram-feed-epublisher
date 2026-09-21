@@ -22,7 +22,7 @@ export const COVER_THEMES: Record<CoverThemeId, CoverThemeDefinition> = {
     panelBackground: "linear-gradient(160deg, #1e3a8a, #0f172a)",
     accentColor: "#f59e0b",
     textColor: "#f8fafc",
-    mutedTextColor: "#cbd5f5",
+    mutedTextColor: "#cbd5e1",
     titleFontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
     bodyFontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
     titleLetterSpacing: "0.02em",

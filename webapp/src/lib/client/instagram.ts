@@ -1,6 +1,7 @@
 /**
  * @file Client-side API wrappers for Instagram and EPUB.
  */
+import type { CoverThemeId, EpubSortOrder } from "@/lib/epub/types";
 
 /**
  * Instagram media item.
@@ -32,16 +33,6 @@ export type EpubMetadata = {
   contact: string;
   instagramUrl: string;
 };
-
-/**
- * Supported cover theme identifiers for EPUB generation.
- */
-export type CoverThemeId = "navy" | "slate" | "ivory" | "white" | "purple";
-
-/**
- * Supported chapter sort order for EPUB generation.
- */
-export type EpubSortOrder = "asc" | "desc";
 
 /**
  * EPUB request payload.
