@@ -8,6 +8,7 @@
     "predev": "pnpm auth:migrate",
     "dev": "node scripts/dev-https.mjs",
     "clean": "node scripts/clean.mjs",
+    "rebuild:native": "pnpm rebuild better-sqlite3",
     "build": "pnpm next build",
     "build:clean": "pnpm clean && pnpm build",
     "start": "pnpm next start",
