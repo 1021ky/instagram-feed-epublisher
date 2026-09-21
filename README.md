@@ -36,6 +36,7 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
     ├── scripts/          # 開発サーバー等の実行スクリプト
     └── src/
         ├── components/   # UI コンポーネント (auth, feed, epub, common)
+        │   └── epub/     # EPUB 装丁設定・表紙テーマ・エクスポートモーダル
         ├── lib/          # 認証、Instagram API クライアント、EPUB 生成ロジック等
         └── types/        # UI・ドメイン共通型定義
 ```

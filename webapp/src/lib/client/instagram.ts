@@ -21,6 +21,7 @@ export type FeedFilter = {
   startDate?: string;
   endDate?: string;
   maxCount: number;
+  sortOrder?: "asc" | "desc";
 };
 
 /**
@@ -31,6 +32,8 @@ export type EpubMetadata = {
   author: string;
   contact: string;
   instagramUrl: string;
+  subtitle?: string;
+  coverTheme?: "navy" | "slate" | "ivory" | "white" | "purple";
 };
 
 /**

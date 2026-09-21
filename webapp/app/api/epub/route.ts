@@ -17,6 +17,17 @@ import type { EpubMetadata } from "@/lib/epub/types";
 
 export const runtime = "nodejs";
 
+function sortItemsByTimestamp<T extends { timestamp: string }>(
+  items: T[],
+  sortOrder: "asc" | "desc" = "asc",
+) {
+  return [...items].sort((left, right) => {
+    const leftTs = new Date(left.timestamp).getTime();
+    const rightTs = new Date(right.timestamp).getTime();
+    return sortOrder === "asc" ? leftTs - rightTs : rightTs - leftTs;
+  });
+}
+
 /**
  * Builds an EPUB from the user's Instagram feed.
  */
@@ -34,7 +45,10 @@ export async function POST(request: Request) {
 
     const accessToken = await resolveInstagramAccessToken(request);
     const items = await fetchGraphMedia(accessToken);
-    const filtered = applyFeedFilter(items, payload.filter);
+    const filtered = sortItemsByTimestamp(
+      applyFeedFilter(items, payload.filter),
+      payload.filter.sortOrder,
+    );
 
     if (filtered.length === 0) {
       logger.error("No posts found for EPUB generation", { filter: payload.filter });

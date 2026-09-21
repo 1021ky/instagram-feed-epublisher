@@ -10,6 +10,7 @@ export type FeedFilter = {
   startDate?: string;
   endDate?: string;
   maxCount: number;
+  sortOrder?: "asc" | "desc";
 };
 
 /**

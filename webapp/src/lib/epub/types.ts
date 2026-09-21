@@ -12,6 +12,8 @@ export type EpubMetadata = {
   contact: string;
   instagramUrl: string;
   language?: string;
+  subtitle?: string;
+  coverTheme?: "navy" | "slate" | "ivory" | "white" | "purple";
 };
 
 /**
