@@ -45,3 +45,16 @@
   - [x] Mermaid 構文・変換確認
   - [x] CI コマンド通過確認
   - [x] コミット作成
+
+---
+
+## 追加タスク: 依存ライブラリのバージョン固定方針 (Exact Version Pinning)
+
+- [x] ルート `.npmrc` 作成 (`save-exact=true`)
+- [x] ルート `package.json` の devDependencies を Exact Version に固定
+- [x] `webapp/package.json` の dependencies / devDependencies を Exact Version に固定
+- [x] `docs/documentation-policy.md` にバージョン固定方針を明記
+- [x] `pnpm install` による lockfile 同期
+- [x] ローカル全検証（Mermaid, Markdown, oxlint, oxfmt, Vitest, tsc）パス確認
+- [x] コミット & プッシュ作成
+- [x] PR #38 の CI 通過確認 (Checks passing)
