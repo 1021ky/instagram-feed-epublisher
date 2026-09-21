@@ -3,15 +3,21 @@
  */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { InAppBrowserAlert } from "@/components/auth/InAppBrowserAlert";
+import { LoginCard } from "@/components/auth/LoginCard";
+import { Navbar } from "@/components/auth/Navbar";
 import {
+  type EpubRequest,
   fetchInstagramFeed,
   requestEpub,
   type FeedFilter,
   type InstagramMedia,
 } from "@/lib/client/instagram";
+import { sampleDemoFeedData } from "@/lib/demo/sampleData";
+import { applyFeedFilter } from "@/lib/instagram/filter-service";
+import type { AppMode, UserProfile } from "@/types/ui";
 
 const defaultMaxCount = 100;
 
@@ -48,9 +54,57 @@ export default function Page() {
   const [loadingFeed, setLoadingFeed] = useState(false);
   const [loadingEpub, setLoadingEpub] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [appMode, setAppMode] = useState<AppMode>("real");
 
   const session = authClient.useSession();
   const isLoggedIn = Boolean(session.data);
+  const isDemoMode = appMode === "demo";
+  const canUseApp = isLoggedIn || isDemoMode;
+
+  const loggedInProfile = useMemo<UserProfile | null>(() => {
+    const user = session.data?.user;
+    if (!user) {
+      return null;
+    }
+    const fallbackUsername = user.email?.endsWith("@instagram.local")
+      ? user.email.replace("@instagram.local", "")
+      : undefined;
+    return {
+      id: user.id,
+      username: user.name ?? fallbackUsername,
+      displayName: user.name ?? fallbackUsername,
+      avatarUrl: user.image ?? undefined,
+    };
+  }, [session.data]);
+
+  const activeProfile = isDemoMode
+    ? {
+        id: "demo-user",
+        username: sampleDemoFeedData.username,
+        displayName: "Demo User",
+        avatarUrl: sampleDemoFeedData.avatarUrl,
+      }
+    : loggedInProfile;
+
+  const scrollToSection = useCallback((id: string) => {
+    window.requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, []);
+
+  const resetDemoState = () => {
+    setAppMode("real");
+    setHashtag("");
+    setStartDate(defaultDates.start);
+    setEndDate(defaultDates.end);
+    setMaxCount(defaultMaxCount);
+    setTitle("私のInstagramフィード");
+    setAuthor("");
+    setContact("");
+    setInstagramUrl("");
+    setFeed([]);
+    setError(null);
+  };
 
   const handleLogin = async () => {
     setLoadingLogin(true);
@@ -68,6 +122,10 @@ export default function Page() {
   };
 
   const handleLogout = async () => {
+    if (isDemoMode) {
+      resetDemoState();
+      return;
+    }
     await authClient.signOut();
     setFeed([]);
   };
@@ -79,21 +137,51 @@ export default function Page() {
     maxCount,
   });
 
+  const buildEpubRequest = (items?: InstagramMedia[]): EpubRequest => ({
+    filter: buildFilter(),
+    metadata: {
+      title,
+      author,
+      contact,
+      instagramUrl,
+    },
+    items,
+  });
+
+  const handleDemo = () => {
+    const demoStartDate = sampleDemoFeedData.posts[0]?.timestamp.slice(0, 10) ?? defaultDates.start;
+    const demoEndDate = sampleDemoFeedData.posts.at(-1)?.timestamp.slice(0, 10) ?? defaultDates.end;
+    setAppMode("demo");
+    setError(null);
+    setHashtag("100日チャレンジ");
+    setStartDate(demoStartDate);
+    setEndDate(demoEndDate);
+    setMaxCount(100);
+    setTitle("100日チャレンジの記録");
+    setAuthor(`@${sampleDemoFeedData.username}`);
+    setInstagramUrl(`https://www.instagram.com/${sampleDemoFeedData.username}/`);
+    setFeed(sampleDemoFeedData.posts);
+    scrollToSection("feed-results");
+  };
+
   const handleFetch = async () => {
-    if (!isLoggedIn) {
+    if (!canUseApp) {
       setError("先にログインしてください");
       return;
     }
     setLoadingFeed(true);
     setError(null);
     try {
-      const items = await fetchInstagramFeed(buildFilter());
+      const items = isDemoMode
+        ? applyFeedFilter(sampleDemoFeedData.posts, buildFilter())
+        : await fetchInstagramFeed(buildFilter());
       setFeed(items);
       if (items.length === 0) {
         setError(
           "フィードが取得できませんでした。指定した条件に該当する投稿がないか、アカウントに投稿がありません。",
         );
       }
+      scrollToSection("feed-results");
     } catch (e) {
       console.error(e);
       setError(e instanceof Error ? e.message : "フィード取得に失敗しました");
@@ -103,22 +191,20 @@ export default function Page() {
   };
 
   const handleGenerate = async () => {
-    if (!isLoggedIn) {
+    if (!canUseApp) {
       setError("先にログインしてください");
       return;
     }
     setLoadingEpub(true);
     setError(null);
     try {
-      const epubBlob = await requestEpub({
-        filter: buildFilter(),
-        metadata: {
-          title,
-          author,
-          contact,
-          instagramUrl,
-        },
-      });
+      const demoItems =
+        isDemoMode && feed.length === 0
+          ? applyFeedFilter(sampleDemoFeedData.posts, buildFilter())
+          : undefined;
+      const epubBlob = await requestEpub(
+        buildEpubRequest(isDemoMode ? (feed.length > 0 ? feed : demoItems) : undefined),
+      );
       const url = window.URL.createObjectURL(epubBlob);
       const anchor = document.createElement("a");
       anchor.href = url;
@@ -136,44 +222,39 @@ export default function Page() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("scroll") === "filters") {
-      const anchor = document.getElementById("filters");
-      anchor?.scrollIntoView({ behavior: "smooth" });
+      scrollToSection("filters");
     }
-  }, []);
+  }, [scrollToSection]);
 
   return (
     <div className="page">
+      <InAppBrowserAlert />
+      <Navbar
+        user={activeProfile}
+        isDemoMode={isDemoMode}
+        onLogout={canUseApp ? handleLogout : undefined}
+        disabled={loadingLogin || loadingFeed || loadingEpub}
+      />
       <header className="hero">
         <div className="badge bg-zinc-100 text-zinc-800">Prototype</div>
         <p className="eyebrow">Instagramフィード → EPUB</p>
-        <h1>SSOでログインして電子書籍を作ろう</h1>
+        <h1>100日チャレンジの投稿を、読み返しやすい EPUB に</h1>
         <p className="lede">
-          ログイン → フィード取得条件を入力 → EPUBをサーバで生成。タイトルや著者情報も埋め込み可能。
+          ハッシュタグや期間で絞り込み、表紙つきの EPUB をまとめて生成。Meta
+          ログイン前でもデモ投稿で体験できます。
         </p>
-        <div className="actions">
-          <button className="primary" onClick={handleLogin} disabled={loadingLogin}>
-            {loadingLogin ? "移動中..." : "Instagramでログイン"}
-          </button>
-          <button className="ghost" onClick={handleLogout} disabled={!isLoggedIn}>
-            ログアウト
-          </button>
-        </div>
-        {isLoggedIn && <p className="status">ログイン済み</p>}
+        {canUseApp && (
+          <p className="status">{isDemoMode ? "デモデータで体験中" : "Instagram にログイン済み"}</p>
+        )}
         {error && <p className="error text-rose-500">{error}</p>}
       </header>
 
       <main className="panel">
-        {!isLoggedIn && (
-          <section className="card">
-            <div className="card__header">
-              <span className="tag">ログイン</span>
-              <h2>続行するにはログインが必要です</h2>
-              <p>Instagramでログイン後にフィード条件とEPUB生成が利用できます。</p>
-            </div>
-          </section>
+        {!canUseApp && (
+          <LoginCard loadingLogin={loadingLogin} onLogin={handleLogin} onDemo={handleDemo} />
         )}
 
-        {isLoggedIn && (
+        {canUseApp && (
           <section className="card" id="filters">
             <div className="card__header">
               <span className="tag">フィルタ</span>
@@ -216,7 +297,7 @@ export default function Page() {
           </section>
         )}
 
-        {isLoggedIn && (
+        {canUseApp && (
           <section className="card">
             <div className="card__header">
               <span className="tag">メタデータ</span>
@@ -259,12 +340,16 @@ export default function Page() {
           </section>
         )}
 
-        {isLoggedIn && (
+        {canUseApp && (
           <section className="card">
             <div className="card__header">
               <span className="tag">アクション</span>
               <h2>フィード取得 → EPUB生成</h2>
-              <p>ログイン後にフィード取得・EPUB生成が利用できます。</p>
+              <p>
+                {isDemoMode
+                  ? "デモデータを再絞り込みして、そのまま EPUB 生成まで試せます。"
+                  : "ログイン後にフィード取得・EPUB生成が利用できます。"}
+              </p>
             </div>
             <div className="actions">
               <button className="primary" onClick={handleFetch} disabled={loadingFeed}>
@@ -276,16 +361,10 @@ export default function Page() {
             </div>
 
             {feed.length > 0 && (
-              <div className="feed">
+              <div className="feed" id="feed-results">
                 {feed.map((item) => (
                   <article key={item.id} className="feed__item">
-                    <Image
-                      src={item.media_url}
-                      alt={item.caption ?? ""}
-                      width={500}
-                      height={500}
-                      style={{ objectFit: "cover" }}
-                    />
+                    <img src={item.media_url} alt={item.caption ?? ""} loading="lazy" />
                     <div className="feed__body">
                       <p className="feed__caption">{item.caption ?? "(キャプションなし)"}</p>
                       <a href={item.permalink} target="_blank" rel="noreferrer">

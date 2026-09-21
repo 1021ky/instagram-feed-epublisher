@@ -39,6 +39,7 @@ export type EpubMetadata = {
 export type EpubRequest = {
   filter: FeedFilter;
   metadata: EpubMetadata;
+  items?: InstagramMedia[];
 };
 
 /**

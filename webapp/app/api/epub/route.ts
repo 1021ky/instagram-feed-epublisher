@@ -14,8 +14,13 @@ import { applyFeedFilter } from "@/lib/instagram/filter-service";
 import { resolveInstagramAccessToken } from "@/lib/auth/session-service";
 import { buildEpub } from "@/lib/epub/epub-builder";
 import type { EpubMetadata } from "@/lib/epub/types";
+import type { InstagramMedia } from "@/lib/instagram/types";
 
 export const runtime = "nodejs";
+
+function hasSafeClientMediaUrl(mediaUrl: string) {
+  return mediaUrl.startsWith("data:image/");
+}
 
 /**
  * Builds an EPUB from the user's Instagram feed.
@@ -24,6 +29,7 @@ export async function POST(request: Request) {
   try {
     const payload = (await request.json()) as {
       filter: FeedFilter;
+      items?: InstagramMedia[];
       metadata: EpubMetadata;
     };
 
@@ -32,8 +38,20 @@ export async function POST(request: Request) {
       title: payload.metadata.title,
     });
 
-    const accessToken = await resolveInstagramAccessToken(request);
-    const items = await fetchGraphMedia(accessToken);
+    const clientItems = payload.items?.length
+      ? payload.items.map((item) => {
+          if (!hasSafeClientMediaUrl(item.media_url)) {
+            throw new Error("許可されていないデモ画像形式です。");
+          }
+          return item;
+        })
+      : undefined;
+    const items =
+      clientItems ??
+      (await (async () => {
+        const accessToken = await resolveInstagramAccessToken(request);
+        return fetchGraphMedia(accessToken);
+      })());
     const filtered = applyFeedFilter(items, payload.filter);
 
     if (filtered.length === 0) {
