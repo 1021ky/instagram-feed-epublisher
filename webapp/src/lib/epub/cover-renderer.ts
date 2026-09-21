@@ -4,16 +4,21 @@
 import { chromium } from "playwright";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { EpubMetadata } from "@/lib/epub/types";
+import { resolveCoverTheme } from "@/lib/epub/themes";
+import type { CoverThemeId, EpubMetadata } from "@/lib/epub/types";
 
 /**
  * Renders a cover image (JPG) from HTML.
  */
-export async function renderCoverJpg(metadata: EpubMetadata, outputDir: string): Promise<string> {
+export async function renderCoverJpg(
+  metadata: EpubMetadata,
+  outputDir: string,
+  themeId?: CoverThemeId,
+): Promise<string> {
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1200, height: 1600 } });
-    const html = buildCoverHtml(metadata);
+    const html = buildCoverHtml(metadata, themeId);
 
     await page.setContent(html, { waitUntil: "networkidle" });
     const buffer = await page.screenshot({ type: "jpeg", quality: 90 });
@@ -29,10 +34,11 @@ export async function renderCoverJpg(metadata: EpubMetadata, outputDir: string):
 /**
  * Builds HTML markup for the cover.
  */
-export function buildCoverHtml(metadata: EpubMetadata): string {
+export function buildCoverHtml(metadata: EpubMetadata, themeId?: CoverThemeId): string {
   const title = metadata.title || "Instagram Feed";
   const author = metadata.author || "";
   const instagramUrl = metadata.instagramUrl || "";
+  const theme = resolveCoverTheme(themeId);
 
   return `
     <!doctype html>
@@ -42,29 +48,32 @@ export function buildCoverHtml(metadata: EpubMetadata): string {
         <style>
           body {
             margin: 0;
-            font-family: "Inter", "Helvetica", "Arial", sans-serif;
-            background: #0f172a;
-            color: #f8fafc;
+            font-family: ${theme.bodyFontFamily};
+            background: ${theme.backgroundColor};
+            color: ${theme.textColor};
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100vh;
           }
           .card {
-            background: linear-gradient(160deg, #1e3a8a, #0f172a);
+            background: ${theme.panelBackground};
             border-radius: 24px;
             padding: 80px;
             width: 920px;
-            box-shadow: 0 40px 80px rgba(15, 23, 42, 0.4);
+            box-shadow: 0 40px 80px rgba(15, 23, 42, 0.25);
+            border-top: 12px solid ${theme.accentColor};
           }
           h1 {
             margin: 0 0 24px;
             font-size: 56px;
             line-height: 1.1;
+            font-family: ${theme.titleFontFamily};
+            letter-spacing: ${theme.titleLetterSpacing};
           }
           .meta {
             font-size: 22px;
-            color: #cbd5f5;
+            color: ${theme.mutedTextColor};
           }
         </style>
       </head>

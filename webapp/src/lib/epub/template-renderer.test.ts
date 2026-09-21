@@ -8,6 +8,7 @@ import {
   mockMediaNoCaption,
   mockMediaWithNewlines,
 } from "@/__fixtures__/instagram-media";
+import type { InstagramMedia } from "@/lib/instagram/types";
 
 const realModulePath = "./template-renderer";
 
@@ -87,6 +88,31 @@ describe("renderChapterHtml", () => {
     expect(html).not.toContain("&lt;br /&gt;");
     // 絵文字も正しく含まれること
     expect(html).toContain("🎉");
+  });
+
+  test("UI向けのいいね数やコメント数を本文HTMLへ出力しない", async () => {
+    const { renderChapterHtml } = await import(realModulePath);
+    const template = {
+      layoutHtml:
+        '<html><body><h1>{chapter_title}</h1><p>{caption_html}</p><a href="{post_url}">Link</a></body></html>',
+      cssContent: "",
+    };
+    const html = renderChapterHtml(
+      template,
+      {
+        ...mockMediaBasic,
+        caption: "本文だけを出力する",
+        like_count: 999,
+        comments_count: 321,
+      } as InstagramMedia & { like_count: number; comments_count: number },
+      "image.jpg",
+    );
+
+    expect(html).toContain("本文だけを出力する");
+    expect(html).not.toContain("999");
+    expect(html).not.toContain("321");
+    expect(html).not.toContain("いいね");
+    expect(html).not.toContain("コメント");
   });
 
   test("生成されたHTMLがXHTMLとして有効である", async () => {

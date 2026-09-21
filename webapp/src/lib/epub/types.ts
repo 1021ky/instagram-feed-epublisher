@@ -15,6 +15,16 @@ export type EpubMetadata = {
 };
 
 /**
+ * Supported cover theme identifiers.
+ */
+export type CoverThemeId = "navy" | "slate" | "ivory" | "white" | "purple";
+
+/**
+ * Supported chapter sort order for EPUB output.
+ */
+export type EpubSortOrder = "asc" | "desc";
+
+/**
  * Prepared EPUB chapter data.
  */
 export type EpubChapter = {
@@ -29,4 +39,7 @@ export type EpubChapter = {
 export type EpubInput = {
   metadata: EpubMetadata;
   items: InstagramMedia[];
+  coverTheme?: CoverThemeId;
+  sortOrder?: EpubSortOrder;
+  selectedMediaIds?: string[];
 };

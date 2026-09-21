@@ -34,11 +34,25 @@ export type EpubMetadata = {
 };
 
 /**
+ * Supported cover theme identifiers for EPUB generation.
+ */
+export type CoverThemeId = "navy" | "slate" | "ivory" | "white" | "purple";
+
+/**
+ * Supported chapter sort order for EPUB generation.
+ */
+export type EpubSortOrder = "asc" | "desc";
+
+/**
  * EPUB request payload.
  */
 export type EpubRequest = {
   filter: FeedFilter;
   metadata: EpubMetadata;
+  coverTheme?: CoverThemeId;
+  sortOrder?: EpubSortOrder;
+  selectedMediaIds?: string[];
+  excludedMediaIds?: string[];
 };
 
 /**

@@ -36,6 +36,22 @@ test("buildCoverHtml includes metadata", () => {
   expect(html).toContain("Author");
 });
 
+test("buildCoverHtml applies the selected theme palette and typography", () => {
+  const html = buildCoverHtml(
+    {
+      title: "Title",
+      author: "Author",
+      contact: "",
+      instagramUrl: "https://instagram.com",
+    },
+    "purple",
+  );
+
+  expect(html).toContain("#2e1065");
+  expect(html).toContain("#f9a8d4");
+  expect(html).toContain('"Trebuchet MS", "Helvetica", "Arial", sans-serif');
+});
+
 test("escapeHtml escapes unsafe characters", () => {
   expect(escapeHtml("<script>")).toBe("&lt;script&gt;");
 });

@@ -4,6 +4,8 @@
 import { EPub } from "@lesjoursfr/html-to-epub";
 import path from "node:path";
 import { getLogger } from "@/lib/logger";
+import type { InstagramMedia } from "@/lib/instagram/types";
+import { DEFAULT_COVER_THEME_ID } from "@/lib/epub/themes";
 
 const logger = getLogger("epub.builder");
 import type { EpubChapter, EpubInput } from "@/lib/epub/types";
@@ -19,13 +21,20 @@ function getTemplatesDir(): string {
  * Builds an EPUB file from Instagram media items.
  */
 export async function buildEpub(input: EpubInput, outputDir: string): Promise<string> {
-  logger.info("Building EPUB", { itemCount: input.items.length, outputDir });
+  const preparedItems = prepareItems(input.items, input.selectedMediaIds, input.sortOrder);
+
+  logger.info("Building EPUB", {
+    itemCount: preparedItems.length,
+    outputDir,
+    sortOrder: input.sortOrder ?? "desc",
+    hasSelection: Boolean(input.selectedMediaIds?.length),
+  });
 
   const template = await loadLayoutTemplate();
   const chapterData: EpubChapter[] = [];
 
-  logger.debug("Downloading media for chapters", { itemCount: input.items.length });
-  for (const item of input.items) {
+  logger.debug("Downloading media for chapters", { itemCount: preparedItems.length });
+  for (const item of preparedItems) {
     const imagePath = await downloadMedia(item, outputDir);
     const html = renderChapterHtml(template, item, `file://${imagePath}`);
     chapterData.push({
@@ -37,7 +46,11 @@ export async function buildEpub(input: EpubInput, outputDir: string): Promise<st
   logger.info("Media download completed", { chapterCount: chapterData.length });
 
   logger.debug("Generating cover image");
-  const coverPath = await renderCoverJpg(input.metadata, outputDir);
+  const coverPath = await renderCoverJpg(
+    input.metadata,
+    outputDir,
+    input.coverTheme ?? DEFAULT_COVER_THEME_ID,
+  );
   logger.info("Cover generated", { coverPath });
 
   const outputPath = path.join(outputDir, "instagram-feed.epub");
@@ -64,4 +77,22 @@ export async function buildEpub(input: EpubInput, outputDir: string): Promise<st
   await epub.render();
   logger.info("EPUB rendered successfully", { outputPath });
   return outputPath;
+}
+
+function prepareItems(
+  items: InstagramMedia[],
+  selectedMediaIds?: string[],
+  sortOrder: EpubInput["sortOrder"] = "desc",
+): InstagramMedia[] {
+  const selectedIds = selectedMediaIds?.length ? new Set(selectedMediaIds) : null;
+
+  return [...items]
+    .filter((item) => (selectedIds ? selectedIds.has(item.id) : true))
+    .sort((left, right) => {
+      const timeLeft = Date.parse(left.timestamp);
+      const timeRight = Date.parse(right.timestamp);
+      const delta =
+        (Number.isNaN(timeLeft) ? 0 : timeLeft) - (Number.isNaN(timeRight) ? 0 : timeRight);
+      return sortOrder === "asc" ? delta : -delta;
+    });
 }
