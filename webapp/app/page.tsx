@@ -203,9 +203,11 @@ export default function Page() {
         isDemoMode && feed.length === 0
           ? applyFeedFilter(sampleDemoFeedData.posts, buildFilter())
           : undefined;
-      const epubBlob = await requestEpub(
-        buildEpubRequest(isDemoMode ? (feed.length > 0 ? feed : demoItems) : undefined),
-      );
+      let itemsForEpub: InstagramMedia[] | undefined;
+      if (isDemoMode) {
+        itemsForEpub = feed.length > 0 ? feed : demoItems;
+      }
+      const epubBlob = await requestEpub(buildEpubRequest(itemsForEpub));
       const url = window.URL.createObjectURL(epubBlob);
       const anchor = document.createElement("a");
       anchor.href = url;
