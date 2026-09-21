@@ -100,3 +100,47 @@
   - [x] クリーンビルド用コマンドの追加 (`pnpm clean`, `pnpm build:clean`)
   - [x] セッション解決時の `getAccessToken` リクエスト形式修正 (`body` 指定)
   - [x] ルート `.gitignore` への SQLite ファイル除外設定追加
+
+---
+
+## Issue #3 (#41): Step 1（絞り込み）& Step 2（投稿確認・選択・固定バー）の実装
+
+- [x] Step 1: 絞り込みフォームコンポーネント (`FeedFilterStep.tsx`)
+  - [x] ハッシュタグ入力 ＋ よく使うタグボタン（`#100日チャレンジ` 等）
+  - [x] 期間指定 ＋ プリセットボタン（「直近100日」「直近30日」「全期間」）
+  - [x] 取得件数スライダー（10〜500件）
+  - [x] 取得完了後のサマリー自動折りたたみ ＆ タップで再展開
+  - [x] 44×44px 以上のタップ領域確保
+- [x] Step 2: 投稿カードコンポーネント (`PostCard.tsx`)
+  - [x] モバイル向け縦1列カードレイアウト（サムネイル画像＋日付＋キャプション冒頭＋いいね数）
+  - [x] カード全体またはチェックボックスでの選択/除外トグル
+  - [x] 44×44px 以上のタップ領域確保
+- [x] Step 2: 投稿確認・選択リストコンポーネント (`PostListStep.tsx`)
+  - [x] 「すべて選択」「選択解除」ボタン
+  - [x] キャプション内キーワード検索バー
+  - [x] 選択件数カウンター・空状態表示
+- [x] 画面下部固定アクションバー (`StickyActionBar.tsx`)
+  - [x] `fixed bottom-0` / iOS Safe Area 対応 (`pb-safe`)
+  - [x] 「選択中: 〇件」表示と「本の設定に進む →」ボタン
+- [x] 単体テスト & 検証
+  - [x] `webapp/src/components/feed/feed-components.test.tsx` 作成 (17テスト)
+  - [x] 受入基準の検証
+  - [x] ビルド、リント、フォーマット確認
+
+---
+
+## PR #49: Step 1 / Step 2 UI コンポーネントと認証・デモモードの統合
+
+- [x] `webapp/app/page.tsx` の UI 統合
+  - [x] `FeedFilterStep` の統合（フィルター状態管理、自動折りたたみ・再展開）
+  - [x] `PostListStep` の統合（投稿一覧、単一トグル、全選択/全解除、検索）
+  - [x] `StickyActionBar` の統合（選択中件数、下部固定、本の設定へのスクロール導線）
+  - [x] デモ体験モード（`handleDemo`）と Step 1 / Step 2 の連携（自動プリロード、サマリー折りたたみ、Step 2 遷移）
+  - [x] EPUB 生成リクエスト（`requestEpub`）における選択中アイテムの連携
+- [x] スタイル・レイアウトの確認と調整
+  - [x] `StickyActionBar` 表示時の下部 Safe Area およびパディング調整
+- [x] 自動テスト・品質ゲートの検証
+  - [x] `pnpm test`
+  - [x] `pnpm lint` && `pnpm format:check` && `pnpm check:mermaid`
+  - [x] `pnpm build`
+- [x] 動作確認 & PR 更新

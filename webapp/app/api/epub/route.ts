@@ -1,8 +1,8 @@
 /**
- * @file EPUB 生成 API
+ * @file EPUB生成API
  */
 import { NextResponse } from "next/server";
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { getLogger } from "@/lib/logger";
@@ -15,13 +15,14 @@ import { resolveInstagramAccessToken } from "@/lib/auth/session-service";
 import { buildEpub } from "@/lib/epub/epub-builder";
 import { sortItemsByTimestamp } from "@/lib/epub/sort";
 import type { EpubMetadata } from "@/lib/epub/types";
-
 export const runtime = "nodejs";
 
 /**
- * ユーザーの Instagram フィードから EPUB を生成する。
+ * ユーザーのInstagramフィードからEPUBを生成します。
  */
 export async function POST(request: Request) {
+  let workDir: string | undefined;
+
   try {
     const payload = (await request.json()) as {
       filter: FeedFilter;
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const workDir = await mkdtemp(path.join(os.tmpdir(), "epub-"));
+    workDir = await mkdtemp(path.join(os.tmpdir(), "epub-"));
     const epubPath = await buildEpub({ items: filtered, metadata: payload.metadata }, workDir);
 
     logger.info("EPUB generation completed", { itemCount: filtered.length, path: epubPath });
@@ -65,5 +66,9 @@ export async function POST(request: Request) {
     const stack = error instanceof Error ? error.stack : undefined;
     logger.error("EPUB generation failed", { error: message, stack });
     return NextResponse.json({ error: message }, { status: 400 });
+  } finally {
+    if (workDir) {
+      await rm(workDir, { recursive: true, force: true });
+    }
   }
 }

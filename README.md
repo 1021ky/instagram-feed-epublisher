@@ -36,8 +36,11 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
     ├── scripts/          # 開発サーバー等の実行スクリプト
     └── src/
         ├── components/   # UI コンポーネント (auth, feed, epub, common)
-        │   └── epub/     # EPUB 装丁設定・表紙テーマ・エクスポートモーダル
+        │   ├── auth/         # ナビゲーション、ログインカード、WebView注意バナー
+        │   ├── epub/         # EPUB 装丁設定・表紙テーマ・エクスポートモーダル
+        │   └── feed/         # 絞り込みフォーム、投稿カード、選択リスト、下部アクションバー
         ├── lib/          # 認証、Instagram API クライアント、EPUB 生成ロジック等
+        │   └── demo/         # デモ体験モード用サンプルデータ
         └── types/        # UI・ドメイン共通型定義
 ```
 
@@ -172,6 +175,12 @@ pnpm dev
 
 # Next.js ビルドキャッシュ (.next) の削除
 pnpm clean
+
+# ネイティブアドオン (better-sqlite3) の再ビルド (Node.jsバージョン切り替え時・ABI不一致時)
+pnpm rebuild:native
+
+# キャッシュ削除 ＋ ネイティブモジュール再ビルド
+pnpm clean:all
 
 # 本番用ビルド（クリーンビルドは pnpm build:clean）
 pnpm build
