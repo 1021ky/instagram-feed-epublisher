@@ -343,10 +343,10 @@ export default function Page() {
               </div>
             )}
 
-            {/* Step 3: 本の設定・メタデータ */}
+            {/* 本の設定・メタデータ */}
             <section className="card" id="book-settings">
               <div className="card__header">
-                <span className="tag">Step 3: メタデータ</span>
+                <span className="tag">本の設定</span>
                 <h2>本の設定・情報</h2>
                 <p>EPUBに埋め込むタイトル・著者情報を入力し、電子書籍を生成します</p>
               </div>
