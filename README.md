@@ -9,8 +9,7 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 
 - **Web アプリケーション本体 (`webapp/`)**: Next.js (App Router) によるフロントエンド、Better Auth を用いた Instagram SSO、フィード取得・EPUB 生成 API Route。
 - **EPUB レイアウトテンプレート (`book_layout/`)**: 電子書籍のスタイル（CSS）および HTML テンプレート。
-- **設計ドキュメント (`designdoc/`)**: 要件定義、アーキテクチャ、データフロー、ER図・フローチャート等の設計資産。
-- **開発運用ガイド (`docs/`)**: ドキュメント更新ポリシーやリポジトリ運用規約。
+- **設計・運用ドキュメント (`docs/`)**: 要件定義、アーキテクチャ、データフロー、ER図・フローチャート等の設計資産（`docs/designdoc/`）およびドキュメント更新ポリシー。
 - **プロジェクト共通スクリプト (`scripts/`)**: Mermaid 図面検証等のリポジトリ共通スクリプト。
 - **CI/CD ワークフロー (`.github/workflows/`)**: GitHub Actions によるコード・Markdown・Mermaid・型・テストの総合自動検証。
 
@@ -22,12 +21,13 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 .
 ├── .github/              # GitHub Actions CI ワークフロー、エージェント向け指示定義
 ├── book_layout/          # EPUB 生成時の HTML / CSS レイアウトテンプレート
-├── designdoc/            # 設計ドキュメント・Mermaid 図面
-│   ├── designDoc.md      # Webapp 詳細設計書
-│   ├── erDiagram.mmd     # データモデル・ER図
-│   ├── flowchart LR.mmd  # ユーザーフロー図
-│   └── sequenceDiagram.mmd # 認証・API連携シーケンス図
-├── docs/                 # ドキュメント更新ポリシー・運用規約
+├── docs/                 # 設計資産・ドキュメント更新ポリシー
+│   ├── designdoc/        # 設計ドキュメント・Mermaid 図面
+│   │   ├── designDoc.md      # Webapp 詳細設計書
+│   │   ├── erDiagram.mmd     # データモデル・ER図
+│   │   ├── flowchart LR.mmd  # ユーザーフロー図
+│   │   └── sequenceDiagram.mmd # 認証・API連携シーケンス図
+│   └── documentation-policy.md # ドキュメント更新ポリシー
 ├── scripts/              # リポジトリ共通チェックスクリプト
 └── webapp/               # Next.js Web アプリケーション本体
     ├── app/              # App Router (UI / API Route Handlers)
@@ -43,13 +43,13 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 
 システムの設計思想、データモデル、認証・通信フロー、運用の詳細は以下のドキュメントを参照してください：
 
-- 📘 [Webapp 詳細設計書](designdoc/designDoc.md)
+- 📘 [Webapp 詳細設計書](docs/designdoc/designDoc.md)
   - 目的・要件、モジュール構成、技術選定の経緯（Vite から Next.js への移行、Instagram Login 対応）、トラブルシューティング。
-- 🔀 [ユーザーフロー図 (Mermaid)](designdoc/flowchart%20LR.mmd)
+- 🔀 [ユーザーフロー図 (Mermaid)](docs/designdoc/flowchart%20LR.mmd)
   - ログインから条件指定、フィード取得、EPUB ダウンロードまでの全体フロー。
-- 🗂 [データモデル・ER図 (Mermaid)](designdoc/erDiagram.mmd)
+- 🗂 [データモデル・ER図 (Mermaid)](docs/designdoc/erDiagram.mmd)
   - ユーザー、アカウント、セッション、Instagram メディア等の関連図。
-- 🔄 [処理シーケンス図 (Mermaid)](designdoc/sequenceDiagram.mmd)
+- 🔄 [処理シーケンス図 (Mermaid)](docs/designdoc/sequenceDiagram.mmd)
   - Next.js フロントエンド、Better Auth、Instagram Graph API 間の認証・データ取得シーケンス。
 - 📜 [ドキュメント更新ポリシー](docs/documentation-policy.md)
   - 人間および AI エージェントが遵守すべきドキュメント配置、更新義務、品質基準（Markdown / Mermaid の検証ルール）。

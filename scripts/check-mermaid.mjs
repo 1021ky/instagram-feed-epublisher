@@ -24,7 +24,7 @@ try {
   let targetFiles = process.argv.slice(2);
 
   if (targetFiles.length === 0) {
-    const designdocDir = join(repoRoot, "designdoc");
+    const designdocDir = join(repoRoot, "docs/designdoc");
     if (existsSync(designdocDir)) {
       targetFiles = readdirSync(designdocDir)
         .filter((f) => f.endsWith(".mmd"))
