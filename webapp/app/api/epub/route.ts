@@ -104,6 +104,12 @@ function validatePayload(value: unknown): EpubRequestPayload {
     throw new Error("sortOrder の値が不正です");
   }
 
+  const selectedMediaIds = optionalStringArray(value.selectedMediaIds, "selectedMediaIds");
+  const excludedMediaIds = optionalStringArray(value.excludedMediaIds, "excludedMediaIds");
+  if (selectedMediaIds?.length && excludedMediaIds?.length) {
+    throw new Error("selectedMediaIds と excludedMediaIds を同時に指定することはできません");
+  }
+
   return {
     filter: {
       hashtag: optionalString(value.filter.hashtag),
@@ -120,8 +126,8 @@ function validatePayload(value: unknown): EpubRequestPayload {
     },
     coverTheme,
     sortOrder,
-    selectedMediaIds: optionalStringArray(value.selectedMediaIds, "selectedMediaIds"),
-    excludedMediaIds: optionalStringArray(value.excludedMediaIds, "excludedMediaIds"),
+    selectedMediaIds,
+    excludedMediaIds,
   };
 }
 

@@ -158,4 +158,32 @@ describe("POST /api/epub", () => {
     await expect(response.json()).resolves.toEqual({ error: "coverTheme の値が不正です" });
     expect(buildEpub).not.toHaveBeenCalled();
   });
+
+  it("returns 400 when selectedMediaIds and excludedMediaIds are both provided", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: { maxCount: 10 },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+          },
+          selectedMediaIds: ["1"],
+          excludedMediaIds: ["2"],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: "selectedMediaIds と excludedMediaIds を同時に指定することはできません",
+    });
+    expect(buildEpub).not.toHaveBeenCalled();
+  });
 });
