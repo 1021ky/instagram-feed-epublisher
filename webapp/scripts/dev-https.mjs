@@ -47,26 +47,30 @@ export function registerGracefulShutdown({
 
     isShuttingDown = true;
     consoleRef.log(`Received ${signal}. Shutting down HTTPS dev server...`);
-
-    let didTimeout = false;
-    const timeoutId = setTimeoutRef(() => {
-      didTimeout = true;
-      consoleRef.error(`Graceful shutdown timed out after ${timeoutMs}ms.`);
-      server.closeAllConnections?.();
-      resolvedExitRef(1);
-    }, timeoutMs);
+    const timeoutError = new Error(`Graceful shutdown timed out after ${timeoutMs}ms.`);
+    let timeoutId;
 
     try {
-      await closeServerRef(server);
-      await app.close?.();
+      await Promise.race([
+        (async () => {
+          await closeServerRef(server);
+          await app.close?.();
+        })(),
+        new Promise((_, reject) => {
+          timeoutId = setTimeoutRef(() => {
+            server.closeAllConnections?.();
+            reject(timeoutError);
+          }, timeoutMs);
+        }),
+      ]);
+
       clearTimeoutRef(timeoutId);
-      if (didTimeout) {
-        return;
-      }
       resolvedExitRef(0);
     } catch (error) {
       clearTimeoutRef(timeoutId);
-      if (didTimeout) {
+      if (error === timeoutError) {
+        consoleRef.error(timeoutError.message);
+        resolvedExitRef(1);
         return;
       }
       consoleRef.error("Failed to shut down HTTPS dev server gracefully.", error);
