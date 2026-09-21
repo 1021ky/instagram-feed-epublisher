@@ -1,0 +1,40 @@
+{
+  "name": "instagram-feed-epublisher",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter instagram-feed-epublisher-webapp dev",
+    "build": "pnpm --filter instagram-feed-epublisher-webapp build",
+    "start": "pnpm --filter instagram-feed-epublisher-webapp start",
+    "lint": "pnpm --filter instagram-feed-epublisher-webapp lint",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" \"#**/.next/**\"",
+    "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#**/node_modules/**\" \"#**/.next/**\"",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "test": "pnpm --filter instagram-feed-epublisher-webapp test",
+    "e2etest": "pnpm --filter instagram-feed-epublisher-webapp e2etest",
+    "check:mermaid": "node scripts/check-mermaid.mjs",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.17.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "markdownlint-cli2": "^0.23.3",
+    "oxfmt": "^0.65.0",
+    "oxlint": "^1.83.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "oxlint --fix",
+      "oxfmt --write"
+    ],
+    "*.md": [
+      "oxfmt --write",
+      "markdownlint-cli2 --fix"
+    ],
+    "*.mmd": [
+      "node scripts/check-mermaid.mjs"
+    ]
+  },
+  "packageManager": "pnpm@10.26.0"
+}

@@ -10,7 +10,9 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 - **Web アプリケーション本体 (`webapp/`)**: Next.js (App Router) によるフロントエンド、Better Auth を用いた Instagram SSO、フィード取得・EPUB 生成 API Route。
 - **EPUB レイアウトテンプレート (`book_layout/`)**: 電子書籍のスタイル（CSS）および HTML テンプレート。
 - **設計ドキュメント (`designdoc/`)**: 要件定義、アーキテクチャ、データフロー、ER図・フローチャート等の設計資産。
-- **CI/CD ワークフロー (`.github/workflows/`)**: GitHub Actions による oxlint（Lint）、oxfmt（Format）、型検査（tsc）の自動検証。
+- **開発運用ガイド (`docs/`)**: ドキュメント更新ポリシーやリポジトリ運用規約。
+- **プロジェクト共通スクリプト (`scripts/`)**: Mermaid 図面検証等のリポジトリ共通スクリプト。
+- **CI/CD ワークフロー (`.github/workflows/`)**: GitHub Actions によるコード・Markdown・Mermaid・型・テストの総合自動検証。
 
 ---
 
@@ -18,13 +20,15 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 
 ```text
 .
-├── .github/              # GitHub Actions ワークフロー定義 (CI)
+├── .github/              # GitHub Actions CI ワークフロー、エージェント向け指示定義
 ├── book_layout/          # EPUB 生成時の HTML / CSS レイアウトテンプレート
 ├── designdoc/            # 設計ドキュメント・Mermaid 図面
 │   ├── designDoc.md      # Webapp 詳細設計書
 │   ├── erDiagram.mmd     # データモデル・ER図
 │   ├── flowchart LR.mmd  # ユーザーフロー図
 │   └── sequenceDiagram.mmd # 認証・API連携シーケンス図
+├── docs/                 # ドキュメント更新ポリシー・運用規約
+├── scripts/              # リポジトリ共通チェックスクリプト
 └── webapp/               # Next.js Web アプリケーション本体
     ├── app/              # App Router (UI / API Route Handlers)
     ├── certs/            # ローカル HTTPS 用証明書配置先 (mkcert)
@@ -37,7 +41,7 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 
 ## 3. アプリ・設計概要ドキュメント
 
-システムの設計思想、データモデル、認証・通信フローの詳細は以下のドキュメントを参照してください：
+システムの設計思想、データモデル、認証・通信フロー、運用の詳細は以下のドキュメントを参照してください：
 
 - 📘 [Webapp 詳細設計書](designdoc/designDoc.md)
   - 目的・要件、モジュール構成、技術選定の経緯（Vite から Next.js への移行、Instagram Login 対応）、トラブルシューティング。
@@ -47,6 +51,8 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
   - ユーザー、アカウント、セッション、Instagram メディア等の関連図。
 - 🔄 [処理シーケンス図 (Mermaid)](designdoc/sequenceDiagram.mmd)
   - Next.js フロントエンド、Better Auth、Instagram Graph API 間の認証・データ取得シーケンス。
+- 📜 [ドキュメント更新ポリシー](docs/documentation-policy.md)
+  - 人間および AI エージェントが遵守すべきドキュメント配置、更新義務、品質基準（Markdown / Mermaid の検証ルール）。
 
 ---
 
@@ -55,11 +61,13 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 開発を始めるにあたり、以下の環境・アカウントが必要です：
 
 ### 開発ツール・ランタイム
+
 - **Node.js**: `>= 24.12.0`（リポジトリ直下の `.node-version` 準拠）
 - **パッケージマネージャー**: `pnpm` (`10.x`)
 - **[mkcert](https://github.com/FiloSottile/mkcert)**: ローカル開発環境で HTTPS を有効化するために必要（Instagram OAuth は HTTPS が必須）
 
 ### 外部アカウント・権限
+
 - **[Meta for Developers](https://developers.facebook.com/apps/) アカウント**:
   - アプリタイプ「ビジネス (Business)」でアプリを作成し、「Instagram（Instagram API with Instagram Login）」を追加できること。
 - **Instagram プロアカウント**:
@@ -122,12 +130,12 @@ BETTER_AUTH_URL=https://localhost:3000
 
 #### 各環境変数の取得元・注意点
 
-| 環境変数名 | 取得元 / 設定方法 | 説明・注意点 |
-| :--- | :--- | :--- |
-| `INSTAGRAM_CLIENT_ID` | [Meta for Developers](https://developers.facebook.com/apps/) ➔ アプリ ➔「Instagram」➔「API設定」 | **Instagram アプリ ID**（数値）。<br>⚠️ 親の Meta (Facebook) アプリID（「ベーシック」に表示されるID）を設定すると `Invalid platform app` エラーになります。必ず **Instagram API 設定側** の ID を指定してください。 |
-| `INSTAGRAM_CLIENT_SECRET` | 同上（「Instagram」➔「API設定」） | **Instagram アプリシークレット**。「表示」を押してコピーします。 |
-| `BETTER_AUTH_SECRET` | ローカルで生成 | ターミナルで `openssl rand -base64 32` を実行して得られた文字列を設定します。 |
-| `BETTER_AUTH_URL` | 固定値 | ローカル開発時は `https://localhost:3000` を設定します。 |
+| 環境変数名                | 取得元 / 設定方法                                                                                | 説明・注意点                                                                                                                                                                                                        |
+| :------------------------ | :----------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `INSTAGRAM_CLIENT_ID`     | [Meta for Developers](https://developers.facebook.com/apps/) ➔ アプリ ➔「Instagram」➔「API設定」 | **Instagram アプリ ID**（数値）。<br>⚠️ 親の Meta (Facebook) アプリID（「ベーシック」に表示されるID）を設定すると `Invalid platform app` エラーになります。必ず **Instagram API 設定側** の ID を指定してください。 |
+| `INSTAGRAM_CLIENT_SECRET` | 同上（「Instagram」➔「API設定」）                                                                | **Instagram アプリシークレット**。「表示」を押してコピーします。                                                                                                                                                    |
+| `BETTER_AUTH_SECRET`      | ローカルで生成                                                                                   | ターミナルで `openssl rand -base64 32` を実行して得られた文字列を設定します。                                                                                                                                       |
+| `BETTER_AUTH_URL`         | 固定値                                                                                           | ローカル開発時は `https://localhost:3000` を設定します。                                                                                                                                                            |
 
 ### ステップ 5: 開発サーバーの起動
 
@@ -143,31 +151,45 @@ pnpm dev
 ## 6. コード品質と開発コマンド
 
 ### Pre-commit Hooks
-このリポジトリでは Husky + lint-staged を設定しており、コミット時にステージされたファイルに対して自動的にフォーマットと Lint が実行されます：
-- `oxlint --fix`: 静的解析および自動修正
-- `oxfmt --write`: 高速コードフォーマット
 
-### 主な開発コマンド (`webapp/` 配下で実行)
+このリポジトリでは Husky + lint-staged を設定しており、コミット時にステージされたファイルに対して自動的にフォーマットと検証が実行されます：
+
+- **TypeScript / JavaScript** (`*.{js,jsx,ts,tsx}`): `oxlint --fix` による静的解析自動修正 ＋ `oxfmt --write` によるコード整形
+- **Markdown** (`*.md`): `oxfmt --write` による整形 ＋ `markdownlint-cli2 --fix` による構文チェック・自動修正
+- **Mermaid 図面** (`*.mmd`): `scripts/check-mermaid.mjs`（`mmdc`）による構文解析・画像変換検証
+
+### 主な開発コマンド
+
+すべてのコマンドは **プロジェクトルート** から直接実行できます：
 
 ```bash
-# 開発サーバー起動 (HTTPS)
+# 開発サーバー起動 (HTTPS: https://localhost:3000)
 pnpm dev
 
 # 本番用ビルド
 pnpm build
 
-# Lint 実行
+# コードの Lint 実行 (oxlint)
 pnpm lint
 
-# フォーマット実行 / チェック
+# Markdown の Lint 実行 (markdownlint-cli2)
+pnpm lint:md
+
+# Markdown の Lint 自動修正
+pnpm lint:md:fix
+
+# コード・Markdown のフォーマット実行 (oxfmt)
 pnpm format
 pnpm format:check
+
+# Mermaid 図面の変換チェック (mmdc)
+pnpm check:mermaid
 
 # 単体テスト (Vitest)
 pnpm test
 
-# 型チェック
-pnpm tsc --noEmit
+# E2E テスト (Playwright ※現在整備中)
+pnpm e2etest
 ```
 
 ---

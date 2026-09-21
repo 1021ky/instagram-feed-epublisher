@@ -1,9 +1,11 @@
 # タスク管理: ルート README.md 改善とポータル化 (#37)
 
 ## 目標
+
 リポジトリ直下の `README.md` を充実させ、プロジェクトの概要・管理対象・ディレクトリ構成・設計へのリンク・前提環境・セットアップ手順・今後の展望を網羅する総合ポータルとする。あわせて `webapp/README.md` を整理する。
 
 ## TODO
+
 - [x] Issue #37 の作成
 - [x] `main` からブランチ `docs/issue-37-improve-root-readme` を作成
 - [x] ルート `README.md` の作成・充実
@@ -21,3 +23,25 @@
   - [x] ドキュメント内のリンクが有効か確認
   - [x] oxlint / oxfmt / Markdown 構文等の確認
 - [x] 完了・まとめ
+
+---
+
+## 追加タスク: ドキュメント更新ポリシー & 品質ツールの導入
+
+- [x] ツール導入: `markdownlint-cli2`, `@mermaid-js/mermaid-cli`
+- [x] 設定ファイル作成: `.markdownlint-cli2.jsonc`, `scripts/check-mermaid.mjs`
+- [x] ドキュメント更新ポリシー作成:
+  - [x] `docs/documentation-policy.md` (人間向け)
+  - [x] `.github/instructions/documentation.instructions.md` (AIエージェント向け)
+- [x] ドキュメント更新:
+  - [x] `README.md` (ポリシーリンク追加、品質コマンド更新)
+  - [x] `webapp/README.md` (コマンド一覧更新)
+- [x] Husky & CI/CD 更新:
+  - [x] `package.json` (`lint:md`, `check:mermaid`, `lint-staged`)
+  - [x] `.husky/pre-commit` (ルート階層対応)
+  - [x] `.github/workflows/webapp-ci.yml` (CI検証ジョブへの追加)
+- [x] 総合検証:
+  - [x] Markdown リント & フォーマット確認
+  - [x] Mermaid 構文・変換確認
+  - [x] CI コマンド通過確認
+  - [x] コミット作成
