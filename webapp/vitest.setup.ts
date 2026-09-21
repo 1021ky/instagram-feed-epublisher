@@ -1,7 +1,8 @@
-/**
- * @file Vitest setup to suppress console logs during test execution
- */
+import React from "react";
 import { beforeEach, vi } from "vitest";
+
+// Ensure React is available globally for JSX in node test environment
+(globalThis as unknown as { React: typeof React }).React = React;
 
 // Suppress console logs during tests to reduce noise
 beforeEach(() => {

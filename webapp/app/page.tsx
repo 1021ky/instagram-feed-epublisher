@@ -12,6 +12,7 @@ import {
   type FeedFilter,
   type InstagramMedia,
 } from "@/lib/client/instagram";
+import { LogOut } from "lucide-react";
 
 const defaultMaxCount = 100;
 
@@ -143,23 +144,43 @@ export default function Page() {
 
   return (
     <div className="page">
-      <header className="hero">
-        <div className="badge bg-zinc-100 text-zinc-800">Prototype</div>
-        <p className="eyebrow">Instagramフィード → EPUB</p>
-        <h1>SSOでログインして電子書籍を作ろう</h1>
-        <p className="lede">
-          ログイン → フィード取得条件を入力 → EPUBをサーバで生成。タイトルや著者情報も埋め込み可能。
+      <header className="hero relative">
+        {/* ログイン時: 右上に小さくスマートなログアウトボタンを配置 */}
+        {isLoggedIn && (
+          <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-200/70 border border-slate-200/80 bg-white/60 backdrop-blur-xs transition cursor-pointer min-h-[36px] shadow-2xs"
+              aria-label="ログアウト"
+            >
+              <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>ログアウト</span>
+            </button>
+          </div>
+        )}
+
+        <p className="eyebrow font-semibold text-blue-600">Instagram Feeds to E-Book</p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          FeedsToBook
+        </h1>
+        <p className="text-sm font-semibold text-slate-700 mt-1">
+          流れるフィードを、ずっと手元に残る一冊に。
         </p>
-        <div className="actions">
-          <button className="primary" onClick={handleLogin} disabled={loadingLogin}>
-            {loadingLogin ? "移動中..." : "Instagramでログイン"}
-          </button>
-          <button className="ghost" onClick={handleLogout} disabled={!isLoggedIn}>
-            ログアウト
-          </button>
-        </div>
-        {isLoggedIn && <p className="status">ログイン済み</p>}
-        {error && <p className="error text-rose-500">{error}</p>}
+        <p className="lede text-slate-600 max-w-xl">
+          日々の投稿や100日チャレンジをまとめて、Kindleや電子書籍リーダーで読める本に仕立てます。
+        </p>
+
+        {/* 未ログイン時のみ、ログインCTAボタンを表示 */}
+        {!isLoggedIn && (
+          <div className="actions pt-2">
+            <button className="primary" onClick={handleLogin} disabled={loadingLogin}>
+              {loadingLogin ? "移動中..." : "Instagramでログイン"}
+            </button>
+          </div>
+        )}
+
+        {error && <p className="error text-rose-500 mt-2">{error}</p>}
       </header>
 
       <main className="panel">
@@ -302,7 +323,7 @@ export default function Page() {
       </main>
 
       <footer className="footer pb-safe">
-        <small>Better Auth + Instagram Graph API + html-to-epub + Playwright</small>
+        <small>© FeedsToBook</small>
       </footer>
     </div>
   );
