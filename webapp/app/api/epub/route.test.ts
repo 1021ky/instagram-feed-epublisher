@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for EPUB API route.
+ * @file EPUB APIルートの単体テスト。
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { InstagramMedia } from "@/lib/instagram/types";
@@ -50,7 +50,7 @@ describe("POST /api/epub", () => {
     vi.clearAllMocks();
   });
 
-  it("uses defaults for legacy payloads and forwards selected media IDs", async () => {
+  it("従来ペイロードではデフォルト値を補い、選択投稿のみを渡す", async () => {
     const response = await POST(
       new Request("http://localhost/api/epub", {
         method: "POST",
@@ -95,7 +95,7 @@ describe("POST /api/epub", () => {
     );
   });
 
-  it("supports excludedMediaIds when selectedMediaIds is omitted", async () => {
+  it("selectedMediaIds未指定時はexcludedMediaIdsで除外できる", async () => {
     await POST(
       new Request("http://localhost/api/epub", {
         method: "POST",
@@ -134,7 +134,7 @@ describe("POST /api/epub", () => {
     );
   });
 
-  it("returns 400 for invalid coverTheme values", async () => {
+  it("不正なcoverTheme値では400を返す", async () => {
     const response = await POST(
       new Request("http://localhost/api/epub", {
         method: "POST",
@@ -159,7 +159,7 @@ describe("POST /api/epub", () => {
     expect(buildEpub).not.toHaveBeenCalled();
   });
 
-  it("returns 400 when selectedMediaIds and excludedMediaIds are both provided", async () => {
+  it("selectedMediaIdsとexcludedMediaIdsの同時指定では400を返す", async () => {
     const response = await POST(
       new Request("http://localhost/api/epub", {
         method: "POST",
@@ -187,7 +187,7 @@ describe("POST /api/epub", () => {
     expect(buildEpub).not.toHaveBeenCalled();
   });
 
-  it("treats null and empty selection arrays as omitted", async () => {
+  it("nullや空配列の選択リストは未指定として扱う", async () => {
     const response = await POST(
       new Request("http://localhost/api/epub", {
         method: "POST",

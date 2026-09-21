@@ -1,5 +1,5 @@
 /**
- * @file EPUB builder using html-to-epub.
+ * @file html-to-epubを利用したEPUBビルダー。
  */
 import { EPub } from "@lesjoursfr/html-to-epub";
 import path from "node:path";
@@ -18,7 +18,7 @@ function getTemplatesDir(): string {
 }
 
 /**
- * Builds an EPUB file from Instagram media items.
+ * Instagramメディア項目からEPUBファイルを生成します。
  */
 export async function buildEpub(input: EpubInput, outputDir: string): Promise<string> {
   const preparedItems = prepareItems(input.items, input.selectedMediaIds, input.sortOrder);
@@ -97,7 +97,7 @@ function prepareItems(
     Number.isNaN(timestamp),
   ).length;
   if (invalidTimestampCount > 0) {
-    logger.debug("Some EPUB items had invalid timestamps; preserving input order for those items", {
+    logger.debug("一部のEPUB項目で不正なtimestampを検出したため元の順序を維持します", {
       invalidTimestampCount,
     });
   }

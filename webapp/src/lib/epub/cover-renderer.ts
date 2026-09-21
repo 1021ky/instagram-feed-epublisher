@@ -1,5 +1,5 @@
 /**
- * @file Cover renderer using Playwright to generate JPG.
+ * @file PlaywrightでJPG表紙を生成する表紙レンダラー。
  */
 import { chromium } from "playwright";
 import { writeFile } from "node:fs/promises";
@@ -8,7 +8,7 @@ import { resolveCoverTheme } from "@/lib/epub/themes";
 import type { CoverThemeId, EpubMetadata } from "@/lib/epub/types";
 
 /**
- * Renders a cover image (JPG) from HTML.
+ * HTMLから表紙画像（JPG）を生成します。
  */
 export async function renderCoverJpg(
   metadata: EpubMetadata,
@@ -32,7 +32,7 @@ export async function renderCoverJpg(
 }
 
 /**
- * Builds HTML markup for the cover.
+ * 表紙用のHTMLマークアップを組み立てます。
  */
 export function buildCoverHtml(metadata: EpubMetadata, themeId?: CoverThemeId): string {
   const title = metadata.title || "Instagram Feed";
@@ -89,7 +89,7 @@ export function buildCoverHtml(metadata: EpubMetadata, themeId?: CoverThemeId): 
 }
 
 /**
- * Escapes HTML entities.
+ * HTMLエンティティをエスケープします。
  */
 export function escapeHtml(value: string): string {
   return value

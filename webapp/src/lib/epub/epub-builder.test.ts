@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for EPUB builder.
+ * @file EPUBビルダーの単体テスト。
  */
 import { expect, test, vi, describe, beforeEach } from "vitest";
 import {
@@ -62,7 +62,7 @@ describe("buildEpub", () => {
     capturedEpubOutputPaths.length = 0;
   });
 
-  test("returns output path", async () => {
+  test("出力パスを返す", async () => {
     const output = await buildEpub(
       {
         items,
@@ -78,7 +78,7 @@ describe("buildEpub", () => {
     expect(output).toBe("/tmp/instagram-feed.epub");
   });
 
-  test("throws on render error", async () => {
+  test("renderエラー時は例外を投げる", async () => {
     // このテストのためにrenderをエラーを投げるように設定
     mockRender.mockRejectedValue(new Error("render error"));
 

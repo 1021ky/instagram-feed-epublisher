@@ -1,5 +1,5 @@
 /**
- * @file Cover theme definitions for EPUB rendering.
+ * @file EPUB表紙レンダリング用のテーマ定義。
  */
 import type { CoverThemeId } from "@/lib/epub/types";
 

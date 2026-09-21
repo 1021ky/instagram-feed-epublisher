@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for EPUB template renderer.
+ * @file EPUBテンプレートレンダラーの単体テスト。
  */
 import { expect, test, describe } from "vitest";
 import {
@@ -13,7 +13,7 @@ import type { InstagramMedia } from "@/lib/instagram/types";
 const realModulePath = "./template-renderer";
 
 describe("renderChapterHtml", () => {
-  test("replaces placeholders", async () => {
+  test("プレースホルダーを置換する", async () => {
     const { renderChapterHtml } = await import(realModulePath);
     const html = renderChapterHtml(
       { layoutHtml: "{chapter_title}-{image_filename}-{caption_html}-{post_url}", cssContent: "" },
@@ -135,7 +135,7 @@ describe("renderChapterHtml", () => {
   });
 });
 
-test("loadLayoutTemplate throws on read failure", async () => {
+test("loadLayoutTemplateは読み込み失敗時に例外を投げる", async () => {
   // このテストではvi.mock()を使うため、logger.tsの再インポートが発生する
   // LogTapeの二重設定エラーを避けるため、このテストはスキップする
   // 代わりにE2Eテストやintegrationテストで実際のファイル読み込みエラーを検証
