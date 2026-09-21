@@ -78,3 +78,15 @@
 - [x] ローカル全検証確認
 - [x] コミット & プッシュ作成
 - [x] PR #38 の CI 通過確認（Document CI: 38s / Webapp CI: 24s 共に成功）
+
+---
+
+## アプリデザイン刷新 (v2) 計画 & Issue準備
+
+- [x] プロトタイプ (`feeds2epub_proto`) と現行実装のギャップ分析
+- [x] モバイルUX（ステップ形式、タップ領域、Instagram WebView制約）の仕様検討
+- [x] プロダクトポリシー策定（いいね数等のSNS付与情報はEPUBに出力しない）
+- [x] `docs/designdoc/designDoc.md` へのプロダクトポリシー反映
+- [x] 並列開発可能な 7 つの Issue 仕様書の作成 (`tasks/design-renewal-issues.md`)
+- [x] GitHub Issue 起票（#39 〜 #45）
+- [ ] Issue #1 (#39) の実装着手（Tailwind CSS v4 & Lucide 導入）
