@@ -1,4 +1,4 @@
-name: Webapp CI
+name: Document CI
 
 on:
   pull_request:
@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  webapp-check:
-    name: Webapp check
+  document-check:
+    name: Document check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,11 +33,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - parallel:
-          - name: Lint code
-            run: pnpm lint
+          - name: Lint markdown
+            run: pnpm lint:md
 
-          - name: Type check
-            run: pnpm --filter instagram-feed-epublisher-webapp exec tsc --noEmit
+          - name: Format check
+            run: pnpm format:check
 
-          - name: Unit tests
-            run: pnpm test
+          - name: Check Mermaid diagrams
+            run: pnpm check:mermaid
+            env:
+              PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
