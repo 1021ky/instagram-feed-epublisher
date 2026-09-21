@@ -77,4 +77,4 @@
 - [x] `.github/workflows/webapp-ci.yml` 更新（Webapp check専任）
 - [x] ローカル全検証確認
 - [x] コミット & プッシュ作成
-- [ ] PR #38 の CI 通過確認（Document CI / Webapp CI の両ワークフロー）
+- [x] PR #38 の CI 通過確認（Document CI: 38s / Webapp CI: 24s 共に成功）
