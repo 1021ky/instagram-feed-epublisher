@@ -22,7 +22,7 @@
     "prepare": "cd .. && pnpm exec husky"
   },
   "dependencies": {
-    "@lesjoursfr/html-to-epub": "2.2.2",
+    "@lesjoursfr/html-to-epub": "6.2.0",
     "@logtape/adaptor-winston": "2.3.6",
     "@logtape/logtape": "2.3.6",
     "better-auth": "1.4.14",

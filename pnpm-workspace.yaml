@@ -7,4 +7,4 @@ onlyBuiltDependencies:
   - sharp
 
 patchedDependencies:
-  '@lesjoursfr/html-to-epub': patches/@lesjoursfr__html-to-epub.patch
+  "@lesjoursfr/html-to-epub": patches/@lesjoursfr__html-to-epub.patch
