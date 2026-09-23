@@ -211,4 +211,15 @@
 - [x] `globals.css` の法的ページスタイルの整理・Tailwind統合
 - [x] `/privacy`, `/terms`, `/data-deletion` のマークアップ・可読性向上
 - [x] テストおよびビルド検証の実行
-- [ ] コミット & プッシュ
+- [x] コミット & プッシュ
+
+---
+
+## グローバル対応プライバシーポリシー更新（日本・EU/GDPR・米国/CCPA対応、日英版）
+
+- [x] `LegalPage.tsx` に `backLabel` と `categoryLabel` の多言語対応プロップスを追加
+- [x] 日本語版プライバシーポリシー（`webapp/app/privacy/page.tsx`）の更新（日本法・GDPR・CCPA要件網羅）
+- [x] 英語版プライバシーポリシー（`webapp/app/privacy/en/page.tsx`）の新規作成
+- [x] 単体テストの更新（日本語・英語版）
+- [x] 全検証（test, lint, format, tsc, build）の実行
+- [x] コミット & プッシュ

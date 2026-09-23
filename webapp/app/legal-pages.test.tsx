@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import DataDeletionPage from "./data-deletion/page";
+import EnglishPrivacyPage from "./privacy/en/page";
 import PrivacyPage from "./privacy/page";
 import TermsPage from "./terms/page";
 
@@ -14,6 +15,17 @@ describe("法的・ポリシーページ", () => {
     expect(html).toContain("サーバーへ永続保存しません");
     expect(html).toContain("第三者へ提供、販売、広告配信へ利用しません");
     expect(html).toContain("お問い合わせ窓口");
+  });
+
+  it("/privacy/en にグローバル対応の英語ポリシー（GDPR・CCPA・ステートレス方針・問い合わせ）が含まれること", () => {
+    const html = renderToStaticMarkup(<EnglishPrivacyPage />);
+
+    expect(html).toContain("Privacy Policy");
+    expect(html).toContain("Instagram user ID");
+    expect(html).toContain("GDPR");
+    expect(html).toContain("CCPA / CPRA");
+    expect(html).toContain("stateless");
+    expect(html).toContain("FeedsToBook Contact Support");
   });
 
   it("/terms に利用条件・禁止事項・免責事項が含まれること", () => {
