@@ -580,6 +580,89 @@ h1 {
   text-align: center;
 }
 
+.footer__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 0;
+}
+
+.footer__card {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 20px;
+}
+
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 20px;
+  margin: 0 0 8px;
+}
+
+.footer__links a,
+.legal-page a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.footer__links a:hover,
+.legal-page a:hover {
+  text-decoration: underline;
+}
+
+.legal-page {
+  max-width: 860px;
+}
+
+.legal-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.legal-page__card {
+  display: grid;
+  gap: 24px;
+}
+
+.legal-page__header {
+  display: grid;
+  gap: 12px;
+}
+
+.legal-page__header p,
+.legal-page__section p,
+.legal-page__section li {
+  margin: 0;
+  line-height: 1.8;
+  color: #334155;
+}
+
+.legal-page__updated {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.legal-page__section {
+  display: grid;
+  gap: 12px;
+}
+
+.legal-page__section h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.legal-page__section ul,
+.legal-page__section ol {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+}
+
 .feed {
   margin-top: 16px;
   display: grid;

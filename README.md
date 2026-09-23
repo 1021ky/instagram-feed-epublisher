@@ -31,12 +31,16 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 ├── scripts/              # リポジトリ共通チェックスクリプト
 └── webapp/               # Next.js Web アプリケーション本体
     ├── app/              # App Router (UI / API Route Handlers)
+    │   ├── data-deletion/    # Meta 審査向けデータ削除手順ページ
+    │   ├── privacy/          # Meta 審査向けプライバシーポリシーページ
+    │   └── terms/            # Meta 審査向け利用規約ページ
     ├── certs/            # ローカル HTTPS 用証明書配置先 (mkcert)
     ├── e2e/              # Playwright E2E テストコード
     ├── scripts/          # 開発サーバー等の実行スクリプト
     └── src/
         ├── components/   # UI コンポーネント (auth, feed, epub, common)
         │   ├── auth/         # ナビゲーション、ログインカード、WebView注意バナー
+        │   ├── common/       # 共通レイアウト、フッターなどの汎用 UI
         │   ├── epub/         # EPUB 装丁設定・表紙テーマ・エクスポートモーダル
         │   └── feed/         # 絞り込みフォーム、投稿カード、選択リスト、下部アクションバー
         ├── lib/          # 認証、Instagram API クライアント、EPUB 生成ロジック等

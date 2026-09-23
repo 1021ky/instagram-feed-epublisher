@@ -506,10 +506,6 @@ export default function Page() {
             </>
           )}
         </main>
-
-        <footer className="footer pb-safe">
-          <small>© FeedsToBook</small>
-        </footer>
       </div>
 
       <ExportModal

@@ -38,13 +38,20 @@ webapp/
 │   │   ├── auth/         # Better Auth 認証エンドポイント
 │   │   ├── epub/         # EPUB 生成 API
 │   │   └── instagram/    # Instagram Graph API プロキシ
+│   ├── data-deletion/    # Meta 審査向けデータ削除手順ページ
 │   ├── layout.tsx        # ルートレイアウト
-│   └── page.tsx          # メイン UI 画面
+│   ├── privacy/          # Meta 審査向けプライバシーポリシーページ
+│   ├── page.tsx          # メイン UI 画面
+│   └── terms/            # Meta 審査向け利用規約ページ
 ├── certs/                # ローカル HTTPS 用証明書 (mkcert)
 ├── e2e/                  # Playwright E2E テスト
 ├── scripts/              # 開発サーバー実行スクリプト (dev-https.mjs)
 └── src/
     ├── components/       # UI コンポーネント (auth, feed, epub, common)
+    │   ├── auth/         # ナビゲーション、ログインカード、WebView注意バナー
+    │   ├── common/       # 共通フッター、法的ページレイアウト
+    │   ├── epub/         # EPUB 装丁設定・表紙テーマ・エクスポートモーダル
+    │   └── feed/         # 絞り込みフォーム、投稿カード、選択リスト、下部アクションバー
     ├── lib/              # 共通ライブラリ・ロジック
     │   ├── auth/         # Better Auth 設定・セッションサービス
     │   ├── epub/         # EPUB ビルダー・レンダラー
