@@ -1,25 +1,24 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/common/LegalPage";
+import { CONTACT_FORM_URL, LEGAL_UPDATED_AT } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "利用規約 | FeedsToBook",
   description: "FeedsToBook の利用規約です。",
 };
 
-const updatedAt = "2026年9月23日";
-const contactUrl = "https://github.com/1021ky/instagram-feed-epublisher/issues";
-
 export default function TermsPage() {
   return (
     <LegalPage
       title="利用規約"
       description="FeedsToBook の利用条件、禁止事項、免責事項、および運営上の取り扱いを定めています。"
-      updatedAt={updatedAt}
+      updatedAt={LEGAL_UPDATED_AT}
     >
       <LegalSection title="1. 適用">
         <p>
-          本規約は、FeedsToBook が提供する Instagram 投稿の取得、選択、EPUB
-          生成およびダウンロード機能の利用条件を定めるものです。
+          本規約は、FeedsToBook が提供する Instagram
+          投稿の取得、選択、電子書籍生成およびダウンロード機能の利用条件を定めるものです。
         </p>
       </LegalSection>
 
@@ -34,8 +33,7 @@ export default function TermsPage() {
             の利用規約、コミュニティ規定、関連法令を遵守するものとします。
           </li>
           <li>
-            本サービスは、利用者自身の閲覧・保存・振り返りを目的とした EPUB
-            生成のために提供されます。
+            本サービスは、利用者自身の閲覧・保存・振り返りを目的とした電子書籍生成のために提供されます。
           </li>
         </ul>
       </LegalSection>
@@ -63,8 +61,7 @@ export default function TermsPage() {
             の仕様変更、制限、障害により、本サービスの全部または一部が利用できない場合があります。
           </li>
           <li>
-            生成された EPUB
-            の表示結果や端末ごとの互換性について、常時完全性を保証するものではありません。
+            生成された電子書籍の表示結果や端末ごとの互換性について、常時完全性を保証するものではありません。
           </li>
           <li>
             利用者が本サービスを利用して保存・管理する投稿データ、著作物その他の権利関係については、利用者自身の責任で確認してください。
@@ -74,12 +71,11 @@ export default function TermsPage() {
 
       <LegalSection title="6. データの取り扱い">
         <p>
-          投稿データおよび生成された EPUB
-          は、ユーザーの要求に応じた処理のためにのみ取り扱い、サーバーへ永続保存しません。
+          投稿データおよび生成された電子書籍は、ユーザーの要求に応じた処理のためにのみ取り扱い、サーバーへ永続保存しません。
         </p>
         <p>
-          詳細は <a href="/privacy">プライバシーポリシー</a> および{" "}
-          <a href="/data-deletion">データ削除手順</a> をご確認ください。
+          詳細は <Link href="/privacy">プライバシーポリシー</Link> および{" "}
+          <Link href="/data-deletion">データ削除手順</Link> をご確認ください。
         </p>
       </LegalSection>
 
@@ -91,10 +87,10 @@ export default function TermsPage() {
       </LegalSection>
 
       <LegalSection title="8. お問い合わせ先">
-        <p>本規約に関するお問い合わせは、以下の窓口をご利用ください。</p>
+        <p>本規約に関するお問い合わせは、以下の窓口（お問い合わせフォーム）をご利用ください。</p>
         <p>
-          <a href={contactUrl} target="_blank" rel="noreferrer">
-            {contactUrl}
+          <a href={CONTACT_FORM_URL} target="_blank" rel="noreferrer">
+            お問い合わせ窓口を開く
           </a>
         </p>
       </LegalSection>

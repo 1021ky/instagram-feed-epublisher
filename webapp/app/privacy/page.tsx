@@ -1,28 +1,28 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/common/LegalPage";
+import { CONTACT_FORM_URL, LEGAL_UPDATED_AT } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "プライバシーポリシー | FeedsToBook",
   description: "FeedsToBook のプライバシーポリシーです。",
 };
 
-const updatedAt = "2026年9月23日";
-const contactUrl = "https://github.com/1021ky/instagram-feed-epublisher/issues";
-
 export default function PrivacyPage() {
   return (
     <LegalPage
       title="プライバシーポリシー"
       description="FeedsToBook が取得する情報、利用目的、保存期間、第三者提供の有無、ユーザーの皆さまが確認できる問い合わせ先を定めています。"
-      updatedAt={updatedAt}
+      updatedAt={LEGAL_UPDATED_AT}
     >
       <LegalSection title="1. 取得する情報">
         <p>
-          FeedsToBook は、Instagram 連携および EPUB 生成のために、次の情報を取得することがあります。
+          FeedsToBook は、Instagram
+          連携および電子書籍生成のために、次の情報を取得することがあります。
         </p>
         <ul>
           <li>Instagram ユーザー ID、ユーザー名など、ログインしたアカウントを識別するための情報</li>
-          <li>投稿写真、キャプション、投稿日時、投稿 URL など、EPUB 生成に必要な投稿情報</li>
+          <li>投稿写真、キャプション、投稿日時、投稿 URL など、電子書籍生成に必要な投稿情報</li>
           <li>ログイン状態を維持するために必要な Cookie その他これに準ずるセッション情報</li>
           <li>お問い合わせ時にユーザーが任意で提供した情報</li>
         </ul>
@@ -31,7 +31,7 @@ export default function PrivacyPage() {
       <LegalSection title="2. 利用目的">
         <p>取得した情報は、次の目的に限って利用します。</p>
         <ul>
-          <li>ユーザー本人が Instagram の投稿を取得し、EPUB 書籍を生成・ダウンロードするため</li>
+          <li>ユーザー本人が Instagram の投稿を取得し、電子書籍を生成・ダウンロードするため</li>
           <li>ログイン状態の維持、不正利用の防止、障害対応などサービス運営上必要な確認のため</li>
           <li>ユーザーからのお問い合わせに対応するため</li>
         </ul>
@@ -39,12 +39,10 @@ export default function PrivacyPage() {
 
       <LegalSection title="3. 保存期間と削除">
         <p>
-          投稿データおよび生成された EPUB
-          データは、ユーザーからの処理要求に応じて一時的に利用するのみで、サーバーへ永続保存しません。
+          投稿データおよび生成された電子書籍データは、ユーザーからの処理要求に応じて一時的に利用するのみで、サーバーへ永続保存しません。
         </p>
         <p>
-          EPUB
-          生成処理の完了後は、当該処理のために取り扱った投稿データおよび生成物をサーバー上に残さない運用としています。
+          電子書籍生成処理の完了後は、当該処理のために取り扱った投稿データおよび生成物をサーバー上に残さない運用としています。
         </p>
         <p>
           ログイン状態の維持に必要なセッション情報は、ユーザーのログアウト操作、Cookie
@@ -69,15 +67,17 @@ export default function PrivacyPage() {
           削除によって、本サービスとの連携状態を見直せます。
         </p>
         <p>
-          詳細な手順は <a href="/data-deletion">データ削除手順</a> をご確認ください。
+          詳細な手順は <Link href="/data-deletion">データ削除手順</Link> をご確認ください。
         </p>
       </LegalSection>
 
       <LegalSection title="6. お問い合わせ先">
-        <p>本ポリシーに関するお問い合わせは、GitHub Issues からご連絡ください。</p>
         <p>
-          <a href={contactUrl} target="_blank" rel="noreferrer">
-            {contactUrl}
+          本ポリシーに関するお問い合わせは、以下の窓口（お問い合わせフォーム）からご連絡ください。
+        </p>
+        <p>
+          <a href={CONTACT_FORM_URL} target="_blank" rel="noreferrer">
+            お問い合わせ窓口を開く
           </a>
         </p>
       </LegalSection>

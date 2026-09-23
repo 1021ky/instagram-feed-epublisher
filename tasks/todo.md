@@ -186,3 +186,18 @@
   - [x] 他のドキュメント（README等）における削除済みコマンド（`rebuild:native`, `clean:all`, `auth:migrate`）の残存がないことを確認
   - [x] 不要な環境変数（`BETTER_AUTH_DB_PATH` 等）の残存がないことを確認
 - [x] 全検証（lint, format, test, typecheck, build）の通過確認
+
+---
+
+## PR #60: Meta審査向け法的・ポリシーページの改善
+
+- [x] ルート `README.md` と `webapp/README.md` の重複解消（webapp以下を参照化）
+- [x] `docs/documentation-policy.md` の更新（ディレクトリ構成更新方針）
+- [x] `LegalPage.tsx` の「Meta 審査対応」バッジ削除
+- [x] `/data-deletion` のリード文の自然化（エンドユーザー向け案内に改善）
+- [x] お問い合わせ先の改善（環境変数 `NEXT_PUBLIC_CONTACT_FORM_URL` 導入・フォーム誘導へ更新）
+- [x] 内部リンクを `<a>` から `next/link` へ置き換え
+- [x] プライバシーポリシー・利用規約・データ削除手順の「EPUB」表記を「電子書籍」に一般化
+- [x] テストコードの更新（`legal-pages.test.tsx`, `common-components.test.tsx`）
+- [x] ドキュメント（環境変数一覧等）の更新
+- [x] 全検証（test, lint, format, typecheck, build）通過確認

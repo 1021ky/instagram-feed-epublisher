@@ -10,10 +10,10 @@ describe("法的・ポリシーページ", () => {
 
     expect(html).toContain("プライバシーポリシー");
     expect(html).toContain("Instagram ユーザー ID");
-    expect(html).toContain("EPUB 書籍を生成・ダウンロード");
+    expect(html).toContain("電子書籍を生成・ダウンロード");
     expect(html).toContain("サーバーへ永続保存しません");
     expect(html).toContain("第三者へ提供、販売、広告配信へ利用しません");
-    expect(html).toContain("GitHub Issues");
+    expect(html).toContain("お問い合わせ窓口");
   });
 
   it("/terms に利用条件・禁止事項・免責事項が含まれること", () => {
@@ -30,7 +30,7 @@ describe("法的・ポリシーページ", () => {
     const html = renderToStaticMarkup(<DataDeletionPage />);
 
     expect(html).toContain("データ削除手順");
-    expect(html).toContain("Data Deletion Instructions URL");
+    expect(html).toContain("連携解除手順");
     expect(html).toContain("ログアウト");
     expect(html).toContain("Cookie");
     expect(html).toContain("アプリとウェブサイト");

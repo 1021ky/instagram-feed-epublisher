@@ -24,7 +24,6 @@ describe("共通法的ページ UI", () => {
       </LegalPage>,
     );
 
-    expect(html).toContain("Meta 審査対応");
     expect(html).toContain("サンプル規約");
     expect(html).toContain("最終更新日: 2026年9月23日");
     expect(html).toContain("トップページへ戻る");
