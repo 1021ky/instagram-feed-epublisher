@@ -1,5 +1,5 @@
 /**
- * @file Instagram / EPUB 用クライアント側 API ラッパー
+ * @file InstagramおよびEPUB向けクライアントAPIラッパー。
  */
 import type { CoverThemeId, EpubSortOrder } from "@/types/ui";
 
@@ -44,11 +44,15 @@ export type EpubRequest = {
   demoMode?: boolean;
   filter: FeedFilter;
   metadata: EpubMetadata;
+  coverTheme?: CoverThemeId;
+  sortOrder?: EpubSortOrder;
+  selectedMediaIds?: string[];
+  excludedMediaIds?: string[];
   items?: InstagramMedia[];
 };
 
 /**
- * 絞り込み条件付きのInstagramメディアをバックエンドから取得します。
+ * バックエンドから絞り込み済みのInstagramメディアを取得します。
  */
 export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramMedia[]> {
   const params = new URLSearchParams({
@@ -71,7 +75,7 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
       const errorJson = JSON.parse(errorText);
       errorMessage = errorJson.error ?? errorText;
     } catch {
-      // JSON でなければそのままエラーテキストを使う
+      // JSONでない場合はレスポンステキストをそのまま使う
     }
     throw new Error(`フィード取得に失敗しました: ${response.status} - ${errorMessage}`);
   }
@@ -81,7 +85,7 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
 }
 
 /**
- * バックエンドにEPUB生成を依頼します。
+ * バックエンドへEPUB生成をリクエストします。
  */
 export async function requestEpub(request: EpubRequest): Promise<Blob> {
   const response = await fetch(request.demoMode ? "/api/epub/demo" : "/api/epub", {
@@ -100,7 +104,7 @@ export async function requestEpub(request: EpubRequest): Promise<Blob> {
       const errorJson = JSON.parse(errorText);
       errorMessage = errorJson.error ?? errorText;
     } catch {
-      // JSON でなければそのままエラーテキストを使う
+      // JSONでない場合はレスポンステキストをそのまま使う
     }
     throw new Error(`EPUB生成に失敗しました: ${response.status} - ${errorMessage}`);
   }

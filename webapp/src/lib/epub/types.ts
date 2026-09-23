@@ -1,11 +1,13 @@
 /**
- * @file EPUB 生成向け型定義
+ * @file EPUB生成向けの型定義。
  */
 import type { InstagramMedia } from "@/lib/instagram/types";
-import type { CoverThemeId } from "@/types/ui";
+import type { CoverThemeId, EpubSortOrder } from "@/types/ui";
+
+export type { CoverThemeId, EpubSortOrder };
 
 /**
- * ユーザーが指定する EPUB メタデータ。
+ * ユーザーが指定するEPUBメタデータ。
  */
 export type EpubMetadata = {
   title: string;
@@ -18,7 +20,7 @@ export type EpubMetadata = {
 };
 
 /**
- * 生成前に整形した EPUB 章データ。
+ * 生成用に整形したEPUB章データ。
  */
 export type EpubChapter = {
   title: string;
@@ -27,9 +29,12 @@ export type EpubChapter = {
 };
 
 /**
- * EPUB 生成処理への入力。
+ * EPUB生成時の入力データ。
  */
 export type EpubInput = {
   metadata: EpubMetadata;
   items: InstagramMedia[];
+  coverTheme?: CoverThemeId;
+  sortOrder?: EpubSortOrder;
+  selectedMediaIds?: string[];
 };

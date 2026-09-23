@@ -3,6 +3,10 @@
  */
 import type { CoverTheme, CoverThemeId } from "@/types/ui";
 
+export type CoverThemeDefinition = CoverTheme;
+
+export const DEFAULT_COVER_THEME_ID: CoverThemeId = "navy";
+
 export const COVER_THEMES: CoverTheme[] = [
   {
     id: "navy",
@@ -13,6 +17,9 @@ export const COVER_THEMES: CoverTheme[] = [
     textColor: "#f8fafc",
     metaColor: "#cbd5f5",
     accentColor: "#f59e0b",
+    titleFontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+    bodyFontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+    titleLetterSpacing: "0.02em",
   },
   {
     id: "slate",
@@ -23,6 +30,9 @@ export const COVER_THEMES: CoverTheme[] = [
     textColor: "#f8fafc",
     metaColor: "#cbd5e1",
     accentColor: "#38bdf8",
+    titleFontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+    bodyFontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+    titleLetterSpacing: "0.04em",
   },
   {
     id: "ivory",
@@ -33,6 +43,9 @@ export const COVER_THEMES: CoverTheme[] = [
     textColor: "#3f2d1d",
     metaColor: "#7c5a3c",
     accentColor: "#c2410c",
+    titleFontFamily: '"Georgia", "Times New Roman", serif',
+    bodyFontFamily: '"Georgia", "Times New Roman", serif',
+    titleLetterSpacing: "0.01em",
   },
   {
     id: "white",
@@ -43,6 +56,9 @@ export const COVER_THEMES: CoverTheme[] = [
     textColor: "#0f172a",
     metaColor: "#475569",
     accentColor: "#0f172a",
+    titleFontFamily: '"Avenir Next", "Helvetica Neue", "Arial", sans-serif',
+    bodyFontFamily: '"Avenir Next", "Helvetica Neue", "Arial", sans-serif',
+    titleLetterSpacing: "0.05em",
   },
   {
     id: "purple",
@@ -53,12 +69,26 @@ export const COVER_THEMES: CoverTheme[] = [
     textColor: "#f5f3ff",
     metaColor: "#ddd6fe",
     accentColor: "#c4b5fd",
+    titleFontFamily: '"Trebuchet MS", "Helvetica", "Arial", sans-serif',
+    bodyFontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+    titleLetterSpacing: "0.03em",
   },
 ];
+
+export const COVER_THEME_MAP: Record<CoverThemeId, CoverTheme> = Object.fromEntries(
+  COVER_THEMES.map((theme) => [theme.id, theme]),
+) as Record<CoverThemeId, CoverTheme>;
 
 /**
  * テーマ ID から表紙テーマを解決し、見つからない場合は濃紺テーマを返す。
  */
-export function getCoverTheme(themeId: CoverThemeId = "navy") {
-  return COVER_THEMES.find((theme) => theme.id === themeId) ?? COVER_THEMES[0]!;
+export function getCoverTheme(themeId: CoverThemeId = DEFAULT_COVER_THEME_ID): CoverTheme {
+  return COVER_THEME_MAP[themeId] ?? COVER_THEME_MAP[DEFAULT_COVER_THEME_ID];
+}
+
+/**
+ * 表紙テーマを解決します（getCoverThemeのエイリアス）。
+ */
+export function resolveCoverTheme(themeId?: CoverThemeId): CoverTheme {
+  return getCoverTheme(themeId ?? DEFAULT_COVER_THEME_ID);
 }

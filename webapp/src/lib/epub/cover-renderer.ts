@@ -1,20 +1,24 @@
 /**
- * @file Playwright を使って JPG 表紙を生成するレンダラー
+ * @file Playwrightを使ってJPG表紙を生成する表紙レンダラー。
  */
 import { chromium } from "playwright";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import { getCoverTheme } from "@/lib/epub/themes";
-import type { EpubMetadata } from "@/lib/epub/types";
+import { resolveCoverTheme } from "@/lib/epub/themes";
+import type { CoverThemeId, EpubMetadata } from "@/lib/epub/types";
 
 /**
- * HTML から表紙画像（JPG）を生成する。
+ * HTMLから表紙画像（JPG）を生成します。
  */
-export async function renderCoverJpg(metadata: EpubMetadata, outputDir: string): Promise<string> {
+export async function renderCoverJpg(
+  metadata: EpubMetadata,
+  outputDir: string,
+  themeId?: CoverThemeId,
+): Promise<string> {
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1200, height: 1600 } });
-    const html = buildCoverHtml(metadata);
+    const html = buildCoverHtml(metadata, themeId);
 
     await page.setContent(html, { waitUntil: "networkidle" });
     const buffer = await page.screenshot({ type: "jpeg", quality: 90 });
@@ -28,14 +32,14 @@ export async function renderCoverJpg(metadata: EpubMetadata, outputDir: string):
 }
 
 /**
- * 表紙用の HTML マークアップを組み立てる。
+ * 表紙用のHTMLマークアップを組み立てます。
  */
-export function buildCoverHtml(metadata: EpubMetadata): string {
+export function buildCoverHtml(metadata: EpubMetadata, themeId?: CoverThemeId): string {
   const title = metadata.title || "Instagram Feed";
   const subtitle = metadata.subtitle || "";
   const author = metadata.author || "";
   const instagramUrl = metadata.instagramUrl || "";
-  const theme = getCoverTheme(metadata.coverTheme ?? "navy");
+  const theme = resolveCoverTheme(themeId ?? metadata.coverTheme);
 
   return `
     <!doctype html>
@@ -45,7 +49,7 @@ export function buildCoverHtml(metadata: EpubMetadata): string {
         <style>
           body {
             margin: 0;
-            font-family: "Inter", "Helvetica", "Arial", sans-serif;
+            font-family: ${theme.bodyFontFamily ?? '"Inter", "Helvetica", "Arial", sans-serif'};
             background: ${theme.pageBackground};
             color: ${theme.textColor};
             display: flex;
@@ -58,7 +62,8 @@ export function buildCoverHtml(metadata: EpubMetadata): string {
             border-radius: 24px;
             padding: 80px;
             width: 920px;
-            box-shadow: 0 40px 80px rgba(15, 23, 42, 0.4);
+            box-shadow: 0 40px 80px rgba(15, 23, 42, 0.25);
+            border-top: 12px solid ${theme.accentColor};
           }
           .accent {
             width: 120px;
@@ -71,6 +76,8 @@ export function buildCoverHtml(metadata: EpubMetadata): string {
             margin: 0 0 24px;
             font-size: 56px;
             line-height: 1.1;
+            font-family: ${theme.titleFontFamily ?? '"Inter", "Helvetica", "Arial", sans-serif'};
+            letter-spacing: ${theme.titleLetterSpacing ?? "0.02em"};
           }
           .subtitle {
             margin: 0 0 36px;
@@ -98,7 +105,7 @@ export function buildCoverHtml(metadata: EpubMetadata): string {
 }
 
 /**
- * HTML エンティティをエスケープする。
+ * HTMLエンティティをエスケープします。
  */
 export function escapeHtml(value: string): string {
   return value

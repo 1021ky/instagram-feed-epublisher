@@ -95,6 +95,12 @@ export interface CoverTheme {
   metaColor: string;
   /** アクセントライン色 */
   accentColor: string;
+  /** 見出しフォント（オプショナル） */
+  titleFontFamily?: string;
+  /** 本文フォント（オプショナル） */
+  bodyFontFamily?: string;
+  /** 見出し文字間隔（オプショナル） */
+  titleLetterSpacing?: string;
 }
 
 /**

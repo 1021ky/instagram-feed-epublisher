@@ -1,5 +1,5 @@
 /**
- * @file 表紙レンダラーの単体テスト
+ * @file 表紙レンダラーの単体テスト。
  */
 import { expect, test, vi } from "vitest";
 
@@ -25,7 +25,7 @@ vi.mock("node:fs/promises", async () => {
 
 import { buildCoverHtml, escapeHtml, renderCoverJpg } from "./cover-renderer";
 
-test("buildCoverHtml includes metadata", () => {
+test("buildCoverHtmlはメタデータを含む", () => {
   const html = buildCoverHtml({
     title: "Title",
     subtitle: "Subtitle",
@@ -40,11 +40,27 @@ test("buildCoverHtml includes metadata", () => {
   expect(html).toContain("#f5efe2");
 });
 
-test("escapeHtml escapes unsafe characters", () => {
+test("buildCoverHtmlは選択テーマの配色とタイポグラフィを反映する", () => {
+  const html = buildCoverHtml(
+    {
+      title: "Title",
+      author: "Author",
+      contact: "",
+      instagramUrl: "https://instagram.com",
+    },
+    "purple",
+  );
+
+  expect(html).toContain("#1e1b4b");
+  expect(html).toContain("#c4b5fd");
+  expect(html).toContain('"Trebuchet MS", "Helvetica", "Arial", sans-serif');
+});
+
+test("escapeHtmlは危険な文字をエスケープする", () => {
   expect(escapeHtml("<script>")).toBe("&lt;script&gt;");
 });
 
-test("renderCoverJpg returns cover path", async () => {
+test("renderCoverJpgは表紙画像のパスを返す", async () => {
   const path = await renderCoverJpg(
     { title: "t", author: "a", contact: "", instagramUrl: "" },
     "/tmp",
@@ -52,7 +68,7 @@ test("renderCoverJpg returns cover path", async () => {
   expect(path).toBe("/tmp/cover.jpg");
 });
 
-test("renderCoverJpg throws when Playwright fails", async () => {
+test("renderCoverJpgはPlaywright失敗時に例外を投げる", async () => {
   const { chromium } = await import("playwright");
   (chromium.launch as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
     new Error("launch error"),
