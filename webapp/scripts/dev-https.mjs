@@ -7,7 +7,7 @@ import next from "next";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, "..");
-const shutdownTimeoutMs = 5000;
+const shutdownTimeoutMs = 10000;
 
 function isMainModule() {
   return process.argv[1] != null && import.meta.url === pathToFileURL(process.argv[1]).href;
