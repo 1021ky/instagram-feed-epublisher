@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { LegalPage, LegalSection } from "@/components/common/LegalPage";
-import { CONTACT_FORM_URL, LEGAL_UPDATED_AT } from "@/lib/legal";
+import { LegalContactBox, LegalPage, LegalSection } from "@/components/common/LegalPage";
+import { LEGAL_UPDATED_AT } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "利用規約 | FeedsToBook",
@@ -88,11 +88,7 @@ export default function TermsPage() {
 
       <LegalSection title="8. お問い合わせ先">
         <p>本規約に関するお問い合わせは、以下の窓口（お問い合わせフォーム）をご利用ください。</p>
-        <p>
-          <a href={CONTACT_FORM_URL} target="_blank" rel="noreferrer">
-            お問い合わせ窓口を開く
-          </a>
-        </p>
+        <LegalContactBox />
       </LegalSection>
     </LegalPage>
   );

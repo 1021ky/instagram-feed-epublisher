@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { LegalPage, LegalSection } from "@/components/common/LegalPage";
-import { CONTACT_FORM_URL, LEGAL_UPDATED_AT } from "@/lib/legal";
+import { LegalContactBox, LegalPage, LegalSection } from "@/components/common/LegalPage";
+import { LEGAL_UPDATED_AT } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "プライバシーポリシー | FeedsToBook",
@@ -75,11 +75,7 @@ export default function PrivacyPage() {
         <p>
           本ポリシーに関するお問い合わせは、以下の窓口（お問い合わせフォーム）からご連絡ください。
         </p>
-        <p>
-          <a href={CONTACT_FORM_URL} target="_blank" rel="noreferrer">
-            お問い合わせ窓口を開く
-          </a>
-        </p>
+        <LegalContactBox />
       </LegalSection>
     </LegalPage>
   );

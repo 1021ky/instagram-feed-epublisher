@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { LegalPage, LegalSection } from "@/components/common/LegalPage";
-import { CONTACT_FORM_URL, LEGAL_UPDATED_AT } from "@/lib/legal";
+import { LegalContactBox, LegalPage, LegalSection } from "@/components/common/LegalPage";
+import { LEGAL_UPDATED_AT } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "データ削除手順 | FeedsToBook",
@@ -57,14 +57,7 @@ export default function DataDeletionPage() {
         <p>
           連携解除後も確認したい事項がある場合や、削除に関するお問い合わせを行いたい場合は、以下の窓口（お問い合わせフォーム）からご連絡ください。
         </p>
-        <p>
-          その際は、利用した Instagram ユーザー名、連携解除日、問い合わせ内容を記載してください。
-        </p>
-        <p>
-          <a href={CONTACT_FORM_URL} target="_blank" rel="noreferrer">
-            お問い合わせ窓口を開く
-          </a>
-        </p>
+        <LegalContactBox note="※送信時は、利用した Instagram ユーザー名、連携解除日をご記載ください。" />
       </LegalSection>
     </LegalPage>
   );

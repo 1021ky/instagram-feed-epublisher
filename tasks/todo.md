@@ -201,3 +201,14 @@
 - [x] テストコードの更新（`legal-pages.test.tsx`, `common-components.test.tsx`）
 - [x] ドキュメント（環境変数一覧等）の更新
 - [x] 全検証（test, lint, format, typecheck, build）通過確認
+
+---
+
+## 法的・ポリシーページ（/privacy, /terms, /data-deletion）のデザイン刷新
+
+- [x] `LegalPage.tsx` のレイアウト・タイポグラフィ刷新（余白拡大、戻るボタンのピル化、見出しアクセントバー、セクション区切り線）
+- [x] お問い合わせ用カードコンポーネント（`LegalContactBox`）の新設と適用
+- [x] `globals.css` の法的ページスタイルの整理・Tailwind統合
+- [x] `/privacy`, `/terms`, `/data-deletion` のマークアップ・可読性向上
+- [x] テストおよびビルド検証の実行
+- [ ] コミット & プッシュ
