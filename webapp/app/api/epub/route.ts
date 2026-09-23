@@ -13,6 +13,7 @@ import { fetchGraphMedia } from "@/lib/instagram/graph-client";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";
 import { resolveInstagramAccessToken } from "@/lib/auth/session-service";
 import { buildEpub } from "@/lib/epub/epub-builder";
+import { sortItemsByTimestamp } from "@/lib/epub/sort";
 import type { EpubMetadata } from "@/lib/epub/types";
 export const runtime = "nodejs";
 
@@ -35,7 +36,10 @@ export async function POST(request: Request) {
 
     const accessToken = await resolveInstagramAccessToken(request);
     const items = await fetchGraphMedia(accessToken);
-    const filtered = applyFeedFilter(items, payload.filter);
+    const filtered = sortItemsByTimestamp(
+      applyFeedFilter(items, payload.filter),
+      payload.filter.sortOrder,
+    );
 
     if (filtered.length === 0) {
       logger.error("No posts found for EPUB generation", { filter: payload.filter });

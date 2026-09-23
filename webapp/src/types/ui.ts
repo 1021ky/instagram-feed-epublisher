@@ -85,16 +85,16 @@ export interface CoverTheme {
   name: string;
   /** デザインコンセプトの説明 */
   description: string;
-  /** 背景色の Tailwind クラス名 */
-  bgClass: string;
-  /** 文字色の Tailwind クラス名 */
-  textClass: string;
-  /** アクセント枠線等の Tailwind クラス名 */
-  accentClass: string;
-  /** プレビュー用の背景カラーコード (HEX) */
-  previewBg: string;
-  /** プレビュー用のアクセントカラーコード (HEX) */
-  previewAccent: string;
+  /** 表紙全体の背景色 */
+  pageBackground: string;
+  /** カード部分の背景スタイル */
+  cardBackground: string;
+  /** 主見出しの文字色 */
+  textColor: string;
+  /** 補足テキストの文字色 */
+  metaColor: string;
+  /** アクセントライン色 */
+  accentColor: string;
 }
 
 /**

@@ -82,11 +82,11 @@ describe("共通UI型定義", () => {
       id: "navy",
       name: "濃紺: チャレンジ",
       description: "誠実さと落ち着きを表現するクラシックネイビー",
-      bgClass: "bg-slate-900",
-      textClass: "text-amber-300",
-      accentClass: "border-amber-400",
-      previewBg: "#0f172a",
-      previewAccent: "#f59e0b",
+      pageBackground: "#0f172a",
+      cardBackground: "linear-gradient(160deg, #1e3a8a, #0f172a)",
+      textColor: "#f8fafc",
+      metaColor: "#cbd5f5",
+      accentColor: "#f59e0b",
     };
 
     expect(settings.coverTheme).toBe("navy");

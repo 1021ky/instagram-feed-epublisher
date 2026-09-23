@@ -42,18 +42,26 @@ test("requestEpub returns blob on success", async () => {
     blob: async () => blob,
     headers: new Headers({ "content-type": "application/epub+zip" }),
   } as unknown as Response;
-  globalThis.fetch = vi.fn().mockResolvedValue(response);
+  const fetchMock = vi.fn().mockResolvedValue(response);
+  globalThis.fetch = fetchMock;
 
-  const result = await requestEpub({
+  const request = {
     filter: { maxCount: 1 },
     metadata: {
       title: "t",
+      subtitle: "s",
       author: "a",
       contact: "c",
       instagramUrl: "u",
+      coverTheme: "purple" as const,
     },
-  });
+  };
+  const result = await requestEpub(request);
   expect(result).toBe(blob);
+  expect(fetchMock).toHaveBeenCalledWith(
+    "/api/epub",
+    expect.objectContaining({ body: JSON.stringify(request) }),
+  );
 });
 
 test("requestEpub throws on error", async () => {

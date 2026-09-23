@@ -1,6 +1,6 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FeedFilterOptions, FeedPostItem } from "@/types/ui";
 import {
   calculatePresetDates,
@@ -48,6 +48,15 @@ describe("FeedFilterStep ロジックおよび日付プリセット", () => {
 });
 
 describe("FeedFilterStep コンポーネント描画", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-21T00:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   const defaultFilter: FeedFilterOptions = {
     hashtag: "100日チャレンジ",
     startDate: "2026-06-13",

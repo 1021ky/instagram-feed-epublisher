@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for cover renderer.
+ * @file 表紙レンダラーの単体テスト
  */
 import { expect, test, vi } from "vitest";
 
@@ -28,12 +28,16 @@ import { buildCoverHtml, escapeHtml, renderCoverJpg } from "./cover-renderer";
 test("buildCoverHtml includes metadata", () => {
   const html = buildCoverHtml({
     title: "Title",
+    subtitle: "Subtitle",
     author: "Author",
     contact: "",
     instagramUrl: "https://instagram.com",
+    coverTheme: "ivory",
   });
   expect(html).toContain("Title");
+  expect(html).toContain("Subtitle");
   expect(html).toContain("Author");
+  expect(html).toContain("#f5efe2");
 });
 
 test("escapeHtml escapes unsafe characters", () => {
