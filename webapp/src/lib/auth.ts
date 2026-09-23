@@ -1,20 +1,26 @@
 /**
  * @file Better Auth configuration with Instagram OAuth.
  */
-import Database from "better-sqlite3";
 import { betterAuth } from "better-auth";
 import { genericOAuth } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 
-const databasePath = process.env.BETTER_AUTH_DB_PATH ?? "./better-auth.db";
-
 /**
- * Better Auth instance configured for Instagram SSO.
+ * Better Auth instance configured for Instagram SSO with stateless session.
  */
 export const auth = betterAuth({
-  database: new Database(databasePath),
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
+  session: {
+    cookieCache: {
+      enabled: true,
+      strategy: "jwe",
+      refreshCache: true,
+    },
+  },
+  account: {
+    storeAccountCookie: true,
+  },
   plugins: [
     genericOAuth({
       config: [
