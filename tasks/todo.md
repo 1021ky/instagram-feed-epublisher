@@ -223,3 +223,16 @@
 - [x] 単体テストの更新（日本語・英語版）
 - [x] 全検証（test, lint, format, tsc, build）の実行
 - [x] コミット & プッシュ
+
+---
+
+## サイト内リンク切れ防止・自動検証テストの実装
+
+- [x] リンク切れ包括テスト（`webapp/app/links.test.tsx`）の作成
+  - [x] `SiteFooter`, `/privacy`, `/privacy/en`, `/terms`, `/data-deletion` から全リンク（内部・外部）を DOM 抽出
+  - [x] 内部リンク（`/` で始まるパス）が実在する App Router ページ（`page.tsx`）を指しているかの検証
+  - [x] 外部リンク（`http://`, `https://`）の URL 妥当性検証
+  - [x] リンク切れ検知自体の妥当性テスト（ネガティブテスト）の実装
+- [x] `/data-deletion` にプライバシーポリシーおよび Instagram 連携管理設定への直接リンクを追加
+- [x] 全検証（test, lint, format, tsc, build）の実行
+- [x] コミット & プッシュ

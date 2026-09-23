@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { LegalContactBox, LegalPage, LegalSection } from "@/components/common/LegalPage";
 import { LEGAL_UPDATED_AT } from "@/lib/legal";
@@ -23,6 +24,11 @@ export default function DataDeletionPage() {
           投稿写真、キャプション、投稿 URL
           などは、ユーザーがその場で電子書籍を生成してダウンロードするために一時的に利用され、処理完了後にサーバーへ残さない運用としています。
         </p>
+        <p>
+          当サービスにおける個人情報の取り扱い全般については、
+          <Link href="/privacy">プライバシーポリシー</Link>
+          も併せてご確認ください。
+        </p>
       </LegalSection>
 
       <LegalSection title="2. アプリ内でできる削除・連携終了手順">
@@ -43,7 +49,17 @@ export default function DataDeletionPage() {
 
       <LegalSection title="3. Instagram アプリ側での連携解除手順">
         <ol>
-          <li>Instagram または Facebook の設定画面を開きます。</li>
+          <li>
+            Instagram または Facebook の設定画面を開きます（Web 版の場合は{" "}
+            <a
+              href="https://www.instagram.com/accounts/manage_access/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Instagram アプリとウェブサイト設定
+            </a>{" "}
+            から直接アクセスできます）。
+          </li>
           <li>「設定」→「アプリとウェブサイト」（または同等の連携管理画面）へ進みます。</li>
           <li>FeedsToBook に関連する連携を選択し、削除または連携解除を実行します。</li>
         </ol>
