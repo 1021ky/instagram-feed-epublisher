@@ -37,11 +37,16 @@
 
 - **Better Auth API のリクエストスキーマ**:
   - `auth.api.getAccessToken` をサーバー側で呼び出す際は、クエリパラメータ（`params`）ではなく `{ body: { providerId: string } }` の形式でプロバイダIDを渡す必要がある。スキーマと異なる引数を渡すとバリデーションエラーとなり、API呼び出しが失敗する。
+- **Better Auth の完全ステートレス化（DBレス化）**:
+  - Cloud Run などのゼロスケール・コンテナ環境では、ローカル SQLite（`better-auth.db`）を使用するとインスタンス停止・再起動でセッションが消失する。
+  - `betterAuth` から `database` オプションを削除し、`account: { storeAccountCookie: true }` を有効化することで、OAuth トークン情報が暗号化 Cookie（`account_data`）に保存される。
+  - サーバー側でアクセストークンを取得する際は、`auth.api.getAccessToken` の `body` に `{ providerId: "instagram", useAccountCookie: true }` を渡すことで、暗号化 Cookie から安全にトークンを復号・取得できる。
+  - DB が不要になることで `better-sqlite3` などのネイティブバイナリ依存やマイグレーション（`auth:migrate`）が撤廃され、コンテナビルドの高速化・ポータビリティ向上にも寄与する。
 
-## ネイティブアドオンと Node.js バージョン整合性
+## ネイティブアドオンと Node.js バージョン整合性 (過去の知見・撤廃済み)
 
 - **ABI 不一致とリビルド**:
-  - `better-sqlite3` などのネイティブアドオンを含む場合、ビルド時と実行時の Node.js バージョン（ABI）が異なると `ERR_DLOPEN_FAILED` が発生する。モノレポ環境ではルートで `pnpm rebuild better-sqlite3` を叩いても対象が見つからずスキップされるため、`pnpm --filter instagram-feed-epublisher-webapp rebuild better-sqlite3`（またはルートに定義したショートカット `pnpm rebuild:native`）を実行して整合性を保つ。
+  - `better-sqlite3` などのネイティブアドオンを含む場合、ビルド時と実行時の Node.js バージョン（ABI）が異なると `ERR_DLOPEN_FAILED` が発生する。モノレポ環境ではルートで `pnpm rebuild better-sqlite3` を叩いても対象が見つからずスキップされるため、`pnpm --filter instagram-feed-epublisher-webapp rebuild better-sqlite3`（またはルートに定義したショートカット `pnpm rebuild:native`）を実行して整合性を保つ（※本プロジェクトではステートレス化により `better-sqlite3` は撤廃済み）。
 
 ## テスト実行基盤 (Vitest & React 19)
 

@@ -19,19 +19,23 @@ export async function resolveInstagramAccessToken(request: Request): Promise<str
     throw new Error("未ログインです");
   }
 
-  // getAccessToken API が利用可能な場合はアクセストークンを直接取得
+  // getAccessToken API が利用可能な場合はアクセストークンを直接取得（ステートレス Cookie 対応）
   if (typeof (auth.api as Record<string, unknown>).getAccessToken === "function") {
     try {
       const tokenResult = await (
         auth.api as unknown as {
           getAccessToken: (options: {
             headers: Headers;
-            body: { providerId: string };
+            body: {
+              providerId: string;
+              useAccountCookie?: boolean;
+              accountId?: string;
+            };
           }) => Promise<{ accessToken?: string } | null>;
         }
       ).getAccessToken({
         headers: request.headers,
-        body: { providerId: "instagram" },
+        body: { providerId: "instagram", useAccountCookie: true },
       });
       if (tokenResult?.accessToken) {
         return tokenResult.accessToken;

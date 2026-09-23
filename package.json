@@ -4,9 +4,6 @@
   "scripts": {
     "dev": "pnpm --filter instagram-feed-epublisher-webapp dev",
     "clean": "pnpm --filter instagram-feed-epublisher-webapp clean",
-    "rebuild": "pnpm --filter instagram-feed-epublisher-webapp rebuild:native",
-    "rebuild:native": "pnpm --filter instagram-feed-epublisher-webapp rebuild:native",
-    "clean:all": "pnpm clean && pnpm rebuild:native",
     "build": "pnpm --filter instagram-feed-epublisher-webapp build",
     "build:clean": "pnpm --filter instagram-feed-epublisher-webapp build:clean",
     "start": "pnpm --filter instagram-feed-epublisher-webapp start",

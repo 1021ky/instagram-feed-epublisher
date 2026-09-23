@@ -176,12 +176,6 @@ pnpm dev
 # Next.js ビルドキャッシュ (.next) の削除
 pnpm clean
 
-# ネイティブアドオン (better-sqlite3) の再ビルド (Node.jsバージョン切り替え時・ABI不一致時)
-pnpm rebuild:native
-
-# キャッシュ削除 ＋ ネイティブモジュール再ビルド
-pnpm clean:all
-
 # 本番用ビルド（クリーンビルドは pnpm build:clean）
 pnpm build
 
