@@ -28,12 +28,16 @@ import { buildCoverHtml, escapeHtml, renderCoverJpg } from "./cover-renderer";
 test("buildCoverHtmlはメタデータを含む", () => {
   const html = buildCoverHtml({
     title: "Title",
+    subtitle: "Subtitle",
     author: "Author",
     contact: "",
     instagramUrl: "https://instagram.com",
+    coverTheme: "ivory",
   });
   expect(html).toContain("Title");
+  expect(html).toContain("Subtitle");
   expect(html).toContain("Author");
+  expect(html).toContain("#f5efe2");
 });
 
 test("buildCoverHtmlは選択テーマの配色とタイポグラフィを反映する", () => {
@@ -47,8 +51,8 @@ test("buildCoverHtmlは選択テーマの配色とタイポグラフィを反映
     "purple",
   );
 
-  expect(html).toContain("#2e1065");
-  expect(html).toContain("#f9a8d4");
+  expect(html).toContain("#1e1b4b");
+  expect(html).toContain("#c4b5fd");
   expect(html).toContain('"Trebuchet MS", "Helvetica", "Arial", sans-serif');
 });
 

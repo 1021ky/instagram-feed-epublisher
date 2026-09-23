@@ -1,5 +1,5 @@
 /**
- * @file PlaywrightでJPG表紙を生成する表紙レンダラー。
+ * @file Playwrightを使ってJPG表紙を生成する表紙レンダラー。
  */
 import { chromium } from "playwright";
 import { writeFile } from "node:fs/promises";
@@ -36,9 +36,10 @@ export async function renderCoverJpg(
  */
 export function buildCoverHtml(metadata: EpubMetadata, themeId?: CoverThemeId): string {
   const title = metadata.title || "Instagram Feed";
+  const subtitle = metadata.subtitle || "";
   const author = metadata.author || "";
   const instagramUrl = metadata.instagramUrl || "";
-  const theme = resolveCoverTheme(themeId);
+  const theme = resolveCoverTheme(themeId ?? metadata.coverTheme);
 
   return `
     <!doctype html>
@@ -48,8 +49,8 @@ export function buildCoverHtml(metadata: EpubMetadata, themeId?: CoverThemeId): 
         <style>
           body {
             margin: 0;
-            font-family: ${theme.bodyFontFamily};
-            background: ${theme.backgroundColor};
+            font-family: ${theme.bodyFontFamily ?? '"Inter", "Helvetica", "Arial", sans-serif'};
+            background: ${theme.pageBackground};
             color: ${theme.textColor};
             display: flex;
             align-items: center;
@@ -57,29 +58,44 @@ export function buildCoverHtml(metadata: EpubMetadata, themeId?: CoverThemeId): 
             height: 100vh;
           }
           .card {
-            background: ${theme.panelBackground};
+            background: ${theme.cardBackground};
             border-radius: 24px;
             padding: 80px;
             width: 920px;
             box-shadow: 0 40px 80px rgba(15, 23, 42, 0.25);
             border-top: 12px solid ${theme.accentColor};
           }
+          .accent {
+            width: 120px;
+            height: 10px;
+            border-radius: 999px;
+            background: ${theme.accentColor};
+            margin-bottom: 40px;
+          }
           h1 {
             margin: 0 0 24px;
             font-size: 56px;
             line-height: 1.1;
-            font-family: ${theme.titleFontFamily};
-            letter-spacing: ${theme.titleLetterSpacing};
+            font-family: ${theme.titleFontFamily ?? '"Inter", "Helvetica", "Arial", sans-serif'};
+            letter-spacing: ${theme.titleLetterSpacing ?? "0.02em"};
+          }
+          .subtitle {
+            margin: 0 0 36px;
+            font-size: 28px;
+            line-height: 1.4;
+            color: ${theme.metaColor};
           }
           .meta {
             font-size: 22px;
-            color: ${theme.mutedTextColor};
+            color: ${theme.metaColor};
           }
         </style>
       </head>
       <body>
         <div class="card">
+          <div class="accent"></div>
           <h1>${escapeHtml(title)}</h1>
+          ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ""}
           <p class="meta">${escapeHtml(author)}</p>
           <p class="meta">${escapeHtml(instagramUrl)}</p>
         </div>

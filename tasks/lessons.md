@@ -41,4 +41,9 @@
 ## ネイティブアドオンと Node.js バージョン整合性
 
 - **ABI 不一致とリビルド**:
-  - `better-sqlite3` などのネイティブアドオンを含む場合、ビルド時と実行時の Node.js バージョン（ABI）が異なると `ERR_DLOPEN_FAILED` が発生する。複数の Node.js バージョンが共存する環境では、`.node-version` に合致した環境（nodenv shims 等）で明示的に `pnpm rebuild` を実行して整合性を保つ必要がある。
+  - `better-sqlite3` などのネイティブアドオンを含む場合、ビルド時と実行時の Node.js バージョン（ABI）が異なると `ERR_DLOPEN_FAILED` が発生する。モノレポ環境ではルートで `pnpm rebuild better-sqlite3` を叩いても対象が見つからずスキップされるため、`pnpm --filter instagram-feed-epublisher-webapp rebuild better-sqlite3`（またはルートに定義したショートカット `pnpm rebuild:native`）を実行して整合性を保つ。
+
+## テスト実行基盤 (Vitest & React 19)
+
+- **Node.js 環境下での React 19 JSX トランスパイル**:
+  - `environment: "node"` で React コンポーネントを静的レンダリング（`renderToStaticMarkup` 等）してテストする場合、esbuild の JSX トランスパイル設定（`jsx: "automatic"`）に加えて、`vitest.setup.ts` で `globalThis.React = React` を補完しておくことで、テストコードおよびインポート先モジュール内での `ReferenceError: React is not defined` を回避し、外部DOMライブラリ非依存の軽量かつ高速な単体テストを実現できる。

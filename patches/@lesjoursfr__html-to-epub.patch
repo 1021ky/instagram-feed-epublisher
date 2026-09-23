@@ -1,0 +1,52 @@
+diff --git a/lib/index.js b/lib/index.js
+index efb26da1b2cd21f4c70afb5d3cd6d23d04ec5905..8c9dcf9170f64e7e3c9cb8a6774238d7cbe0ed9f 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -240,7 +240,14 @@ function uuid() {
+     });
+ }
+ // Current directory
+-const __dirname = fileURLToPath(new URL(".", import.meta.url));
++const __dirname = (() => {
++    try {
++        if (typeof import.meta !== "undefined" && import.meta.url && import.meta.url.startsWith("file:")) {
++            return fileURLToPath(new URL(".", import.meta.url));
++        }
++    } catch {}
++    return resolve(process.cwd(), "node_modules/@lesjoursfr/html-to-epub/lib");
++})();
+ export class EPub {
+     uuid;
+     title;
+@@ -351,7 +358,7 @@ export class EPub {
+             .use(rehypeParse, { fragment: true })
+             .use(plugins)
+             // Voids: [] is required for epub generation, and causes little/no harm for non-epub usage
+-            .use(rehypeStringify, { allowDangerousHtml: true, voids: [], collapseBooleanAttributes: false })
++            .use(rehypeStringify, { allowDangerousHtml: true, voids: [], collapseBooleanAttributes: false, closeSelfClosing: true })
+             .processSync(content)
+             .toString();
+         this.images = [];
+@@ -744,15 +751,14 @@ export class EPub {
+             archive.directory(`${cwd}/META-INF`, "META-INF");
+             archive.directory(`${cwd}/OEBPS`, "OEBPS");
+             archive.pipe(output);
+-            archive.on("end", () => {
+-                output.end(() => {
+-                    if (this.verbose) {
+-                        console.log("Done zipping, clearing temp dir...");
+-                    }
+-                    fsExtra.removeSync(cwd);
+-                    resolve();
+-                });
++            output.on("close", () => {
++                if (this.verbose) {
++                    console.log("Done zipping, clearing temp dir...");
++                }
++                fsExtra.removeSync(cwd);
++                resolve();
+             });
++            output.on("error", (err) => reject(err));
+             // eslint-disable-next-line @typescript-eslint/no-explicit-any
+             archive.on("error", (err) => reject(err));
+             archive.finalize();

@@ -1,74 +1,94 @@
 /**
- * @file EPUB表紙レンダリング用のテーマ定義。
+ * @file 共有 EPUB 表紙テーマ定義
  */
-import type { CoverThemeId } from "@/lib/epub/types";
+import type { CoverTheme, CoverThemeId } from "@/types/ui";
 
-export type CoverThemeDefinition = {
-  backgroundColor: string;
-  panelBackground: string;
-  accentColor: string;
-  textColor: string;
-  mutedTextColor: string;
-  titleFontFamily: string;
-  bodyFontFamily: string;
-  titleLetterSpacing: string;
-};
+export type CoverThemeDefinition = CoverTheme;
 
 export const DEFAULT_COVER_THEME_ID: CoverThemeId = "navy";
 
-export const COVER_THEMES: Record<CoverThemeId, CoverThemeDefinition> = {
-  navy: {
-    backgroundColor: "#0f172a",
-    panelBackground: "linear-gradient(160deg, #1e3a8a, #0f172a)",
-    accentColor: "#f59e0b",
+export const COVER_THEMES: CoverTheme[] = [
+  {
+    id: "navy",
+    name: "濃紺: チャレンジ",
+    description: "挑戦の記録に似合う、芯のあるクラシックネイビー",
+    pageBackground: "#0f172a",
+    cardBackground: "linear-gradient(160deg, #1e3a8a, #0f172a)",
     textColor: "#f8fafc",
-    mutedTextColor: "#cbd5e1",
+    metaColor: "#cbd5f5",
+    accentColor: "#f59e0b",
     titleFontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
     bodyFontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
     titleLetterSpacing: "0.02em",
   },
-  slate: {
-    backgroundColor: "#111827",
-    panelBackground: "linear-gradient(160deg, #334155, #111827)",
+  {
+    id: "slate",
+    name: "スレート: モダン",
+    description: "都会的で引き締まった、モダンなスレートグレー",
+    pageBackground: "#111827",
+    cardBackground: "linear-gradient(160deg, #334155, #111827)",
+    textColor: "#f8fafc",
+    metaColor: "#cbd5e1",
     accentColor: "#38bdf8",
-    textColor: "#e5eef8",
-    mutedTextColor: "#cbd5e1",
     titleFontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
     bodyFontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
     titleLetterSpacing: "0.04em",
   },
-  ivory: {
-    backgroundColor: "#faf6ef",
-    panelBackground: "linear-gradient(160deg, #fffdf8, #efe5d7)",
-    accentColor: "#b7791f",
+  {
+    id: "ivory",
+    name: "アイボリー: エディトリアル",
+    description: "雑誌のように上品で柔らかな、エディトリアル調",
+    pageBackground: "#f5efe2",
+    cardBackground: "linear-gradient(160deg, #fffaf0, #efe5d0)",
     textColor: "#3f2d1d",
-    mutedTextColor: "#6b4f35",
+    metaColor: "#7c5a3c",
+    accentColor: "#c2410c",
     titleFontFamily: '"Georgia", "Times New Roman", serif',
     bodyFontFamily: '"Georgia", "Times New Roman", serif',
     titleLetterSpacing: "0.01em",
   },
-  white: {
-    backgroundColor: "#f8fafc",
-    panelBackground: "linear-gradient(160deg, #ffffff, #e2e8f0)",
-    accentColor: "#2563eb",
+  {
+    id: "white",
+    name: "白: ミニマル",
+    description: "写真を主役にしたいときの、余白を活かすミニマル構成",
+    pageBackground: "#f8fafc",
+    cardBackground: "linear-gradient(160deg, #ffffff, #eef2f7)",
     textColor: "#0f172a",
-    mutedTextColor: "#475569",
+    metaColor: "#475569",
+    accentColor: "#0f172a",
     titleFontFamily: '"Avenir Next", "Helvetica Neue", "Arial", sans-serif',
     bodyFontFamily: '"Avenir Next", "Helvetica Neue", "Arial", sans-serif',
     titleLetterSpacing: "0.05em",
   },
-  purple: {
-    backgroundColor: "#2e1065",
-    panelBackground: "linear-gradient(160deg, #7c3aed, #2e1065)",
-    accentColor: "#f9a8d4",
-    textColor: "#faf5ff",
-    mutedTextColor: "#ddd6fe",
+  {
+    id: "purple",
+    name: "紫: ダーク",
+    description: "夜景やムードのある投稿に映える、深いダークパープル",
+    pageBackground: "#1e1b4b",
+    cardBackground: "linear-gradient(160deg, #581c87, #1e1b4b)",
+    textColor: "#f5f3ff",
+    metaColor: "#ddd6fe",
+    accentColor: "#c4b5fd",
     titleFontFamily: '"Trebuchet MS", "Helvetica", "Arial", sans-serif',
     bodyFontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
     titleLetterSpacing: "0.03em",
   },
-};
+];
 
-export function resolveCoverTheme(themeId?: CoverThemeId): CoverThemeDefinition {
-  return COVER_THEMES[themeId ?? DEFAULT_COVER_THEME_ID];
+export const COVER_THEME_MAP: Record<CoverThemeId, CoverTheme> = Object.fromEntries(
+  COVER_THEMES.map((theme) => [theme.id, theme]),
+) as Record<CoverThemeId, CoverTheme>;
+
+/**
+ * テーマ ID から表紙テーマを解決し、見つからない場合は濃紺テーマを返す。
+ */
+export function getCoverTheme(themeId: CoverThemeId = DEFAULT_COVER_THEME_ID): CoverTheme {
+  return COVER_THEME_MAP[themeId] ?? COVER_THEME_MAP[DEFAULT_COVER_THEME_ID];
+}
+
+/**
+ * 表紙テーマを解決します（getCoverThemeのエイリアス）。
+ */
+export function resolveCoverTheme(themeId?: CoverThemeId): CoverTheme {
+  return getCoverTheme(themeId ?? DEFAULT_COVER_THEME_ID);
 }

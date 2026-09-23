@@ -1,7 +1,10 @@
 packages:
-  - "webapp"
+  - webapp
 
 onlyBuiltDependencies:
   - better-sqlite3
   - esbuild
   - sharp
+
+patchedDependencies:
+  "@lesjoursfr/html-to-epub": patches/@lesjoursfr__html-to-epub.patch

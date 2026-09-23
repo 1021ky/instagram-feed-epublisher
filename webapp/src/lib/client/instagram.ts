@@ -1,7 +1,7 @@
 /**
  * @file InstagramおよびEPUB向けクライアントAPIラッパー。
  */
-import type { CoverThemeId, EpubSortOrder } from "@/lib/epub/types";
+import type { CoverThemeId, EpubSortOrder } from "@/types/ui";
 
 /**
  * Instagramメディア項目。
@@ -22,6 +22,7 @@ export type FeedFilter = {
   startDate?: string;
   endDate?: string;
   maxCount: number;
+  sortOrder?: EpubSortOrder;
 };
 
 /**
@@ -32,18 +33,22 @@ export type EpubMetadata = {
   author: string;
   contact: string;
   instagramUrl: string;
+  subtitle?: string;
+  coverTheme?: CoverThemeId;
 };
 
 /**
  * EPUB生成リクエストのペイロード。
  */
 export type EpubRequest = {
+  demoMode?: boolean;
   filter: FeedFilter;
   metadata: EpubMetadata;
   coverTheme?: CoverThemeId;
   sortOrder?: EpubSortOrder;
   selectedMediaIds?: string[];
   excludedMediaIds?: string[];
+  items?: InstagramMedia[];
 };
 
 /**
@@ -58,7 +63,6 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
   if (filter.endDate) params.set("endDate", filter.endDate);
 
   const url = `/api/instagram/media?${params.toString()}`;
-  console.debug("[client] feed request", { filter });
 
   const response = await fetch(url, {
     credentials: "include",
@@ -73,19 +77,10 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
     } catch {
       // JSONでない場合はレスポンステキストをそのまま使う
     }
-    console.error("[client] feed request failed", {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText,
-    });
     throw new Error(`フィード取得に失敗しました: ${response.status} - ${errorMessage}`);
   }
 
   const payload = (await response.json()) as { items: InstagramMedia[] };
-  console.info("[client] feed request succeeded", {
-    status: response.status,
-    count: payload.items?.length ?? 0,
-  });
   return payload.items ?? [];
 }
 
@@ -93,12 +88,7 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
  * バックエンドへEPUB生成をリクエストします。
  */
 export async function requestEpub(request: EpubRequest): Promise<Blob> {
-  console.debug("[client] epub request", {
-    filter: request.filter,
-    title: request.metadata.title,
-  });
-
-  const response = await fetch("/api/epub", {
+  const response = await fetch(request.demoMode ? "/api/epub/demo" : "/api/epub", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -113,21 +103,11 @@ export async function requestEpub(request: EpubRequest): Promise<Blob> {
     try {
       const errorJson = JSON.parse(errorText);
       errorMessage = errorJson.error ?? errorText;
-      console.error("[client] epub request error", { error: errorMessage });
     } catch {
       // JSONでない場合はレスポンステキストをそのまま使う
     }
-    console.error("[client] epub request failed", {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText,
-    });
     throw new Error(`EPUB生成に失敗しました: ${response.status} - ${errorMessage}`);
   }
 
-  console.info("[client] epub request succeeded", {
-    status: response.status,
-    contentType: response.headers.get("content-type"),
-  });
   return response.blob();
 }

@@ -2,7 +2,7 @@
  * @file EPUB生成API。
  */
 import { NextResponse } from "next/server";
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { getLogger } from "@/lib/logger";
@@ -22,6 +22,8 @@ export const runtime = "nodejs";
  * ユーザーのInstagramフィードからEPUBを生成します。
  */
 export async function POST(request: Request) {
+  let workDir: string | undefined;
+
   try {
     const payload = validatePayload(await request.json());
 
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const workDir = await mkdtemp(path.join(os.tmpdir(), "epub-"));
+    workDir = await mkdtemp(path.join(os.tmpdir(), "epub-"));
     const epubPath = await buildEpub(
       {
         items: selectedItems,
@@ -72,6 +74,10 @@ export async function POST(request: Request) {
     const stack = error instanceof Error ? error.stack : undefined;
     logger.error("EPUB generation failed", { error: message, stack });
     return NextResponse.json({ error: message }, { status: 400 });
+  } finally {
+    if (workDir) {
+      await rm(workDir, { recursive: true, force: true });
+    }
   }
 }
 
@@ -154,7 +160,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
 }
 
 function isCoverThemeId(value: unknown): value is CoverThemeId {
-  return typeof value === "string" && value in COVER_THEMES;
+  return typeof value === "string" && COVER_THEMES.some((theme) => theme.id === value);
 }
 
 function isSortOrder(value: unknown): value is EpubSortOrder {

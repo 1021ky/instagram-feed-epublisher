@@ -2,6 +2,9 @@
  * @file EPUB生成向けの型定義。
  */
 import type { InstagramMedia } from "@/lib/instagram/types";
+import type { CoverThemeId, EpubSortOrder } from "@/types/ui";
+
+export type { CoverThemeId, EpubSortOrder };
 
 /**
  * ユーザーが指定するEPUBメタデータ。
@@ -12,17 +15,9 @@ export type EpubMetadata = {
   contact: string;
   instagramUrl: string;
   language?: string;
+  subtitle?: string;
+  coverTheme?: CoverThemeId;
 };
-
-/**
- * サポートしている表紙テーマの識別子。
- */
-export type CoverThemeId = "navy" | "slate" | "ivory" | "white" | "purple";
-
-/**
- * EPUB出力時に利用する章の並び順。
- */
-export type EpubSortOrder = "asc" | "desc";
 
 /**
  * 生成用に整形したEPUB章データ。
