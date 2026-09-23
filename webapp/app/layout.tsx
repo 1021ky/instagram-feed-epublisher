@@ -17,8 +17,8 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ja">
-      <body className="min-h-dvh bg-zinc-50 text-zinc-900 antialiased">
-        {children}
+      <body className="min-h-dvh bg-zinc-50 text-zinc-900 antialiased flex flex-col">
+        <div className="flex-1">{children}</div>
         <SiteFooter />
       </body>
     </html>
