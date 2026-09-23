@@ -10,9 +10,10 @@ export function sortItemsByTimestamp<T extends { timestamp: string }>(
   items: T[],
   sortOrder: EpubSortOrder = "asc",
 ) {
+  const normalizedOrder = sortOrder === "desc" ? "desc" : "asc";
   return [...items].sort((left, right) => {
     const leftTs = new Date(left.timestamp).getTime();
     const rightTs = new Date(right.timestamp).getTime();
-    return sortOrder === "asc" ? leftTs - rightTs : rightTs - leftTs;
+    return normalizedOrder === "asc" ? leftTs - rightTs : rightTs - leftTs;
   });
 }

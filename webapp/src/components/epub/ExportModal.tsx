@@ -91,7 +91,7 @@ export function ExportModal({ progress, isOpen, onClose, onDownload }: ExportMod
             </button>
           )}
           <button type="button" className="ghost" onClick={onClose}>
-            {isCompleted || isError ? "閉じる" : "バックグラウンドで待つ"}
+            {isCompleted || isError ? "閉じる" : "バックグラウンドで待つ（完了時に自動表示）"}
           </button>
         </div>
       </div>

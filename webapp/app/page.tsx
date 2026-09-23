@@ -122,7 +122,9 @@ export default function Page() {
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = filename;
+    document.body.appendChild(anchor);
     anchor.click();
+    document.body.removeChild(anchor);
   };
 
   const resetDemoState = useCallback(() => {
@@ -338,6 +340,7 @@ export default function Page() {
         message: "ダウンロードが始まりました。端末への転送方法も確認できます。",
         downloadUrl: url,
       });
+      setIsExportModalOpen(true);
     } catch (e) {
       console.error(e);
       const message = e instanceof Error ? e.message : "EPUB生成に失敗しました";
@@ -348,6 +351,7 @@ export default function Page() {
         message: "EPUBの生成に失敗しました。",
         error: message,
       });
+      setIsExportModalOpen(true);
     }
   };
 
@@ -392,14 +396,6 @@ export default function Page() {
 
   const closeExportModal = () => {
     setIsExportModalOpen(false);
-    if (downloadUrlRef.current) {
-      window.URL.revokeObjectURL(downloadUrlRef.current);
-      downloadUrlRef.current = null;
-    }
-    setExportProgress((current) => ({
-      ...current,
-      downloadUrl: undefined,
-    }));
   };
 
   return (
@@ -476,6 +472,25 @@ export default function Page() {
                       : `EPUBを生成してダウンロード (${selectedPosts.length}件収録)`}
                   </button>
                 </div>
+
+                {exportProgress.status === "completed" && (
+                  <div
+                    role="status"
+                    className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center justify-between gap-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-emerald-600">✓</span>
+                      <span>EPUBの書き出しが完了しました</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-emerald-700 font-semibold underline text-sm hover:text-emerald-900 cursor-pointer whitespace-nowrap"
+                      onClick={() => setIsExportModalOpen(true)}
+                    >
+                      転送ガイド・ダウンロードを再表示
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* 画面下部固定アクションバー */}
