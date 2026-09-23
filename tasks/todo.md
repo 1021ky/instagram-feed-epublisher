@@ -171,3 +171,18 @@
   - [x] `pnpm build` 成功確認
   - [x] `better-auth.db` が生成されないことの確認
 - [x] 学びと知見（`tasks/lessons.md`）の反映
+
+---
+
+## PR #61 レビュー指摘対応 (Copilot Review)
+
+- [x] `pnpm-lock.yaml` から `better-sqlite3` の完全除去
+  - [x] `package.json` に `pnpm.overrides: { "better-sqlite3": "-" }` を追加
+  - [x] `pnpm-lock.yaml` を再生成し、`better-auth` の依存から `better-sqlite3` が完全に消去されたことを確認
+- [x] `tasks/lessons.md` の記述修正
+  - [x] 削除済みコマンド `rebuild:native` への言及を修正
+  - [x] `pnpm.overrides` による optional peerDependencies 除外の知見を追記
+- [x] 類似ミスの有無の点検
+  - [x] 他のドキュメント（README等）における削除済みコマンド（`rebuild:native`, `clean:all`, `auth:migrate`）の残存がないことを確認
+  - [x] 不要な環境変数（`BETTER_AUTH_DB_PATH` 等）の残存がないことを確認
+- [x] 全検証（lint, format, test, typecheck, build）の通過確認

@@ -38,5 +38,10 @@
       "node scripts/check-mermaid.mjs"
     ]
   },
-  "packageManager": "pnpm@10.26.0"
+  "packageManager": "pnpm@10.26.0",
+  "pnpm": {
+    "overrides": {
+      "better-sqlite3": "-"
+    }
+  }
 }

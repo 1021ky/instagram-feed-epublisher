@@ -46,7 +46,10 @@
 ## ネイティブアドオンと Node.js バージョン整合性 (過去の知見・撤廃済み)
 
 - **ABI 不一致とリビルド**:
-  - `better-sqlite3` などのネイティブアドオンを含む場合、ビルド時と実行時の Node.js バージョン（ABI）が異なると `ERR_DLOPEN_FAILED` が発生する。モノレポ環境ではルートで `pnpm rebuild better-sqlite3` を叩いても対象が見つからずスキップされるため、`pnpm --filter instagram-feed-epublisher-webapp rebuild better-sqlite3`（またはルートに定義したショートカット `pnpm rebuild:native`）を実行して整合性を保つ（※本プロジェクトではステートレス化により `better-sqlite3` は撤廃済み）。
+  - `better-sqlite3` などのネイティブアドオンを含む場合、ビルド時と実行時の Node.js バージョン（ABI）が異なると `ERR_DLOPEN_FAILED` が発生する。モノレポ環境ではルート直下での `pnpm rebuild <pkg>` がスキップされる場合があるため、対象パッケージのスコープを指定して `pnpm --filter <workspace> rebuild <pkg>` を実行する必要があった（※本プロジェクトではステートレス化により `better-sqlite3` は撤廃済み）。
+- **pnpm で不要な optional peerDependencies を除外する overrides**:
+  - `auto-install-peers=true`（pnpm のデフォルト動作）の環境では、ライブラリ（Better Auth 等）が宣言している optional peerDependencies（`better-sqlite3` 等）が自動的に解決・インストールされ、lockfile やコンテナ環境に残存してしまう場合がある。
+  - ルート `package.json` の `pnpm.overrides` に `"package-name": "-"` を指定することで、依存関係グラフから対象パッケージを完全に除外・無効化できる。
 
 ## テスト実行基盤 (Vitest & React 19)
 
