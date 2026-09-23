@@ -33,7 +33,7 @@ describe("resolveInstagramAccessToken", () => {
     expect(token).toBe("token_from_get_access_token");
     expect(mockedAuth.api.getAccessToken).toHaveBeenCalledWith({
       headers: expect.any(Headers),
-      body: { providerId: "instagram" },
+      body: { providerId: "instagram", useAccountCookie: true },
     });
   });
 

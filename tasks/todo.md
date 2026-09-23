@@ -144,3 +144,45 @@
   - [x] `pnpm lint` && `pnpm format:check` && `pnpm check:mermaid`
   - [x] `pnpm build`
 - [x] 動作確認 & PR 更新
+
+---
+
+## Issue #54: Better Auth のステートレス化（DBレス化）対応
+
+- [x] `webapp/src/lib/auth.ts` のステートレス化
+  - [x] `better-sqlite3` インポートおよび `database: new Database(...)` の削除
+  - [x] `account: { storeAccountCookie: true }` の設定
+  - [x] `session: { cookieCache: { ... } }` の設定
+- [x] `webapp/src/lib/auth/session-service.ts` の更新
+  - [x] `getAccessToken` 呼び出しに `useAccountCookie: true` を指定
+- [x] 依存関係およびスクリプトの整理
+  - [x] `webapp/package.json` から `better-sqlite3`, `@types/better-sqlite3` を削除
+  - [x] `webapp/package.json` から `auth:migrate`, `predev`, `rebuild:native` を削除
+  - [x] ルート `package.json` から `rebuild`, `rebuild:native` を削除し、`clean:all` を整理
+  - [x] `pnpm-workspace.yaml` の `onlyBuiltDependencies` から `better-sqlite3` を削除
+  - [x] `pnpm install` で lockfile を更新
+- [x] ドキュメント更新
+  - [x] `README.md` のネイティブビルド関連コマンド記述を整理
+- [x] テストの更新と検証
+  - [x] `session-service.test.ts` の更新
+  - [x] `pnpm test` 全通過確認
+  - [x] `pnpm lint` & `pnpm format:check` 全通過確認
+  - [x] `tsc --noEmit` 型チェック全通過確認
+  - [x] `pnpm build` 成功確認
+  - [x] `better-auth.db` が生成されないことの確認
+- [x] 学びと知見（`tasks/lessons.md`）の反映
+
+---
+
+## PR #61 レビュー指摘対応 (Copilot Review)
+
+- [x] `pnpm-lock.yaml` から `better-sqlite3` の完全除去
+  - [x] `package.json` に `pnpm.overrides: { "better-sqlite3": "-" }` を追加
+  - [x] `pnpm-lock.yaml` を再生成し、`better-auth` の依存から `better-sqlite3` が完全に消去されたことを確認
+- [x] `tasks/lessons.md` の記述修正
+  - [x] 削除済みコマンド `rebuild:native` への言及を修正
+  - [x] `pnpm.overrides` による optional peerDependencies 除外の知見を追記
+- [x] 類似ミスの有無の点検
+  - [x] 他のドキュメント（README等）における削除済みコマンド（`rebuild:native`, `clean:all`, `auth:migrate`）の残存がないことを確認
+  - [x] 不要な環境変数（`BETTER_AUTH_DB_PATH` 等）の残存がないことを確認
+- [x] 全検証（lint, format, test, typecheck, build）の通過確認
