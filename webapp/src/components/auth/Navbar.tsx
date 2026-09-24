@@ -3,6 +3,9 @@
 import { LogOut } from "lucide-react";
 import type { UserProfile } from "@/types/ui";
 
+/**
+ * ナビゲーションバーが受け取る描画・操作用プロパティ。
+ */
 type NavbarProps = {
   disabled?: boolean;
   isDemoMode?: boolean;
@@ -11,11 +14,25 @@ type NavbarProps = {
   user?: UserProfile | null;
 };
 
+/**
+ * ユーザー表示名からアバター代替表示用のイニシャルを生成する。
+ *
+ * @param user - 現在表示中のユーザープロフィール
+ * @returns 先頭 2 文字の大文字イニシャル
+ */
 function getInitials(user?: UserProfile | null) {
   const label = user?.username ?? user?.displayName ?? "IG";
   return label.slice(0, 2).toUpperCase();
 }
 
+/**
+ * アプリ共通のヘッダーナビゲーションを描画する。
+ *
+ * ログイン中のプロフィール表示と、ログアウト・退会（連携解除）導線の表示を担当する。
+ *
+ * @param props - 表示状態と操作コールバック
+ * @returns ナビゲーションの JSX 要素
+ */
 export function Navbar({
   disabled = false,
   isDemoMode = false,

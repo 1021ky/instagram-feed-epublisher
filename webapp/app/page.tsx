@@ -175,6 +175,14 @@ export default function Page() {
     setIsFilterCollapsed(false);
   };
 
+  /**
+   * 退会（連携解除）操作を実行する。
+   *
+   * 確認ダイアログを表示し、同意が得られた場合のみ退会 API を呼び出して
+   * 認可失効と Cookie 破棄を行い、完了後はトップページへ遷移する。
+   *
+   * @returns 完了を表す Promise
+   */
   const handleDeleteAccount = async () => {
     if (!window.confirm("Instagram 連携を解除し、ログアウトします。この操作を続けますか？")) {
       return;

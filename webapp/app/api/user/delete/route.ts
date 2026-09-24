@@ -1,5 +1,6 @@
 /**
- * @file Account deletion route that revokes Instagram access and clears auth cookies.
+ * @file 退会 API ルート。
+ * Instagram 側の認可失効を試行し、Better Auth の認証 Cookie を破棄する。
  */
 import { NextResponse } from "next/server";
 import { resolveInstagramAccessToken } from "@/lib/auth/session-service";
@@ -20,6 +21,12 @@ const betterAuthCookieNames = [
   "better-auth.two_factor",
 ] as const;
 
+/**
+ * リクエストがセキュアコンテキスト上で処理されているかを判定する。
+ *
+ * @param request - 現在処理中の HTTP リクエスト
+ * @returns Cookie に secure 属性を付与すべき場合は `true`
+ */
 function isSecureRequest(request: Request) {
   const forwardedProto = request.headers.get("x-forwarded-proto");
   if (forwardedProto) {
@@ -29,6 +36,16 @@ function isSecureRequest(request: Request) {
   return new URL(request.url).protocol === "https:";
 }
 
+/**
+ * Better Auth が利用する主要 Cookie をすべて期限切れにする。
+ *
+ * `better-auth.*` と `__Secure-` / `__Host-` 接頭辞付きの候補をまとめて失効し、
+ * ブラウザ上の認証状態を確実に破棄する責務を持つ。
+ *
+ * @param response - 失効用の Set-Cookie ヘッダーを書き込むレスポンス
+ * @param request - secure 属性判定に利用する元リクエスト
+ * @returns なし
+ */
 function clearBetterAuthCookies(response: NextResponse, request: Request) {
   const secure = isSecureRequest(request);
 
@@ -48,6 +65,16 @@ function clearBetterAuthCookies(response: NextResponse, request: Request) {
   }
 }
 
+/**
+ * Instagram / Facebook Graph API に対して認可失効を順次試行する。
+ *
+ * 先に Instagram Graph API のエンドポイントを試し、失敗した場合のみ
+ * Facebook Graph API 側へフォールバックする責務を持つ。
+ *
+ * @param accessToken - 現在のログインセッションから解決した Instagram アクセストークン
+ * @returns 失効に成功した時点で `Promise<void>` を完了する
+ * @throws Error すべての失効先で失敗した場合
+ */
 async function revokeInstagramAuthorization(accessToken: string) {
   const failures: Array<{ endpoint: string; status?: number; body?: string; error?: string }> = [];
 
@@ -89,6 +116,15 @@ async function revokeInstagramAuthorization(accessToken: string) {
   );
 }
 
+/**
+ * `POST /api/user/delete` を処理する。
+ *
+ * 現在のセッションからアクセストークンを取得し、Instagram 側の認可失効を試みたうえで
+ * Better Auth Cookie を削除し、クライアントを未ログイン状態へ戻す責務を持つ。
+ *
+ * @param request - 呼び出し元の HTTP リクエスト
+ * @returns 成功時は `{ ok: true }`、失敗時はエラー内容を含む JSON レスポンス
+ */
 export async function POST(request: Request) {
   try {
     const accessToken = await resolveInstagramAccessToken(request);
