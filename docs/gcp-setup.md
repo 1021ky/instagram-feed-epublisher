@@ -94,7 +94,7 @@ EOF
 
 # 本番用公開 URL (独自ドメイン)
 gcloud secrets versions add BETTER_AUTH_URL --data-file=- <<EOF
-https://ksanchu.info
+https://feedstobook.ksanchu.info
 EOF
 
 # お問い合わせフォーム URL (Google Forms 等)
@@ -144,7 +144,7 @@ Values: 2001:4860:4802:32::15, ...
 お使いのドメイン管理サービス（お名前.com、Cloudflare 等）の DNS 設定画面で、`ksanchu.info` に対して上記のレコードを追加してください。
 
 > [!NOTE]
-> DNS レコードの設定後、Google のマネージド SSL/TLS 証明書が自動発行され、HTTPS アクセス（`https://ksanchu.info`）が有効化されます（反映まで通常 15分〜数時間程度かかります）。
+> DNS レコードの設定後、Google のマネージド SSL/TLS 証明書が自動発行され、HTTPS アクセス（`https://feedstobook.ksanchu.info`）が有効化されます（反映まで通常 15分〜数時間程度かかります）。
 
 ---
 

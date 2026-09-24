@@ -232,7 +232,7 @@ pnpm e2etest
 
 ## 8. 本番運用・デプロイ (Google Cloud Run)
 
-本番環境は **Google Cloud Run**（東京リージョン: `asia-northeast1`）で運用され、独自ドメイン **`https://ksanchu.info`** で公開されます。
+本番環境は **Google Cloud Run**（東京リージョン: `asia-northeast1`）で運用され、独自ドメイン **`https://feedstobook.ksanchu.info`** で公開されます。
 
 ### 特徴
 
