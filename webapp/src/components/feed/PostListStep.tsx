@@ -61,20 +61,25 @@ export function PostListStep({
   return (
     <section className="w-full space-y-4" aria-label="投稿確認・選択リスト">
       {/* 1. ステップヘッダー & コントロールバー */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900">{title}</h2>
-            <p className="text-xs sm:text-sm text-slate-500">{subtitle}</p>
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
+              2
+            </span>
+            <div>
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 m-0">{title}</h2>
+              <p className="text-xs text-slate-500 m-0">{subtitle}</p>
+            </div>
           </div>
 
           {/* 選択件数バッジ */}
           <div className="flex items-center gap-2 self-start sm:self-auto">
             <span
-              className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition ${
+              className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                 isNoneSelected
                   ? "bg-rose-50 text-rose-700 border border-rose-200"
-                  : "bg-blue-50 text-blue-700 border border-blue-200"
+                  : "bg-slate-100 text-slate-800 border border-slate-200"
               }`}
             >
               選択中: {selectedCount} / {posts.length} 件

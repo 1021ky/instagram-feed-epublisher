@@ -43,7 +43,11 @@ export function CoverThemeSelector({ selectedTheme, onChange }: CoverThemeSelect
   };
 
   return (
-    <div className="theme-selector" role="radiogroup" aria-label="表紙テーマ">
+    <div
+      className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"
+      role="radiogroup"
+      aria-label="表紙テーマ"
+    >
       {COVER_THEMES.map((theme, index) => {
         const isSelected = theme.id === selectedTheme;
         return (
@@ -54,14 +58,26 @@ export function CoverThemeSelector({ selectedTheme, onChange }: CoverThemeSelect
             role="radio"
             aria-checked={isSelected}
             tabIndex={isSelected ? 0 : -1}
-            className={`theme-card ${isSelected ? "theme-card--selected" : ""}`}
+            className={`relative p-4 rounded-2xl border text-left cursor-pointer transition min-h-[140px] flex flex-col justify-between overflow-hidden shadow-xs focus:outline-none ${
+              isSelected
+                ? "ring-2 ring-slate-900 ring-offset-2 border-transparent"
+                : "border-slate-200/80 hover:border-slate-300 hover:shadow-sm"
+            }`}
             style={{ background: theme.cardBackground, color: theme.textColor }}
             onClick={() => onChange(theme.id)}
             onKeyDown={(event) => handleKeyDown(event, index)}
           >
-            <span className="theme-card__accent" style={{ background: theme.accentColor }} />
-            <span className="theme-card__title">{theme.name}</span>
-            <span className="theme-card__body" style={{ color: theme.metaColor }}>
+            <div>
+              <span
+                className="block w-8 h-1.5 rounded-full mb-3"
+                style={{ background: theme.accentColor }}
+              />
+              <span className="block font-bold text-xs sm:text-sm mb-1">{theme.name}</span>
+            </div>
+            <span
+              className="block text-[11px] leading-relaxed opacity-85"
+              style={{ color: theme.metaColor }}
+            >
               {theme.description}
             </span>
           </button>

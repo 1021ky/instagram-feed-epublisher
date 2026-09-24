@@ -195,28 +195,30 @@ export function FeedFilterStep({
   if (isCollapsed) {
     return (
       <section
-        className="w-full bg-white rounded-2xl border border-slate-200 shadow-sm transition-all hover:border-slate-300"
+        className="w-full bg-white rounded-2xl border border-slate-200/80 shadow-xs transition-all hover:border-slate-300"
         aria-label="フィード絞り込み条件サマリー"
       >
         <button
           type="button"
           onClick={toggleCollapse}
-          className="w-full flex items-center justify-between p-4 sm:p-5 text-left min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-2xl"
+          className="w-full flex items-center justify-between p-4 sm:p-5 text-left min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 rounded-2xl"
           aria-expanded={false}
           aria-label={`絞り込み条件を展開: ${summaryText}`}
         >
           <div className="flex items-center gap-3 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-              <Filter className="w-5 h-5" aria-hidden="true" />
-            </div>
+            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
+              1
+            </span>
             <div className="min-w-0">
-              <span className="text-xs font-semibold text-blue-600 tracking-wide uppercase">
+              <span className="text-[11px] font-semibold text-slate-400 tracking-wide block uppercase">
                 絞り込み条件
               </span>
-              <p className="text-sm font-medium text-slate-800 truncate">{summaryText}</p>
+              <p className="text-xs sm:text-sm font-bold text-slate-800 truncate m-0">
+                {summaryText}
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 shrink-0 bg-slate-100 px-3 py-2 rounded-lg">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 shrink-0 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition">
             <span>条件を変更</span>
             <ChevronDown className="w-4 h-4" aria-hidden="true" />
           </div>
@@ -227,18 +229,20 @@ export function FeedFilterStep({
 
   return (
     <section
-      className="w-full bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 transition-all"
+      className="w-full bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-6 transition-all"
       aria-label="フィード絞り込みフォーム"
     >
       {/* フォームヘッダー */}
       <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-            <Filter className="w-5 h-5" aria-hidden="true" />
-          </div>
+        <div className="flex items-center gap-3">
+          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
+            1
+          </span>
           <div>
-            <h2 className="text-base font-bold text-slate-900">Step 1: フィードの絞り込み</h2>
-            <p className="text-xs text-slate-500">
+            <h2 className="text-sm sm:text-base font-bold text-slate-900 m-0">
+              Step 1: フィードの絞り込み
+            </h2>
+            <p className="text-xs text-slate-500 m-0">
               ハッシュタグや期間を指定してInstagramから投稿を取得します
             </p>
           </div>
@@ -248,7 +252,7 @@ export function FeedFilterStep({
           <button
             type="button"
             onClick={toggleCollapse}
-            className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-700 min-h-[44px] px-2 py-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
+            className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-700 min-h-[44px] px-2 py-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 rounded-lg"
             aria-label="絞り込み条件を折りたたむ"
           >
             <span>閉じる</span>
@@ -310,9 +314,9 @@ export function FeedFilterStep({
                     key={tag}
                     type="button"
                     onClick={() => handleTagClick(tag)}
-                    className={`inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                    className={`inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 ${
                       isSelected
-                        ? "bg-blue-600 text-white shadow-xs font-semibold"
+                        ? "bg-slate-900 text-white shadow-xs font-semibold"
                         : "bg-slate-100 text-slate-600 hover:bg-slate-200 active:bg-slate-300"
                     }`}
                   >
@@ -337,9 +341,9 @@ export function FeedFilterStep({
               <button
                 type="button"
                 onClick={() => handlePresetSelect("100days")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition min-h-[44px] sm:min-h-[36px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] sm:min-h-[36px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 ${
                   activePreset === "100days"
-                    ? "bg-white text-blue-700 shadow-xs"
+                    ? "bg-white text-slate-900 font-bold shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -348,9 +352,9 @@ export function FeedFilterStep({
               <button
                 type="button"
                 onClick={() => handlePresetSelect("30days")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition min-h-[44px] sm:min-h-[36px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] sm:min-h-[36px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 ${
                   activePreset === "30days"
-                    ? "bg-white text-blue-700 shadow-xs"
+                    ? "bg-white text-slate-900 font-bold shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -359,9 +363,9 @@ export function FeedFilterStep({
               <button
                 type="button"
                 onClick={() => handlePresetSelect("all")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition min-h-[44px] sm:min-h-[36px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] sm:min-h-[36px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 ${
                   activePreset === "all"
-                    ? "bg-white text-blue-700 shadow-xs"
+                    ? "bg-white text-slate-900 font-bold shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -419,7 +423,7 @@ export function FeedFilterStep({
               <Sliders className="w-4 h-4 text-slate-500" aria-hidden="true" />
               <span>最大取得件数</span>
             </label>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
               {filter.maxCount} 件
             </span>
           </div>
@@ -438,7 +442,7 @@ export function FeedFilterStep({
                   maxCount: Number(e.target.value),
                 })
               }
-              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[44px]"
+              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 min-h-[44px]"
             />
             <span className="text-xs text-slate-400 font-medium shrink-0">500</span>
           </div>
@@ -459,7 +463,7 @@ export function FeedFilterStep({
         <button
           type="submit"
           disabled={isLoading || disabled}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-slate-300 disabled:cursor-not-allowed shadow-sm transition min-h-[48px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 active:bg-slate-950 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed shadow-xs transition min-h-[48px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400"
         >
           {isLoading ? (
             <>
