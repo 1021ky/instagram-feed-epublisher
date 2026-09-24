@@ -26,9 +26,9 @@ const steps = [
 
 export function LoginCard({ loadingLogin, onDemo, onLogin }: LoginCardProps) {
   return (
-    <section className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 shadow-sm border border-slate-200/80 max-w-3xl mx-auto">
-      {/* ヘッダー・メイン見出し（1行レイアウト） */}
-      <div className="mb-6 sm:mb-8">
+    <section className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm border border-slate-200/80 max-w-xl mx-auto">
+      {/* ヘッダー・メイン見出し */}
+      <div className="mb-6 sm:mb-7">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 mb-2.5">
           {/* ブランドロゴ（アイコン＋FeedsToBook） */}
           <div className="flex items-center gap-2">
@@ -52,15 +52,15 @@ export function LoginCard({ loadingLogin, onDemo, onLogin }: LoginCardProps) {
           </h1>
         </div>
 
-        <p className="text-slate-500 text-xs sm:text-sm leading-relaxed m-0 sm:pl-9">
+        <p className="text-slate-500 text-xs sm:text-sm leading-relaxed m-0">
           100日チャレンジやイラスト連載といった作品投稿や、日々のライフログを電子書籍に。
           <br className="hidden sm:inline" />
           お使いの端末の電子書籍リーダー（KindleやApple Booksなど）でいつでも読めます。
         </p>
       </div>
 
-      {/* CTAボタン群（横幅に合わせたグリッド配置・等幅化） */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 sm:pl-9 max-w-lg">
+      {/* CTAボタン群（横幅いっぱいに収まる横並び等幅配置） */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 w-full">
         <button
           type="button"
           onClick={onLogin}
@@ -87,7 +87,7 @@ export function LoginCard({ loadingLogin, onDemo, onLogin }: LoginCardProps) {
         <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center mb-5">
           かんたん 3 ステップ
         </p>
-        <div className="flex flex-col gap-3.5 sm:gap-4 max-w-lg">
+        <div className="flex flex-col gap-3.5 sm:gap-4 w-full">
           {steps.map(({ description, step, title }) => (
             <div key={title} className="flex items-start gap-2.5 sm:gap-3">
               <span className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center border border-slate-200">
