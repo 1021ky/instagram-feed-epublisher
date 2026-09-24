@@ -6,7 +6,7 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import { Calendar, ChevronDown, ChevronUp, Filter, Hash, Loader2, Sliders } from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp, Filter, Hash, Loader2 } from "lucide-react";
 import type { DatePreset, FeedFilterOptions } from "@/types/ui";
 
 /**
@@ -206,7 +206,7 @@ export function FeedFilterStep({
               Step 1: フィードの絞り込み
             </h2>
             <p className="text-xs text-slate-500 m-0">
-              ハッシュタグや期間を指定してInstagramから投稿を取得します
+              ハッシュタグや期間を指定してInstagramから投稿を取得します（最大200件）
             </p>
           </div>
         </div>
@@ -349,47 +349,8 @@ export function FeedFilterStep({
               />
             </div>
           </div>
-        </div>
-
-        {/* 3. 最大取得件数プリセット */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
-              <Sliders className="w-4 h-4 text-slate-500" aria-hidden="true" />
-              <span>最大取得件数</span>
-            </span>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
-              {filter.maxCount} 件
-            </span>
-          </div>
-
-          {/* セグメントボタングループ */}
-          <div
-            role="group"
-            aria-label="最大取得件数の選択"
-            className="grid grid-cols-4 gap-1.5 bg-slate-100 p-1 rounded-xl"
-          >
-            {[30, 50, 100, 200].map((count) => {
-              const isSelected = filter.maxCount === count;
-              return (
-                <button
-                  key={count}
-                  type="button"
-                  onClick={() => onFilterChange({ ...filter, maxCount: count })}
-                  className={`py-2 px-3 rounded-lg text-xs font-medium transition min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 text-center ${
-                    isSelected
-                      ? "bg-white text-slate-900 font-bold shadow-xs border border-slate-200/60"
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                  aria-pressed={isSelected}
-                >
-                  {count} 件
-                </button>
-              );
-            })}
-          </div>
           <p className="text-[11px] text-slate-400 m-0">
-            ※ 100日チャレンジの場合は「100 件」がおすすめです。
+            ※ 1回の取得で最大200件の投稿を自動取得します。
           </p>
         </div>
 

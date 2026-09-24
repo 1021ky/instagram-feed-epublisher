@@ -24,7 +24,7 @@ import type {
   UserProfile,
 } from "@/types/ui";
 
-const defaultMaxCount = 100;
+const defaultMaxCount = 200;
 const defaultBookTitle = "私のInstagramフィード";
 
 const dateISO = (d: Date) => d.toISOString().slice(0, 10);
@@ -243,7 +243,7 @@ export default function Page() {
       hashtag: "100日チャレンジ",
       startDate: demoStartDate,
       endDate: demoEndDate,
-      maxCount: 100,
+      maxCount: 200,
     });
     setCustomSettings({
       title: "100日チャレンジの記録",
