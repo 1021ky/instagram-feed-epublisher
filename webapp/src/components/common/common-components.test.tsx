@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { LegalPage, LegalSection } from "./LegalPage";
+import { LegalContactBox, LegalPage, LegalSection } from "./LegalPage";
 import { SiteFooter } from "./SiteFooter";
 
 describe("共通法的ページ UI", () => {
@@ -29,5 +29,18 @@ describe("共通法的ページ UI", () => {
     expect(html).toContain("トップページへ戻る");
     expect(html).toContain("第1条");
     expect(html).toContain("本文");
+  });
+
+  it("LegalContactBox のボタンが視認性の高い白文字（!text-white）を保持すること", () => {
+    const html = renderToStaticMarkup(
+      <LegalSection title="お問い合わせ">
+        <LegalContactBox />
+      </LegalSection>,
+    );
+
+    expect(html).toContain("お問い合わせ窓口を開く");
+    expect(html).toContain("!text-white");
+    expect(html).toContain("!no-underline");
+    expect(html).toContain("bg-blue-600");
   });
 });

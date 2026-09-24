@@ -78,7 +78,7 @@ export function LegalSection({ children, title }: LegalSectionProps) {
         />
         <span>{title}</span>
       </h2>
-      <div className="text-slate-600 text-sm sm:text-base leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-2 [&_li]:leading-relaxed [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800">
+      <div className="text-slate-600 text-sm sm:text-base leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-2 [&_li]:leading-relaxed [&_:where(a)]:text-blue-600 [&_:where(a)]:underline hover:[&_:where(a)]:text-blue-800">
         {children}
       </div>
     </section>
@@ -107,10 +107,10 @@ export function LegalContactBox({
         href={CONTACT_FORM_URL}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition shadow-2xs whitespace-nowrap self-start sm:self-center"
+        className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold !text-white !no-underline hover:!text-white bg-blue-600 hover:bg-blue-700 transition shadow-2xs whitespace-nowrap self-start sm:self-center"
       >
-        <span>{buttonLabel}</span>
-        <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+        <span className="!text-white">{buttonLabel}</span>
+        <ExternalLink className="w-3.5 h-3.5 text-white shrink-0" aria-hidden="true" />
       </a>
     </div>
   );
