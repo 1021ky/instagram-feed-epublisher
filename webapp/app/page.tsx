@@ -57,6 +57,7 @@ export default function Page() {
   const [feed, setFeed] = useState<FeedPostItem[]>([]);
   const [loadingLogin, setLoadingLogin] = useState(false);
   const [loadingFeed, setLoadingFeed] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [customSettings, setCustomSettings] = useState<EpubCustomSettings>({
@@ -172,6 +173,33 @@ export default function Page() {
     await authClient.signOut();
     setFeed([]);
     setIsFilterCollapsed(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("Instagram 連携を解除し、ログアウトします。この操作を続けますか？")) {
+      return;
+    }
+
+    setDeletingAccount(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/user/delete", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? "退会処理に失敗しました");
+      }
+
+      window.location.assign("/");
+    } catch (e) {
+      console.error(e);
+      setError(e instanceof Error ? e.message : "退会処理に失敗しました");
+    } finally {
+      setDeletingAccount(false);
+    }
   };
 
   // 選択中の投稿一覧
@@ -406,7 +434,8 @@ export default function Page() {
           user={activeProfile}
           isDemoMode={isDemoMode}
           onLogout={canUseApp ? handleLogout : undefined}
-          disabled={loadingLogin || loadingFeed || isGeneratingEpub}
+          onDeleteAccount={!isDemoMode && isLoggedIn ? handleDeleteAccount : undefined}
+          disabled={loadingLogin || loadingFeed || isGeneratingEpub || deletingAccount}
         />
         {error && (
           <div

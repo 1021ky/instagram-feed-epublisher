@@ -10,10 +10,12 @@ flowchart LR
     build["サーバでEPUB生成"]
     download["EPUBダウンロード"]
     logout["ログアウト"]
+    withdraw["退会（連携解除）"]
     legal["フッターから法的ページを確認"]
     actor --> login --> filters
     actor --> demo --> filters
     fetch --> banner --> build --> download
     filters --> meta --> fetch
     login --> logout
+    login --> withdraw
     actor --> legal

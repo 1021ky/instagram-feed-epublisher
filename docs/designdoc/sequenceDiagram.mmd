@@ -19,3 +19,7 @@ sequenceDiagram
     EP-->>FE: Blob URL
     FE-->>U: Trigger download (EPUB)
     U->>FE: Logout
+    U->>FE: 退会（連携解除）を実行
+    FE->>IG: DELETE /me/permissions (access_token)
+    IG-->>FE: Authorization revoked
+    FE-->>U: Better Auth Cookie を削除して未ログイン状態へ戻す

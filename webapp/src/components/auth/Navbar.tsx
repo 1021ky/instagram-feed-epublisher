@@ -6,6 +6,7 @@ import type { UserProfile } from "@/types/ui";
 type NavbarProps = {
   disabled?: boolean;
   isDemoMode?: boolean;
+  onDeleteAccount?: () => void;
   onLogout?: () => void;
   user?: UserProfile | null;
 };
@@ -15,7 +16,13 @@ function getInitials(user?: UserProfile | null) {
   return label.slice(0, 2).toUpperCase();
 }
 
-export function Navbar({ disabled = false, isDemoMode = false, onLogout, user }: NavbarProps) {
+export function Navbar({
+  disabled = false,
+  isDemoMode = false,
+  onDeleteAccount,
+  onLogout,
+  user,
+}: NavbarProps) {
   const accountLabel = user?.username ? `@${user.username}` : user?.displayName;
 
   return (
@@ -40,7 +47,7 @@ export function Navbar({ disabled = false, isDemoMode = false, onLogout, user }:
         </div>
       </div>
 
-      {user && onLogout ? (
+      {user && (onLogout || onDeleteAccount) ? (
         <div className="navbar__account">
           <div className="navbar__profile">
             {user.avatarUrl ? (
@@ -59,16 +66,31 @@ export function Navbar({ disabled = false, isDemoMode = false, onLogout, user }:
               <p>{isDemoMode ? "デモ体験モード" : "ログイン済み"}</p>
             </div>
           </div>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 bg-white/80 transition cursor-pointer min-h-[36px] shadow-2xs navbar__logout"
-            onClick={onLogout}
-            disabled={disabled}
-            aria-label={isDemoMode ? "デモを終了" : "ログアウト"}
-          >
-            <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>{isDemoMode ? "デモを終了" : "ログアウト"}</span>
-          </button>
+          <div className="flex flex-wrap justify-end gap-2">
+            {!isDemoMode && onDeleteAccount ? (
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-700 hover:text-rose-900 hover:bg-rose-50 border border-rose-200 bg-white/80 transition cursor-pointer min-h-[36px] shadow-2xs"
+                onClick={onDeleteAccount}
+                disabled={disabled}
+                aria-label="退会して連携を解除"
+              >
+                <span>退会（連携解除）</span>
+              </button>
+            ) : null}
+            {onLogout ? (
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 bg-white/80 transition cursor-pointer min-h-[36px] shadow-2xs navbar__logout"
+                onClick={onLogout}
+                disabled={disabled}
+                aria-label={isDemoMode ? "デモを終了" : "ログアウト"}
+              >
+                <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>{isDemoMode ? "デモを終了" : "ログアウト"}</span>
+              </button>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </nav>
