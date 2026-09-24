@@ -6,16 +6,7 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import {
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  Filter,
-  Hash,
-  Loader2,
-  Sliders,
-  Sparkles,
-} from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp, Filter, Hash, Loader2, Sliders } from "lucide-react";
 import type { DatePreset, FeedFilterOptions } from "@/types/ui";
 
 /**
@@ -84,17 +75,6 @@ export function detectPreset(
   return "custom";
 }
 
-/**
- * おすすめハッシュタグのデフォルト候補。
- */
-export const DEFAULT_SUGGESTED_TAGS = [
-  "#100日チャレンジ",
-  "#成長記録",
-  "#写真好きな人と繋がりたい",
-  "#travel",
-  "#イラスト",
-];
-
 export interface FeedFilterStepProps {
   /** フィルター設定値 */
   filter: FeedFilterOptions;
@@ -112,8 +92,6 @@ export interface FeedFilterStepProps {
   isCollapsed?: boolean;
   /** 折りたたみ状態変更ハンドラ */
   onToggleCollapse?: () => void;
-  /** おすすめハッシュタグ一覧 */
-  suggestedTags?: string[];
   /** 「条件変更」ボタンの表示制御（サマリー表示時） */
   disabled?: boolean;
 }
@@ -130,7 +108,6 @@ export function FeedFilterStep({
   fetchedCount,
   isCollapsed: controlledCollapsed,
   onToggleCollapse,
-  suggestedTags = DEFAULT_SUGGESTED_TAGS,
   disabled = false,
 }: FeedFilterStepProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
@@ -142,7 +119,6 @@ export function FeedFilterStep({
   const hashtagId = useId();
   const startDateId = useId();
   const endDateId = useId();
-  const maxCountId = useId();
 
   // 現在の日付プリセット判定
   const activePreset = useMemo(() => {
@@ -157,19 +133,6 @@ export function FeedFilterStep({
       startDate: dates.startDate,
       endDate: dates.endDate,
     });
-  };
-
-  // タグ候補選択ハンドラ
-  const handleTagClick = (tag: string) => {
-    const cleanTag = tag.startsWith("#") ? tag.slice(1) : tag;
-    const currentClean = filter.hashtag?.startsWith("#") ? filter.hashtag.slice(1) : filter.hashtag;
-
-    // 既に選択されていたら解除、別タグなら上書き
-    if (currentClean === cleanTag) {
-      onFilterChange({ ...filter, hashtag: undefined });
-    } else {
-      onFilterChange({ ...filter, hashtag: cleanTag });
-    }
   };
 
   // サマリーテキストの生成
@@ -271,7 +234,7 @@ export function FeedFilterStep({
         className="space-y-5"
       >
         {/* 1. ハッシュタグ入力 */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <label
             htmlFor={hashtagId}
             className="flex items-center gap-1.5 text-sm font-semibold text-slate-800"
@@ -295,37 +258,12 @@ export function FeedFilterStep({
                   hashtag: e.target.value ? e.target.value.replace(/^#/, "") : undefined,
                 })
               }
-              className="w-full pl-8 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition min-h-[44px]"
+              className="w-full pl-8 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100 outline-none transition min-h-[44px]"
             />
           </div>
-
-          {/* おすすめタグボタン */}
-          {suggestedTags.length > 0 && (
-            <div className="flex items-center gap-1.5 flex-wrap pt-1">
-              <span className="text-xs font-medium text-slate-400 flex items-center gap-1 mr-1">
-                <Sparkles className="w-3 h-3 text-amber-500" aria-hidden="true" />
-                人気タグ:
-              </span>
-              {suggestedTags.map((tag) => {
-                const clean = tag.replace(/^#/, "");
-                const isSelected = filter.hashtag?.replace(/^#/, "") === clean;
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => handleTagClick(tag)}
-                    className={`inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 ${
-                      isSelected
-                        ? "bg-slate-900 text-white shadow-xs font-semibold"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200 active:bg-slate-300"
-                    }`}
-                  >
-                    {tag.startsWith("#") ? tag : `#${tag}`}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <p className="text-[11px] text-slate-400 m-0">
+            ご自身のアカウントでつけたハッシュタグを入力してください（未入力の場合は全投稿が対象になります）。
+          </p>
         </div>
 
         {/* 2. 期間指定 & プリセット */}
@@ -413,39 +351,46 @@ export function FeedFilterStep({
           </div>
         </div>
 
-        {/* 3. 最大取得件数スライダー */}
+        {/* 3. 最大取得件数プリセット */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label
-              htmlFor={maxCountId}
-              className="flex items-center gap-1.5 text-sm font-semibold text-slate-800"
-            >
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
               <Sliders className="w-4 h-4 text-slate-500" aria-hidden="true" />
               <span>最大取得件数</span>
-            </label>
+            </span>
             <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
               {filter.maxCount} 件
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-400 font-medium shrink-0">10</span>
-            <input
-              id={maxCountId}
-              type="range"
-              min={10}
-              max={500}
-              step={10}
-              value={filter.maxCount}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  maxCount: Number(e.target.value),
-                })
-              }
-              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 min-h-[44px]"
-            />
-            <span className="text-xs text-slate-400 font-medium shrink-0">500</span>
+
+          {/* セグメントボタングループ */}
+          <div
+            role="group"
+            aria-label="最大取得件数の選択"
+            className="grid grid-cols-4 gap-1.5 bg-slate-100 p-1 rounded-xl"
+          >
+            {[30, 50, 100, 200].map((count) => {
+              const isSelected = filter.maxCount === count;
+              return (
+                <button
+                  key={count}
+                  type="button"
+                  onClick={() => onFilterChange({ ...filter, maxCount: count })}
+                  className={`py-2 px-3 rounded-lg text-xs font-medium transition min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 text-center ${
+                    isSelected
+                      ? "bg-white text-slate-900 font-bold shadow-xs border border-slate-200/60"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                  aria-pressed={isSelected}
+                >
+                  {count} 件
+                </button>
+              );
+            })}
           </div>
+          <p className="text-[11px] text-slate-400 m-0">
+            ※ 100日チャレンジの場合は「100 件」がおすすめです。
+          </p>
         </div>
 
         {/* エラーメッセージ */}

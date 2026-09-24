@@ -33,7 +33,7 @@ export function EpubCustomizeStep({ settings, onChange, defaultTitle }: EpubCust
             Step 3: EPUBの装丁を整える
           </h2>
           <p className="text-xs text-slate-500 m-0">
-            タイトル・並び順・表紙テーマを設定して、読みやすい1冊に仕上げます
+            タイトルや表紙テーマを設定して、読みやすい1冊に仕上げます
           </p>
         </div>
       </div>
@@ -91,63 +91,14 @@ export function EpubCustomizeStep({ settings, onChange, defaultTitle }: EpubCust
         </label>
       </div>
 
-      <div className="space-y-5 pt-2">
-        <fieldset className="space-y-2 border-0 p-0 m-0">
-          <legend className="text-xs font-semibold text-slate-700 mb-2">掲載順序</legend>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <label
-              className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition ${
-                settings.sortOrder === "asc"
-                  ? "bg-white border-slate-900 ring-1 ring-slate-900 shadow-xs"
-                  : "bg-slate-50/80 border-slate-200 hover:bg-slate-50"
-              }`}
-            >
-              <input
-                type="radio"
-                name="sortOrder"
-                value="asc"
-                checked={settings.sortOrder === "asc"}
-                onChange={() => update("sortOrder", "asc")}
-                className="mt-1 accent-slate-900"
-              />
-              <div>
-                <strong className="text-xs sm:text-sm font-bold text-slate-800 block">
-                  古い順（Day 1 → 100 推奨）
-                </strong>
-                <small className="text-[11px] text-slate-500 mt-0.5 block leading-normal">
-                  日々の積み重ねを時系列で読み返しやすい並びです。
-                </small>
-              </div>
-            </label>
-            <label
-              className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition ${
-                settings.sortOrder === "desc"
-                  ? "bg-white border-slate-900 ring-1 ring-slate-900 shadow-xs"
-                  : "bg-slate-50/80 border-slate-200 hover:bg-slate-50"
-              }`}
-            >
-              <input
-                type="radio"
-                name="sortOrder"
-                value="desc"
-                checked={settings.sortOrder === "desc"}
-                onChange={() => update("sortOrder", "desc")}
-                className="mt-1 accent-slate-900"
-              />
-              <div>
-                <strong className="text-xs sm:text-sm font-bold text-slate-800 block">
-                  新しい順
-                </strong>
-                <small className="text-[11px] text-slate-500 mt-0.5 block leading-normal">
-                  最近の投稿からすぐに読み始めたい場合に向いています。
-                </small>
-              </div>
-            </label>
-          </div>
-        </fieldset>
-
+      <div className="space-y-4 pt-1">
         <div className="space-y-2">
-          <span className="text-xs font-semibold text-slate-700 block">表紙テーマ</span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-700 block">表紙テーマ</span>
+            <span className="text-[11px] text-slate-400">
+              ※ 投稿は時系列（古い順）で自動組版されます
+            </span>
+          </div>
           <CoverThemeSelector
             selectedTheme={settings.coverTheme}
             onChange={(themeId) => update("coverTheme", themeId)}
