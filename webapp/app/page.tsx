@@ -436,7 +436,11 @@ export default function Page() {
 
   return (
     <div className={`page ${feed.length > 0 ? "pb-28 sm:pb-32" : ""}`}>
-      <div aria-hidden={isExportModalOpen} inert={isExportModalOpen}>
+      <div
+        aria-hidden={isExportModalOpen}
+        inert={isExportModalOpen}
+        className="max-w-3xl mx-auto w-full"
+      >
         <InAppBrowserAlert />
         <Navbar
           user={activeProfile}

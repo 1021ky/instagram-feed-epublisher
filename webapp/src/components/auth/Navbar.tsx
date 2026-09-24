@@ -47,7 +47,7 @@ export function Navbar({
   const accountLabel = user?.username ? `@${user.username}` : user?.displayName;
 
   return (
-    <nav className="navbar">
+    <nav className="navbar max-w-3xl mx-auto w-full">
       <div className="navbar__brand">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-white shadow-2xs">
