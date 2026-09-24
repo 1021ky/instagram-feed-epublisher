@@ -59,6 +59,7 @@ export default function Page() {
   const [loadingFeed, setLoadingFeed] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasFetched, setHasFetched] = useState(false);
 
   const [customSettings, setCustomSettings] = useState<EpubCustomSettings>({
     title: defaultBookTitle,
@@ -147,6 +148,7 @@ export default function Page() {
     });
     setFeed([]);
     setIsFilterCollapsed(false);
+    setHasFetched(false);
     setError(null);
   }, [defaultDates.end, defaultDates.start]);
 
@@ -173,6 +175,7 @@ export default function Page() {
     await authClient.signOut();
     setFeed([]);
     setIsFilterCollapsed(false);
+    setHasFetched(false);
   };
 
   /**
@@ -211,6 +214,7 @@ export default function Page() {
       // 3. ローカルのフィードやフィルターなどの状態をクリア
       setFeed([]);
       setIsFilterCollapsed(false);
+      setHasFetched(false);
       setAppMode("real");
 
       // 4. TOP（ログイン前）へ確実に遷移（URLパラメータ等をリセット）
@@ -274,6 +278,7 @@ export default function Page() {
 
     // デモ投稿を初期全選択状態でセット
     setFeed(sampleDemoFeedData.posts.map((p) => ({ ...p, selected: true })));
+    setHasFetched(true);
     // Step 1 は折りたたまず、通常時と同じように検索条件を表示
     setIsFilterCollapsed(false);
   };
@@ -304,6 +309,7 @@ export default function Page() {
           }));
 
       setFeed(items);
+      setHasFetched(true);
       if (items.length === 0) {
         setError(
           "フィードが取得できませんでした。指定した条件に該当する投稿がないか、アカウントに投稿がありません。",
@@ -499,16 +505,15 @@ export default function Page() {
               </div>
 
               {/* Step 2: 投稿確認・選択リスト */}
-              {feed.length > 0 && (
-                <div id="post-list">
-                  <PostListStep
-                    posts={feed}
-                    onToggleSelect={handleToggleSelect}
-                    onSelectAll={handleSelectAll}
-                    onDeselectAll={handleDeselectAll}
-                  />
-                </div>
-              )}
+              <div id="post-list">
+                <PostListStep
+                  posts={feed}
+                  isFetched={hasFetched || feed.length > 0}
+                  onToggleSelect={handleToggleSelect}
+                  onSelectAll={handleSelectAll}
+                  onDeselectAll={handleDeselectAll}
+                />
+              </div>
 
               {/* Step 3: EPUB装丁・メタデータ設定 */}
               <div id="book-settings" className="space-y-4">
@@ -523,7 +528,7 @@ export default function Page() {
                     type="button"
                     className="w-full sm:w-auto px-6 py-3 rounded-xl text-white font-medium text-sm bg-gradient-to-r from-[#405DE6] via-[#C13584] to-[#E1306C] hover:opacity-95 transition flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-50 min-h-[44px]"
                     onClick={handleGenerate}
-                    disabled={isGeneratingEpub || (feed.length > 0 && selectedPosts.length === 0)}
+                    disabled={isGeneratingEpub || selectedPosts.length === 0}
                   >
                     <svg
                       className="w-4 h-4 fill-current shrink-0"

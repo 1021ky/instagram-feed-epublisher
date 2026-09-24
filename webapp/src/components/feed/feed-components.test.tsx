@@ -270,6 +270,23 @@ describe("PostListStep コンポーネント", () => {
     expect(html).toContain("投稿が見つかりませんでした");
     expect(html).toContain("選択中: 0 / 0 件");
   });
+
+  it("フィード未取得（isFetched=false）のときに未取得案内が表示されること", () => {
+    const html = renderToStaticMarkup(
+      <PostListStep
+        posts={[]}
+        isFetched={false}
+        onToggleSelect={vi.fn()}
+        onSelectAll={vi.fn()}
+        onDeselectAll={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain("Step 2: 投稿の確認・選択");
+    expect(html).toContain("未取得");
+    expect(html).toContain("投稿はまだ取得されていません");
+    expect(html).toContain("この条件で投稿を取得");
+  });
 });
 
 describe("StickyActionBar コンポーネント", () => {

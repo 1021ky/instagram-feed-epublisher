@@ -6,7 +6,7 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import { CheckSquare, FileQuestion, Search, Square, X } from "lucide-react";
+import { CheckSquare, FileQuestion, Image as ImageIcon, Search, Square, X } from "lucide-react";
 import type { FeedPostItem } from "@/types/ui";
 import { PostCard } from "./PostCard";
 
@@ -23,6 +23,8 @@ export interface PostListStepProps {
   title?: string;
   /** サブタイトル（オプショナル） */
   subtitle?: string;
+  /** フィード取得済みかどうか（false の場合は未取得の案内を表示） */
+  isFetched?: boolean;
 }
 
 /**
@@ -35,9 +37,51 @@ export function PostListStep({
   onDeselectAll,
   title = "Step 2: 投稿の確認・選択",
   subtitle = "書籍に収録したい投稿を選択してください（除外したい投稿はタップしてチェックを外せます）",
+  isFetched = true,
 }: PostListStepProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputId = useId();
+
+  // フィード未取得状態のプレースホルダー表示
+  if (!isFetched && posts.length === 0) {
+    return (
+      <section className="w-full" aria-label="投稿確認・選択リスト">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-6 transition-all">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <span className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
+                2
+              </span>
+              <div>
+                <h2 className="text-sm sm:text-base font-bold text-slate-900 m-0">{title}</h2>
+                <p className="text-xs text-slate-500 m-0">
+                  書籍に収録したい投稿の確認と選択（Step 1 の取得後に操作可能）
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200/80">
+              未取得
+            </span>
+          </div>
+
+          <div className="py-8 px-4 text-center my-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-slate-400">
+              <ImageIcon className="w-6 h-6 stroke-[1.5]" aria-hidden="true" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs sm:text-sm font-bold text-slate-700 m-0">
+                投稿はまだ取得されていません
+              </p>
+              <p className="text-xs text-slate-500 m-0 max-w-sm">
+                Step 1
+                で条件を指定して「この条件で投稿を取得」を押すと、ここに投稿一覧が表示されます。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   // 選択件数の集計
   const selectedCount = useMemo(() => {
