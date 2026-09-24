@@ -122,6 +122,25 @@ describe("FeedFilterStep コンポーネント描画", () => {
     expect(html).toContain("投稿を取得中...");
     expect(html).toContain("disabled");
   });
+
+  it("デモモード（isDemoMode=true）のとき、案内バナーが表示され入力がreadonlyになること", () => {
+    const html = renderToStaticMarkup(
+      <FeedFilterStep
+        filter={defaultFilter}
+        onFilterChange={vi.fn()}
+        onSubmit={vi.fn()}
+        isCollapsed={false}
+        isDemoMode={true}
+      />,
+    );
+
+    expect(html).toContain(
+      "デモ体験モード：条件は固定サンプルです（ログイン後に自由に変更できます）",
+    );
+    expect(html).toContain("readOnly");
+    expect(html).toContain("cursor-not-allowed");
+    expect(html).toContain("この条件で投稿を取得");
+  });
 });
 
 describe("PostCard コンポーネント", () => {

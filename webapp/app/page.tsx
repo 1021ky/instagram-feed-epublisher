@@ -257,9 +257,8 @@ export default function Page() {
 
     // デモ投稿を初期全選択状態でセット
     setFeed(sampleDemoFeedData.posts.map((p) => ({ ...p, selected: true })));
-    // Step 1 を自動折りたたみ、Step 2 へスクロール
-    setIsFilterCollapsed(true);
-    scrollToSection("post-list");
+    // Step 1 は折りたたまず、通常時と同じように検索条件を表示
+    setIsFilterCollapsed(false);
   };
 
   const handleFetch = async () => {
@@ -478,6 +477,7 @@ export default function Page() {
                   isCollapsed={isFilterCollapsed}
                   onToggleCollapse={() => setIsFilterCollapsed((prev) => !prev)}
                   disabled={isGeneratingEpub}
+                  isDemoMode={isDemoMode}
                 />
               </div>
 

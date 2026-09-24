@@ -94,6 +94,8 @@ export interface FeedFilterStepProps {
   onToggleCollapse?: () => void;
   /** 「条件変更」ボタンの表示制御（サマリー表示時） */
   disabled?: boolean;
+  /** デモモードフラグ（変更不可・案内表示） */
+  isDemoMode?: boolean;
 }
 
 /**
@@ -109,8 +111,14 @@ export function FeedFilterStep({
   isCollapsed: controlledCollapsed,
   onToggleCollapse,
   disabled = false,
+  isDemoMode = false,
 }: FeedFilterStepProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
+  const [showDemoNotice, setShowDemoNotice] = useState(false);
+
+  const handleDemoBlocked = () => {
+    setShowDemoNotice(true);
+  };
 
   // 外部からの制御があればそれを優先、なければ内部ステート
   const isCollapsed = controlledCollapsed ?? internalCollapsed;
@@ -224,9 +232,46 @@ export function FeedFilterStep({
         )}
       </div>
 
+      {/* デモ体験モード案内バナー */}
+      {isDemoMode && (
+        <div
+          role="status"
+          className={`mb-4 p-3 rounded-xl text-xs sm:text-sm flex items-center justify-between gap-2 transition-all ${
+            showDemoNotice
+              ? "bg-amber-50 border border-amber-300 text-amber-900 shadow-xs"
+              : "bg-blue-50/70 border border-blue-100 text-blue-800"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm shrink-0" aria-hidden="true">
+              {showDemoNotice ? "⚠️" : "💡"}
+            </span>
+            <span className="font-medium">
+              {showDemoNotice
+                ? "デモ体験中は条件を変更できません（ログイン後に自由に変更できます）"
+                : "デモ体験モード：条件は固定サンプルです（ログイン後に自由に変更できます）"}
+            </span>
+          </div>
+          {showDemoNotice && (
+            <button
+              type="button"
+              onClick={() => setShowDemoNotice(false)}
+              className="text-amber-700 hover:text-amber-900 p-1 rounded-md text-xs font-bold shrink-0 cursor-pointer"
+              aria-label="案内を閉じる"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      )}
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          if (isDemoMode) {
+            handleDemoBlocked();
+            return;
+          }
           if (!isLoading && !disabled) {
             void onSubmit();
           }
@@ -252,13 +297,24 @@ export function FeedFilterStep({
               type="text"
               placeholder="100日チャレンジ"
               value={filter.hashtag ? filter.hashtag.replace(/^#/, "") : ""}
-              onChange={(e) =>
+              readOnly={isDemoMode}
+              onClick={isDemoMode ? handleDemoBlocked : undefined}
+              onFocus={isDemoMode ? handleDemoBlocked : undefined}
+              onChange={(e) => {
+                if (isDemoMode) {
+                  handleDemoBlocked();
+                  return;
+                }
                 onFilterChange({
                   ...filter,
                   hashtag: e.target.value ? e.target.value.replace(/^#/, "") : undefined,
-                })
-              }
-              className="w-full pl-8 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100 outline-none transition min-h-[44px]"
+                });
+              }}
+              className={`w-full pl-8 pr-4 py-2.5 text-sm rounded-xl outline-none transition min-h-[44px] ${
+                isDemoMode
+                  ? "bg-slate-100/70 border border-slate-200 text-slate-600 cursor-not-allowed select-none"
+                  : "bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+              }`}
             />
           </div>
           <p className="text-[11px] text-slate-400 m-0">
@@ -278,8 +334,10 @@ export function FeedFilterStep({
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
               <button
                 type="button"
-                onClick={() => handlePresetSelect("100days")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] sm:min-h-[36px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                onClick={isDemoMode ? handleDemoBlocked : () => handlePresetSelect("100days")}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] sm:min-h-[36px] focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                  isDemoMode ? "cursor-not-allowed" : "cursor-pointer"
+                } ${
                   activePreset === "100days"
                     ? "bg-white text-slate-900 font-bold shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
@@ -289,8 +347,10 @@ export function FeedFilterStep({
               </button>
               <button
                 type="button"
-                onClick={() => handlePresetSelect("30days")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] sm:min-h-[36px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                onClick={isDemoMode ? handleDemoBlocked : () => handlePresetSelect("30days")}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] sm:min-h-[36px] focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                  isDemoMode ? "cursor-not-allowed" : "cursor-pointer"
+                } ${
                   activePreset === "30days"
                     ? "bg-white text-slate-900 font-bold shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
@@ -300,8 +360,10 @@ export function FeedFilterStep({
               </button>
               <button
                 type="button"
-                onClick={() => handlePresetSelect("all")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] sm:min-h-[36px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                onClick={isDemoMode ? handleDemoBlocked : () => handlePresetSelect("all")}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] sm:min-h-[36px] focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                  isDemoMode ? "cursor-not-allowed" : "cursor-pointer"
+                } ${
                   activePreset === "all"
                     ? "bg-white text-slate-900 font-bold shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
@@ -322,13 +384,32 @@ export function FeedFilterStep({
                 id={startDateId}
                 type="date"
                 value={filter.startDate ?? ""}
-                onChange={(e) =>
+                readOnly={isDemoMode}
+                onClick={isDemoMode ? handleDemoBlocked : undefined}
+                onFocus={isDemoMode ? handleDemoBlocked : undefined}
+                onKeyDown={
+                  isDemoMode
+                    ? (e) => {
+                        e.preventDefault();
+                        handleDemoBlocked();
+                      }
+                    : undefined
+                }
+                onChange={(e) => {
+                  if (isDemoMode) {
+                    handleDemoBlocked();
+                    return;
+                  }
                   onFilterChange({
                     ...filter,
                     startDate: e.target.value || undefined,
-                  })
-                }
-                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition min-h-[44px]"
+                  });
+                }}
+                className={`w-full px-3 py-2 text-sm rounded-xl outline-none transition min-h-[44px] ${
+                  isDemoMode
+                    ? "bg-slate-100/70 border border-slate-200 text-slate-600 cursor-not-allowed"
+                    : "bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                }`}
               />
             </div>
             <div className="space-y-1">
@@ -339,13 +420,32 @@ export function FeedFilterStep({
                 id={endDateId}
                 type="date"
                 value={filter.endDate ?? ""}
-                onChange={(e) =>
+                readOnly={isDemoMode}
+                onClick={isDemoMode ? handleDemoBlocked : undefined}
+                onFocus={isDemoMode ? handleDemoBlocked : undefined}
+                onKeyDown={
+                  isDemoMode
+                    ? (e) => {
+                        e.preventDefault();
+                        handleDemoBlocked();
+                      }
+                    : undefined
+                }
+                onChange={(e) => {
+                  if (isDemoMode) {
+                    handleDemoBlocked();
+                    return;
+                  }
                   onFilterChange({
                     ...filter,
                     endDate: e.target.value || undefined,
-                  })
-                }
-                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition min-h-[44px]"
+                  });
+                }}
+                className={`w-full px-3 py-2 text-sm rounded-xl outline-none transition min-h-[44px] ${
+                  isDemoMode
+                    ? "bg-slate-100/70 border border-slate-200 text-slate-600 cursor-not-allowed"
+                    : "bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                }`}
               />
             </div>
           </div>
@@ -367,8 +467,9 @@ export function FeedFilterStep({
 
         {/* 取得アクションボタン */}
         <button
-          type="submit"
-          disabled={isLoading || disabled}
+          type={isDemoMode ? "button" : "submit"}
+          onClick={isDemoMode ? handleDemoBlocked : undefined}
+          disabled={isLoading || (!isDemoMode && disabled)}
           className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 active:bg-slate-950 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed shadow-xs transition min-h-[48px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400"
         >
           {isLoading ? (
