@@ -179,7 +179,7 @@ export default function Page() {
    * 退会（連携解除）操作を実行する。
    *
    * 確認ダイアログを表示し、同意が得られた場合のみ退会 API を呼び出して
-   * 認可失効と Cookie 破棄を行い、完了後はトップページへ遷移する。
+   * 認可失効と Cookie 破棄を行い、完了後はトップページ（ログイン前）へ確実に遷移する。
    *
    * @returns 完了を表す Promise
    */
@@ -192,19 +192,36 @@ export default function Page() {
     setError(null);
 
     try {
-      const response = await fetch("/api/user/delete", {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? "退会処理に失敗しました");
+      // 1. サーバー側の Instagram 認可失効 & Cookie 破棄 API を呼び出す
+      try {
+        await fetch("/api/user/delete", {
+          method: "POST",
+        });
+      } catch (apiError) {
+        console.warn("退会 API 呼び出しで例外が発生しました:", apiError);
       }
 
-      window.location.assign("/");
+      // 2. クライアント側の Better Auth セッションを破棄
+      try {
+        await authClient.signOut();
+      } catch (authError) {
+        console.warn("クライアント サインアウトで例外が発生しました:", authError);
+      }
+
+      // 3. ローカルのフィードやフィルターなどの状態をクリア
+      setFeed([]);
+      setIsFilterCollapsed(false);
+      setAppMode("real");
+
+      // 4. TOP（ログイン前）へ確実に遷移（URLパラメータ等をリセット）
+      if (window.location.pathname === "/" && !window.location.search && !window.location.hash) {
+        window.location.reload();
+      } else {
+        window.location.href = "/";
+      }
     } catch (e) {
-      console.error(e);
-      setError(e instanceof Error ? e.message : "退会処理に失敗しました");
+      console.error("退会後遷移処理でエラーが発生しました:", e);
+      window.location.href = "/";
     } finally {
       setDeletingAccount(false);
     }
