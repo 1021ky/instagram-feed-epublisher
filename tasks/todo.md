@@ -186,3 +186,63 @@
   - [x] 他のドキュメント（README等）における削除済みコマンド（`rebuild:native`, `clean:all`, `auth:migrate`）の残存がないことを確認
   - [x] 不要な環境変数（`BETTER_AUTH_DB_PATH` 等）の残存がないことを確認
 - [x] 全検証（lint, format, test, typecheck, build）の通過確認
+
+---
+
+## PR #60: Meta審査向け法的・ポリシーページの改善
+
+- [x] ルート `README.md` と `webapp/README.md` の重複解消（webapp以下を参照化）
+- [x] `docs/documentation-policy.md` の更新（ディレクトリ構成更新方針）
+- [x] `LegalPage.tsx` の「Meta 審査対応」バッジ削除
+- [x] `/data-deletion` のリード文の自然化（エンドユーザー向け案内に改善）
+- [x] お問い合わせ先の改善（環境変数 `NEXT_PUBLIC_CONTACT_FORM_URL` 導入・フォーム誘導へ更新）
+- [x] 内部リンクを `<a>` から `next/link` へ置き換え
+- [x] プライバシーポリシー・利用規約・データ削除手順の「EPUB」表記を「電子書籍」に一般化
+- [x] テストコードの更新（`legal-pages.test.tsx`, `common-components.test.tsx`）
+- [x] ドキュメント（環境変数一覧等）の更新
+- [x] 全検証（test, lint, format, typecheck, build）通過確認
+
+---
+
+## 法的・ポリシーページ（/privacy, /terms, /data-deletion）のデザイン刷新
+
+- [x] `LegalPage.tsx` のレイアウト・タイポグラフィ刷新（余白拡大、戻るボタンのピル化、見出しアクセントバー、セクション区切り線）
+- [x] お問い合わせ用カードコンポーネント（`LegalContactBox`）の新設と適用
+- [x] `globals.css` の法的ページスタイルの整理・Tailwind統合
+- [x] `/privacy`, `/terms`, `/data-deletion` のマークアップ・可読性向上
+- [x] テストおよびビルド検証の実行
+- [x] コミット & プッシュ
+
+---
+
+## グローバル対応プライバシーポリシー更新（日本・EU/GDPR・米国/CCPA対応、日英版）
+
+- [x] `LegalPage.tsx` に `backLabel` と `categoryLabel` の多言語対応プロップスを追加
+- [x] 日本語版プライバシーポリシー（`webapp/app/privacy/page.tsx`）の更新（日本法・GDPR・CCPA要件網羅）
+- [x] 英語版プライバシーポリシー（`webapp/app/privacy/en/page.tsx`）の新規作成
+- [x] 単体テストの更新（日本語・英語版）
+- [x] 全検証（test, lint, format, tsc, build）の実行
+- [x] コミット & プッシュ
+
+---
+
+## サイト内リンク切れ防止・自動検証テストの実装
+
+- [x] リンク切れ包括テスト（`webapp/app/links.test.tsx`）の作成
+  - [x] `SiteFooter`, `/privacy`, `/privacy/en`, `/terms`, `/data-deletion` から全リンク（内部・外部）を DOM 抽出
+  - [x] 内部リンク（`/` で始まるパス）が実在する App Router ページ（`page.tsx`）を指しているかの検証
+  - [x] 外部リンク（`http://`, `https://`）の URL 妥当性検証
+  - [x] リンク切れ検知自体の妥当性テスト（ネガティブテスト）の実装
+- [x] `/data-deletion` にプライバシーポリシーおよび Instagram 連携管理設定への直接リンクを追加
+- [x] 全検証（test, lint, format, tsc, build）の実行
+- [x] コミット & プッシュ
+
+---
+
+## 法的ページ・グローバルポリシー設計経緯のドキュメント化
+
+- [x] `docs/designdoc/designDoc.md` に「11. 法的ページ・グローバルポリシー設計の経緯」を追加
+  - [x] 背景と目的（Meta Live 審査要件、グローバル展開）
+  - [x] 採用方針（GDPR・CCPA・日本法の網羅、ステートレス整合、日英2言語、Googleフォーム、リンク切れ自動テスト）
+  - [x] 検討した選択肢と却下・改善理由（審査用ラベルの削除、電子書籍への表記一般化、next/link SPA遷移）
+- [x] コミット & プッシュ

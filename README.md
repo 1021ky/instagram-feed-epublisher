@@ -29,20 +29,11 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 │   │   └── sequenceDiagram.mmd # 認証・API連携シーケンス図
 │   └── documentation-policy.md # ドキュメント更新ポリシー
 ├── scripts/              # リポジトリ共通チェックスクリプト
-└── webapp/               # Next.js Web アプリケーション本体
-    ├── app/              # App Router (UI / API Route Handlers)
-    ├── certs/            # ローカル HTTPS 用証明書配置先 (mkcert)
-    ├── e2e/              # Playwright E2E テストコード
-    ├── scripts/          # 開発サーバー等の実行スクリプト
-    └── src/
-        ├── components/   # UI コンポーネント (auth, feed, epub, common)
-        │   ├── auth/         # ナビゲーション、ログインカード、WebView注意バナー
-        │   ├── epub/         # EPUB 装丁設定・表紙テーマ・エクスポートモーダル
-        │   └── feed/         # 絞り込みフォーム、投稿カード、選択リスト、下部アクションバー
-        ├── lib/          # 認証、Instagram API クライアント、EPUB 生成ロジック等
-        │   └── demo/         # デモ体験モード用サンプルデータ
-        └── types/        # UI・ドメイン共通型定義
+└── webapp/               # Next.js Web アプリケーション本体（※詳細は webapp/README.md 参照）
 ```
+
+> [!TIP]
+> `webapp/` 配下の詳細なディレクトリ構成やコンポーネント配置については、[webapp/README.md](webapp/README.md) を参照してください。
 
 ---
 
@@ -133,16 +124,20 @@ INSTAGRAM_CLIENT_SECRET=あなたのInstagramアプリシークレット
 # Better Auth の設定
 BETTER_AUTH_SECRET=32文字以上のランダム文字列（例: openssl rand -base64 32 で生成）
 BETTER_AUTH_URL=https://localhost:3000
+
+# 法的ページ等のお問い合わせ窓口フォーム（任意・未設定時は GitHub Issues）
+# NEXT_PUBLIC_CONTACT_FORM_URL=https://forms.gle/xxxxxx
 ```
 
 #### 各環境変数の取得元・注意点
 
-| 環境変数名                | 取得元 / 設定方法                                                                                | 説明・注意点                                                                                                                                                                                                        |
-| :------------------------ | :----------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `INSTAGRAM_CLIENT_ID`     | [Meta for Developers](https://developers.facebook.com/apps/) ➔ アプリ ➔「Instagram」➔「API設定」 | **Instagram アプリ ID**（数値）。<br>⚠️ 親の Meta (Facebook) アプリID（「ベーシック」に表示されるID）を設定すると `Invalid platform app` エラーになります。必ず **Instagram API 設定側** の ID を指定してください。 |
-| `INSTAGRAM_CLIENT_SECRET` | 同上（「Instagram」➔「API設定」）                                                                | **Instagram アプリシークレット**。「表示」を押してコピーします。                                                                                                                                                    |
-| `BETTER_AUTH_SECRET`      | ローカルで生成                                                                                   | ターミナルで `openssl rand -base64 32` を実行して得られた文字列を設定します。                                                                                                                                       |
-| `BETTER_AUTH_URL`         | 固定値                                                                                           | ローカル開発時は `https://localhost:3000` を設定します。                                                                                                                                                            |
+| 環境変数名                     | 取得元 / 設定方法                                                                                | 説明・注意点                                                                                                                                                                                                        |
+| :----------------------------- | :----------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `INSTAGRAM_CLIENT_ID`          | [Meta for Developers](https://developers.facebook.com/apps/) ➔ アプリ ➔「Instagram」➔「API設定」 | **Instagram アプリ ID**（数値）。<br>⚠️ 親の Meta (Facebook) アプリID（「ベーシック」に表示されるID）を設定すると `Invalid platform app` エラーになります。必ず **Instagram API 設定側** の ID を指定してください。 |
+| `INSTAGRAM_CLIENT_SECRET`      | 同上（「Instagram」➔「API設定」）                                                                | **Instagram アプリシークレット**。「表示」を押してコピーします。                                                                                                                                                    |
+| `BETTER_AUTH_SECRET`           | ローカルで生成                                                                                   | ターミナルで `openssl rand -base64 32` を実行して得られた文字列を設定します。                                                                                                                                       |
+| `BETTER_AUTH_URL`              | 固定値                                                                                           | ローカル開発時は `https://localhost:3000` を設定します。                                                                                                                                                            |
+| `NEXT_PUBLIC_CONTACT_FORM_URL` | Googleフォーム等のURL（任意）                                                                    | 法的・ポリシーページに表示するお問い合わせフォームのURL。未設定時はリポジトリの GitHub Issues がフォールバックされます。                                                                                            |
 
 ### ステップ 5: 開発サーバーの起動
 

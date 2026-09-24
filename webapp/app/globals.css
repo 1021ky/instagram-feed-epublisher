@@ -580,6 +580,34 @@ h1 {
   text-align: center;
 }
 
+.footer__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 0;
+}
+
+.footer__card {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 20px;
+}
+
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 20px;
+  margin: 0 0 8px;
+}
+
+.footer__links a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.footer__links a:hover {
+  text-decoration: underline;
+}
+
 .feed {
   margin-top: 16px;
   display: grid;
