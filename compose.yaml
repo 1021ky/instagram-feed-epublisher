@@ -1,0 +1,20 @@
+services:
+  webapp:
+    build:
+      context: .
+      dockerfile: webapp/Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+      - HTTPS_HOST=0.0.0.0
+      - HTTPS_PORT=3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/webapp/node_modules
+      - /app/webapp/.next
+    env_file:
+      - path: webapp/.env.local
+        required: false

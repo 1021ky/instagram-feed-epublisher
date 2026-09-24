@@ -141,12 +141,25 @@ BETTER_AUTH_URL=https://localhost:3000
 
 ### ステップ 5: 開発サーバーの起動
 
+開発サーバーの起動方法は、**ローカル環境（ホスト）直実行** または **Docker Compose** のいずれかを選択できます。どちらも HTTPS（`https://localhost:3000`）およびホットリロード（Fast Refresh）に対応しています。
+
+#### パターン A: ローカル環境で直接起動
+
 ```bash
-cd webapp
+# プロジェクトルートから実行
 pnpm dev
 ```
 
-ブラウザで **`https://localhost:3000`** にアクセスし、「Instagramでログイン」から動作確認を行ってください。
+#### パターン B: Docker Compose で起動（推奨）
+
+コンテナ内で隔離された Node.js 24 環境で起動します。ホスト側のソースコード変更が即座にホットリロードされます。
+
+```bash
+# プロジェクトルートから実行
+docker compose up
+```
+
+起動後、ブラウザで **`https://localhost:3000`** にアクセスし、「Instagramでログイン」から動作確認を行ってください。
 
 ---
 
@@ -206,5 +219,23 @@ pnpm e2etest
   - 今後、認証フローのモック検証、および「ログイン ➔ 投稿取得・条件フィルタ ➔ EPUB 生成・ダウンロード」までの一連のユーザー体験を自動テストする E2E スイートを構築予定です。
 - [ ] **EPUB 生成プレビュー・プログレス表示の向上**
   - 多数の画像を含む投稿の取得・変換時の進捗状況（プログレスバー）やエラーハンドリングの強化。
-- [ ] **本番デプロイ手順の整備**
-  - Vercel 等への本番デプロイ設定、本番環境向け OAuth リダイレクト URI の構成ガイドの追加。
+- [x] **本番デプロイ環境の整備（Google Cloud Run）**
+  - Docker マルチステージビルド、Secret Manager、Workload Identity Federation による自動 CI/CD を構築済み。
+
+---
+
+## 8. 本番運用・デプロイ (Google Cloud Run)
+
+本番環境は **Google Cloud Run**（東京リージョン: `asia-northeast1`）で運用され、独自ドメイン **`https://ksanchu.info`** で公開されます。
+
+### 特徴
+
+- **ゼロスケール運用**: リクエストがない待機時はインスタンス数を 0 に保ち、運用コストを最小化。
+- **キーレス CI/CD**: Workload Identity Federation (OIDC) を利用し、永続的なサービスアカウントキーを発行せずに GitHub Actions から自動デプロイ。
+- **Secret Manager 連携**: Instagram API キーやセッション暗号化鍵などの機密情報を安全に注入。
+
+### 詳細な環境構築・リソース設定手順
+
+GCP プロジェクト作成、Artifact Registry、Secret Manager、WIF 設定、独自ドメインマッピング（DNS）の完全な手順は以下を参照してください：
+
+- 📖 [Google Cloud & CI/CD 環境構築手順書 (docs/gcp-setup.md)](docs/gcp-setup.md)

@@ -246,3 +246,31 @@
   - [x] 採用方針（GDPR・CCPA・日本法の網羅、ステートレス整合、日英2言語、Googleフォーム、リンク切れ自動テスト）
   - [x] 検討した選択肢と却下・改善理由（審査用ラベルの削除、電子書籍への表記一般化、next/link SPA遷移）
 - [x] コミット & プッシュ
+
+---
+
+## Issue #57: Dockerfile 作成 & Cloud Run / CI/CD 環境構築
+
+- [x] Next.js 15 standalone 出力対応
+  - [x] `webapp/next.config.mjs` に `output: "standalone"` と適切な `outputFileTracingRoot` を設定
+- [x] 本番用マルチステージ Dockerfile 作成
+  - [x] `webapp/Dockerfile` の作成 (Node.js 24, pnpm, 非rootユーザー, 最小イメージ)
+  - [x] `.dockerignore` の作成
+- [x] ローカル開発用 Docker Compose 環境構築（ホットリロード対応）
+  - [x] `compose.yaml` の作成 (ソースコードバインドマウント, node_modules/ .next ボリューム保護, WATCHPACK_POLLING, HTTPS 証明書・ポート設定)
+  - [x] `webapp/Dockerfile.dev` の作成
+- [x] ローカル Docker 動作確認
+  - [x] 本番用イメージのローカルビルド・起動確認 (コンテンツサイズ 90MB、HTTP 200 応答確認)
+  - [x] compose 起動によるホットリロード検証 (Fast Refresh 反応確認)
+- [x] GitHub Actions CI/CD ワークフロー作成
+  - [x] `.github/workflows/deploy.yml` の作成 (WIF キーレス認証, Artifact Registry push, Cloud Run デプロイ)
+- [x] Terraform によるインフラ・権限 IaC 化
+  - [x] `terraform/` に Cloud Run, Secret Manager, Artifact Registry, WIF, サービスアカウント, 独自ドメインマッピングのリソース定義を作成
+  - [x] `terraform fmt` および `terraform validate` の構文・型検証通過確認
+- [x] GCP リソースセットアップガイド・スクリプトの作成
+  - [x] `docs/gcp-setup.md` の作成 (Terraform による一括プロビジョニング手順、シークレット登録、DNS設定)
+- [x] ドキュメント更新
+  - [x] `README.md` に Docker ローカル開発手順および Cloud Run デプロイ構成を追記
+- [x] 品質ゲート・全検証
+  - [x] lint / format / test / typecheck / build
+- [x] コミット & プッシュ

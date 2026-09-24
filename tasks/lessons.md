@@ -64,3 +64,15 @@
   - 連絡窓口を GitHub Issues に限定すると、GitHub アカウントを持たない一般利用者から連絡を受け付けられないと審査員に指摘されるケースがある。Googleフォーム等の汎用フォームを用意し、環境変数（`NEXT_PUBLIC_CONTACT_FORM_URL`）経由で差し替え可能に設計することで、開発・本番の切り替えや運用変更に柔軟に対応できる。
 - **Next.js App Router における静的ページの配信**:
   - 動的関数を使用しない Server Component は、ビルド時に自動的に静的HTML（Static Rendering）として事前生成される。クローラーやボットがアクセスした際も初回から完全なHTMLが即時返却されるため、Meta審査のボット巡回やSEO、表示パフォーマンスのすべてにおいて最適となる。
+
+## コンテナ化・Cloud Run デプロイ・Docker 開発基盤
+
+- **Next.js 15 standalone 出力とモノレポ構成**:
+  - `pnpm` ワークスペース（モノレポ）構成下では、`next.config.mjs` で `output: "standalone"` に加えて `outputFileTracingRoot: path.resolve(__dirname, "..")`（リポジトリルート）を指定することで、親ディレクトリの lockfile や共有設定が正しくトレースされ、`.next/standalone` 配下に完全な実行ファイル群が生成される。
+  - 静的アセット（`.next/static`）および `public` ディレクトリは standalone 出力に自動コピーされないため、Dockerfile の runner ステージで明示的に `COPY` する必要がある。また `public` ディレクトリが存在しない場合のビルド失敗を防ぐため、`.gitkeep` やワイルドカード（`public*`）による防御的コピーが有効。
+- **Docker ローカル開発におけるホットリロードとボリューム分離**:
+  - ホスト側ソースコードをバインドマウント（`-v .:/app`）する際、ホスト（macOS）の `node_modules` や `.next` でコンテナ内（Linux）の依存関係が上書きされないよう、匿名ボリューム（`/app/node_modules`, `/app/webapp/node_modules`, `/app/webapp/.next`）で保護する。
+  - macOS の Docker Desktop 上でのファイル変更検知を安定させるため `WATCHPACK_POLLING=true` を指定し、HTTPS 開発サーバーではコンテナ外（ホストブラウザ）からの接続を許可するため `HTTPS_HOST=0.0.0.0` にバインドする。
+- **Google Cloud Run へのキーレス CI/CD (Workload Identity Federation)**:
+  - 永続的なサービスアカウントキー（JSON）を発行せず、GitHub Actions の OIDC トークンと GCP Workload Identity Pool を連携させることで、鍵漏洩リスクを排除したセキュアな自動デプロイを実現できる。
+  - 機密情報（Instagram クレデンシャルやセッション暗号化鍵）は Secret Manager で集中管理し、Cloud Run のデプロイフラグ（`--set-secrets`）で環境変数としてセキュアに注入する。
