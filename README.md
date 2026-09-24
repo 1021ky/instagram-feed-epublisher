@@ -172,6 +172,7 @@ docker compose up
 - **TypeScript / JavaScript** (`*.{js,jsx,ts,tsx}`): `oxlint --fix` による静的解析自動修正 ＋ `oxfmt --write` によるコード整形
 - **Markdown** (`*.md`): `oxfmt --write` による整形 ＋ `markdownlint-cli2 --fix` による構文チェック・自動修正
 - **Mermaid 図面** (`*.mmd`): `scripts/check-mermaid.mjs`（`mmdc`）による構文解析・画像変換検証
+- **Terraform** (`*.tf`): `terraform fmt` によるインフラコードの自動整形
 
 ### 主な開発コマンド
 
@@ -202,6 +203,11 @@ pnpm format:check
 
 # Mermaid 図面の変換チェック (mmdc)
 pnpm check:mermaid
+
+# Terraform のフォーマット・構文検証
+pnpm terraform:fmt
+pnpm terraform:fmt:check
+pnpm terraform:validate
 
 # 単体テスト (Vitest)
 pnpm test
