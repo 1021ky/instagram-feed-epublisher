@@ -82,9 +82,9 @@ export function Navbar({
               <strong className="text-xs sm:text-sm font-bold text-slate-800 block">
                 {accountLabel ?? "Instagram user"}
               </strong>
-              <p className="text-[11px] text-slate-500 m-0">
-                {isDemoMode ? "デモ体験モード" : "ログイン済み"}
-              </p>
+              {isDemoMode && (
+                <p className="text-[11px] text-amber-700 font-medium m-0">デモ体験モード</p>
+              )}
             </div>
           </div>
           <div className="flex flex-wrap justify-end gap-2">
