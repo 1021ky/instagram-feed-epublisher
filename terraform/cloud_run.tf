@@ -15,9 +15,11 @@ resource "google_secret_manager_secret_iam_member" "secret_accessor" {
 
 # Cloud Run v2 サービス
 resource "google_cloud_run_v2_service" "app" {
-  name     = var.app_name
-  location = var.region
-  ingress  = "INGRESS_TRAFFIC_ALL"
+  project             = var.project_id
+  name                = var.app_name
+  location            = var.region
+  ingress             = "INGRESS_TRAFFIC_ALL"
+  deletion_protection = false
 
   template {
     service_account = google_service_account.cloud_run_runtime.email
@@ -68,7 +70,8 @@ resource "google_cloud_run_v2_service" "app" {
 
   depends_on = [
     google_project_service.apis,
-    google_secret_manager_secret_version.initial_versions
+    google_secret_manager_secret_version.initial_versions,
+    google_secret_manager_secret_iam_member.secret_accessor
   ]
 }
 

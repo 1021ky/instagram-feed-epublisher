@@ -1,6 +1,11 @@
 variable "project_id" {
   type        = string
-  description = "Google Cloud プロジェクトID"
+  description = "Google Cloud プロジェクトID（※プロジェクト番号ではなく、英字のプロジェクトIDを指定してください）"
+
+  validation {
+    condition     = !can(regex("^[0-9]+$", var.project_id))
+    error_message = "プロジェクト番号（数字のみ）ではなく、プロジェクトID（例: feeds-to-book）を指定してください。"
+  }
 }
 
 variable "region" {
