@@ -575,9 +575,10 @@ h1 {
 }
 
 .footer {
-  margin-top: 24px;
-  color: #475569;
+  margin-top: 32px;
+  color: #64748b;
   text-align: center;
+  font-size: 12px;
 }
 
 .footer__inner {
@@ -588,24 +589,33 @@ h1 {
 
 .footer__card {
   border-top: 1px solid #e2e8f0;
-  padding-top: 20px;
+  padding-top: 16px;
 }
 
 .footer__links {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px 20px;
-  margin: 0 0 8px;
+  gap: 8px 16px;
+  margin: 0 0 6px;
 }
 
 .footer__links a {
-  color: #2563eb;
+  color: #64748b;
   text-decoration: none;
+  font-size: 12px;
+  transition: color 0.15s ease;
 }
 
 .footer__links a:hover {
+  color: #0f172a;
   text-decoration: underline;
+}
+
+.footer small {
+  display: block;
+  color: #94a3b8;
+  font-size: 11px;
 }
 
 .feed {

@@ -6,16 +6,7 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import {
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  Filter,
-  Hash,
-  Loader2,
-  Sliders,
-  Sparkles,
-} from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp, Filter, Hash, Loader2 } from "lucide-react";
 import type { DatePreset, FeedFilterOptions } from "@/types/ui";
 
 /**
@@ -84,17 +75,6 @@ export function detectPreset(
   return "custom";
 }
 
-/**
- * おすすめハッシュタグのデフォルト候補。
- */
-export const DEFAULT_SUGGESTED_TAGS = [
-  "#100日チャレンジ",
-  "#成長記録",
-  "#写真好きな人と繋がりたい",
-  "#travel",
-  "#イラスト",
-];
-
 export interface FeedFilterStepProps {
   /** フィルター設定値 */
   filter: FeedFilterOptions;
@@ -112,10 +92,10 @@ export interface FeedFilterStepProps {
   isCollapsed?: boolean;
   /** 折りたたみ状態変更ハンドラ */
   onToggleCollapse?: () => void;
-  /** おすすめハッシュタグ一覧 */
-  suggestedTags?: string[];
   /** 「条件変更」ボタンの表示制御（サマリー表示時） */
   disabled?: boolean;
+  /** デモモードフラグ（変更不可・案内表示） */
+  isDemoMode?: boolean;
 }
 
 /**
@@ -130,10 +110,15 @@ export function FeedFilterStep({
   fetchedCount,
   isCollapsed: controlledCollapsed,
   onToggleCollapse,
-  suggestedTags = DEFAULT_SUGGESTED_TAGS,
   disabled = false,
+  isDemoMode = false,
 }: FeedFilterStepProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
+  const [showDemoNotice, setShowDemoNotice] = useState(false);
+
+  const handleDemoBlocked = () => {
+    setShowDemoNotice(true);
+  };
 
   // 外部からの制御があればそれを優先、なければ内部ステート
   const isCollapsed = controlledCollapsed ?? internalCollapsed;
@@ -142,7 +127,6 @@ export function FeedFilterStep({
   const hashtagId = useId();
   const startDateId = useId();
   const endDateId = useId();
-  const maxCountId = useId();
 
   // 現在の日付プリセット判定
   const activePreset = useMemo(() => {
@@ -157,19 +141,6 @@ export function FeedFilterStep({
       startDate: dates.startDate,
       endDate: dates.endDate,
     });
-  };
-
-  // タグ候補選択ハンドラ
-  const handleTagClick = (tag: string) => {
-    const cleanTag = tag.startsWith("#") ? tag.slice(1) : tag;
-    const currentClean = filter.hashtag?.startsWith("#") ? filter.hashtag.slice(1) : filter.hashtag;
-
-    // 既に選択されていたら解除、別タグなら上書き
-    if (currentClean === cleanTag) {
-      onFilterChange({ ...filter, hashtag: undefined });
-    } else {
-      onFilterChange({ ...filter, hashtag: cleanTag });
-    }
   };
 
   // サマリーテキストの生成
@@ -195,28 +166,30 @@ export function FeedFilterStep({
   if (isCollapsed) {
     return (
       <section
-        className="w-full bg-white rounded-2xl border border-slate-200 shadow-sm transition-all hover:border-slate-300"
+        className="w-full bg-white rounded-2xl border border-slate-200/80 shadow-xs transition-all hover:border-slate-300"
         aria-label="フィード絞り込み条件サマリー"
       >
         <button
           type="button"
           onClick={toggleCollapse}
-          className="w-full flex items-center justify-between p-4 sm:p-5 text-left min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-2xl"
+          className="w-full flex items-center justify-between p-4 sm:p-5 text-left min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 rounded-2xl"
           aria-expanded={false}
           aria-label={`絞り込み条件を展開: ${summaryText}`}
         >
           <div className="flex items-center gap-3 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-              <Filter className="w-5 h-5" aria-hidden="true" />
-            </div>
+            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
+              1
+            </span>
             <div className="min-w-0">
-              <span className="text-xs font-semibold text-blue-600 tracking-wide uppercase">
+              <span className="text-[11px] font-semibold text-slate-400 tracking-wide block uppercase">
                 絞り込み条件
               </span>
-              <p className="text-sm font-medium text-slate-800 truncate">{summaryText}</p>
+              <p className="text-xs sm:text-sm font-bold text-slate-800 truncate m-0">
+                {summaryText}
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 shrink-0 bg-slate-100 px-3 py-2 rounded-lg">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 shrink-0 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition">
             <span>条件を変更</span>
             <ChevronDown className="w-4 h-4" aria-hidden="true" />
           </div>
@@ -227,19 +200,21 @@ export function FeedFilterStep({
 
   return (
     <section
-      className="w-full bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 transition-all"
+      className="w-full bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-6 transition-all"
       aria-label="フィード絞り込みフォーム"
     >
       {/* フォームヘッダー */}
       <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-            <Filter className="w-5 h-5" aria-hidden="true" />
-          </div>
+        <div className="flex items-center gap-3">
+          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
+            1
+          </span>
           <div>
-            <h2 className="text-base font-bold text-slate-900">Step 1: フィードの絞り込み</h2>
-            <p className="text-xs text-slate-500">
-              ハッシュタグや期間を指定してInstagramから投稿を取得します
+            <h2 className="text-sm sm:text-base font-bold text-slate-900 m-0">
+              Step 1: フィードの絞り込み
+            </h2>
+            <p className="text-xs text-slate-500 m-0">
+              ハッシュタグや期間を指定してInstagramから投稿を取得します（最大200件）
             </p>
           </div>
         </div>
@@ -248,7 +223,7 @@ export function FeedFilterStep({
           <button
             type="button"
             onClick={toggleCollapse}
-            className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-700 min-h-[44px] px-2 py-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
+            className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-700 min-h-[44px] px-2 py-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 rounded-lg"
             aria-label="絞り込み条件を折りたたむ"
           >
             <span>閉じる</span>
@@ -257,9 +232,46 @@ export function FeedFilterStep({
         )}
       </div>
 
+      {/* デモ体験モード案内バナー */}
+      {isDemoMode && (
+        <div
+          role="status"
+          className={`mb-4 p-3 rounded-xl text-xs sm:text-sm flex items-center justify-between gap-2 transition-all ${
+            showDemoNotice
+              ? "bg-amber-50 border border-amber-300 text-amber-900 shadow-xs"
+              : "bg-blue-50/70 border border-blue-100 text-blue-800"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm shrink-0" aria-hidden="true">
+              {showDemoNotice ? "⚠️" : "💡"}
+            </span>
+            <span className="font-medium">
+              {showDemoNotice
+                ? "デモ体験中は条件を変更できません（ログイン後に自由に変更できます）"
+                : "デモ体験モード：条件は固定サンプルです（ログイン後に自由に変更できます）"}
+            </span>
+          </div>
+          {showDemoNotice && (
+            <button
+              type="button"
+              onClick={() => setShowDemoNotice(false)}
+              className="text-amber-700 hover:text-amber-900 p-1 rounded-md text-xs font-bold shrink-0 cursor-pointer"
+              aria-label="案内を閉じる"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      )}
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          if (isDemoMode) {
+            handleDemoBlocked();
+            return;
+          }
           if (!isLoading && !disabled) {
             void onSubmit();
           }
@@ -267,7 +279,7 @@ export function FeedFilterStep({
         className="space-y-5"
       >
         {/* 1. ハッシュタグ入力 */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <label
             htmlFor={hashtagId}
             className="flex items-center gap-1.5 text-sm font-semibold text-slate-800"
@@ -285,43 +297,29 @@ export function FeedFilterStep({
               type="text"
               placeholder="100日チャレンジ"
               value={filter.hashtag ? filter.hashtag.replace(/^#/, "") : ""}
-              onChange={(e) =>
+              readOnly={isDemoMode}
+              onClick={isDemoMode ? handleDemoBlocked : undefined}
+              onFocus={isDemoMode ? handleDemoBlocked : undefined}
+              onChange={(e) => {
+                if (isDemoMode) {
+                  handleDemoBlocked();
+                  return;
+                }
                 onFilterChange({
                   ...filter,
                   hashtag: e.target.value ? e.target.value.replace(/^#/, "") : undefined,
-                })
-              }
-              className="w-full pl-8 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition min-h-[44px]"
+                });
+              }}
+              className={`w-full pl-8 pr-4 py-2.5 text-sm rounded-xl outline-none transition min-h-[44px] ${
+                isDemoMode
+                  ? "bg-slate-100/70 border border-slate-200 text-slate-600 cursor-not-allowed select-none"
+                  : "bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+              }`}
             />
           </div>
-
-          {/* おすすめタグボタン */}
-          {suggestedTags.length > 0 && (
-            <div className="flex items-center gap-1.5 flex-wrap pt-1">
-              <span className="text-xs font-medium text-slate-400 flex items-center gap-1 mr-1">
-                <Sparkles className="w-3 h-3 text-amber-500" aria-hidden="true" />
-                人気タグ:
-              </span>
-              {suggestedTags.map((tag) => {
-                const clean = tag.replace(/^#/, "");
-                const isSelected = filter.hashtag?.replace(/^#/, "") === clean;
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => handleTagClick(tag)}
-                    className={`inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                      isSelected
-                        ? "bg-blue-600 text-white shadow-xs font-semibold"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200 active:bg-slate-300"
-                    }`}
-                  >
-                    {tag.startsWith("#") ? tag : `#${tag}`}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <p className="text-[11px] text-slate-400 m-0">
+            ご自身のアカウントでつけたハッシュタグを入力してください（未入力の場合は全投稿が対象になります）。
+          </p>
         </div>
 
         {/* 2. 期間指定 & プリセット */}
@@ -336,10 +334,12 @@ export function FeedFilterStep({
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
               <button
                 type="button"
-                onClick={() => handlePresetSelect("100days")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition min-h-[44px] sm:min-h-[36px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                onClick={isDemoMode ? handleDemoBlocked : () => handlePresetSelect("100days")}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] sm:min-h-[36px] focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                  isDemoMode ? "cursor-not-allowed" : "cursor-pointer"
+                } ${
                   activePreset === "100days"
-                    ? "bg-white text-blue-700 shadow-xs"
+                    ? "bg-white text-slate-900 font-bold shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -347,10 +347,12 @@ export function FeedFilterStep({
               </button>
               <button
                 type="button"
-                onClick={() => handlePresetSelect("30days")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition min-h-[44px] sm:min-h-[36px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                onClick={isDemoMode ? handleDemoBlocked : () => handlePresetSelect("30days")}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] sm:min-h-[36px] focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                  isDemoMode ? "cursor-not-allowed" : "cursor-pointer"
+                } ${
                   activePreset === "30days"
-                    ? "bg-white text-blue-700 shadow-xs"
+                    ? "bg-white text-slate-900 font-bold shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -358,10 +360,12 @@ export function FeedFilterStep({
               </button>
               <button
                 type="button"
-                onClick={() => handlePresetSelect("all")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition min-h-[44px] sm:min-h-[36px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                onClick={isDemoMode ? handleDemoBlocked : () => handlePresetSelect("all")}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition min-h-[44px] sm:min-h-[36px] focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                  isDemoMode ? "cursor-not-allowed" : "cursor-pointer"
+                } ${
                   activePreset === "all"
-                    ? "bg-white text-blue-700 shadow-xs"
+                    ? "bg-white text-slate-900 font-bold shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -380,13 +384,32 @@ export function FeedFilterStep({
                 id={startDateId}
                 type="date"
                 value={filter.startDate ?? ""}
-                onChange={(e) =>
+                readOnly={isDemoMode}
+                onClick={isDemoMode ? handleDemoBlocked : undefined}
+                onFocus={isDemoMode ? handleDemoBlocked : undefined}
+                onKeyDown={
+                  isDemoMode
+                    ? (e) => {
+                        e.preventDefault();
+                        handleDemoBlocked();
+                      }
+                    : undefined
+                }
+                onChange={(e) => {
+                  if (isDemoMode) {
+                    handleDemoBlocked();
+                    return;
+                  }
                   onFilterChange({
                     ...filter,
                     startDate: e.target.value || undefined,
-                  })
-                }
-                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition min-h-[44px]"
+                  });
+                }}
+                className={`w-full px-3 py-2 text-sm rounded-xl outline-none transition min-h-[44px] ${
+                  isDemoMode
+                    ? "bg-slate-100/70 border border-slate-200 text-slate-600 cursor-not-allowed"
+                    : "bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                }`}
               />
             </div>
             <div className="space-y-1">
@@ -397,51 +420,38 @@ export function FeedFilterStep({
                 id={endDateId}
                 type="date"
                 value={filter.endDate ?? ""}
-                onChange={(e) =>
+                readOnly={isDemoMode}
+                onClick={isDemoMode ? handleDemoBlocked : undefined}
+                onFocus={isDemoMode ? handleDemoBlocked : undefined}
+                onKeyDown={
+                  isDemoMode
+                    ? (e) => {
+                        e.preventDefault();
+                        handleDemoBlocked();
+                      }
+                    : undefined
+                }
+                onChange={(e) => {
+                  if (isDemoMode) {
+                    handleDemoBlocked();
+                    return;
+                  }
                   onFilterChange({
                     ...filter,
                     endDate: e.target.value || undefined,
-                  })
-                }
-                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition min-h-[44px]"
+                  });
+                }}
+                className={`w-full px-3 py-2 text-sm rounded-xl outline-none transition min-h-[44px] ${
+                  isDemoMode
+                    ? "bg-slate-100/70 border border-slate-200 text-slate-600 cursor-not-allowed"
+                    : "bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                }`}
               />
             </div>
           </div>
-        </div>
-
-        {/* 3. 最大取得件数スライダー */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label
-              htmlFor={maxCountId}
-              className="flex items-center gap-1.5 text-sm font-semibold text-slate-800"
-            >
-              <Sliders className="w-4 h-4 text-slate-500" aria-hidden="true" />
-              <span>最大取得件数</span>
-            </label>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700">
-              {filter.maxCount} 件
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-400 font-medium shrink-0">10</span>
-            <input
-              id={maxCountId}
-              type="range"
-              min={10}
-              max={500}
-              step={10}
-              value={filter.maxCount}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  maxCount: Number(e.target.value),
-                })
-              }
-              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[44px]"
-            />
-            <span className="text-xs text-slate-400 font-medium shrink-0">500</span>
-          </div>
+          <p className="text-[11px] text-slate-400 m-0">
+            ※ 1回の取得で最大200件の投稿を自動取得します。
+          </p>
         </div>
 
         {/* エラーメッセージ */}
@@ -457,9 +467,10 @@ export function FeedFilterStep({
 
         {/* 取得アクションボタン */}
         <button
-          type="submit"
-          disabled={isLoading || disabled}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-slate-300 disabled:cursor-not-allowed shadow-sm transition min-h-[48px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          type={isDemoMode ? "button" : "submit"}
+          onClick={isDemoMode ? handleDemoBlocked : undefined}
+          disabled={isLoading || (!isDemoMode && disabled)}
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 active:bg-slate-950 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed shadow-xs transition min-h-[48px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400"
         >
           {isLoading ? (
             <>

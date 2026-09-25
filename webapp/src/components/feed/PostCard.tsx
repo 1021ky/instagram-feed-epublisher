@@ -70,7 +70,7 @@ export function PostCard({ post, onToggleSelect, index }: PostCardProps) {
       onClick={handleCardClick}
       className={`group relative flex items-start gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 cursor-pointer select-none ${
         isSelected
-          ? "bg-white border-blue-200 ring-1 ring-blue-100 shadow-xs"
+          ? "bg-white border-slate-300 ring-1 ring-slate-200 shadow-xs"
           : "bg-slate-50/80 border-slate-200 opacity-60 hover:opacity-85"
       }`}
       aria-label={`投稿: ${formattedDate} - ${captionText.slice(0, 30)}`}
@@ -83,13 +83,13 @@ export function PostCard({ post, onToggleSelect, index }: PostCardProps) {
           role="checkbox"
           aria-checked={isSelected}
           onClick={handleCheckboxClick}
-          className={`w-11 h-11 flex items-center justify-center rounded-xl transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          className={`w-11 h-11 flex items-center justify-center rounded-xl transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400`}
           aria-label={isSelected ? "この投稿をEPUBから除外" : "この投稿をEPUBに収録"}
         >
           <div
             className={`w-6 h-6 rounded-lg flex items-center justify-center transition border ${
               isSelected
-                ? "bg-blue-600 border-blue-600 text-white shadow-xs"
+                ? "bg-slate-900 border-slate-900 text-white shadow-2xs"
                 : "bg-white border-slate-300 text-transparent group-hover:border-slate-400"
             }`}
           >
@@ -167,9 +167,7 @@ export function PostCard({ post, onToggleSelect, index }: PostCardProps) {
           )}
 
           <span
-            className={`text-[11px] font-semibold ${
-              isSelected ? "text-blue-600" : "text-slate-400"
-            }`}
+            className={`text-[11px] ${isSelected ? "text-slate-800 font-bold" : "text-slate-400"}`}
           >
             {isSelected ? "収録対象" : "除外"}
           </span>

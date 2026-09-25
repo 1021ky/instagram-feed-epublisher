@@ -23,94 +23,82 @@ export function EpubCustomizeStep({ settings, onChange, defaultTitle }: EpubCust
   };
 
   return (
-    <section className="card">
-      <div className="card__header">
-        <span className="tag">Step 3</span>
-        <h2>EPUBの装丁を整える</h2>
-        <p>タイトル・並び順・表紙テーマを設定して、読みやすい1冊に仕上げます。</p>
+    <section className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6 space-y-6">
+      <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
+          3
+        </span>
+        <div>
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 m-0">
+            Step 3: EPUBの装丁を整える
+          </h2>
+          <p className="text-xs text-slate-500 m-0">
+            タイトルや表紙テーマを設定して、読みやすい1冊に仕上げます
+          </p>
+        </div>
       </div>
 
-      <div className="grid">
-        <label className="field">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <label className="flex flex-col gap-1.5 text-xs font-semibold text-slate-700">
           <span>書籍タイトル</span>
           <input
             type="text"
             placeholder={defaultTitle}
             value={settings.title}
             onChange={(event) => update("title", event.target.value)}
+            className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100 outline-none transition min-h-[44px]"
           />
         </label>
-        <label className="field">
+        <label className="flex flex-col gap-1.5 text-xs font-semibold text-slate-700">
           <span>サブタイトル</span>
           <input
             type="text"
             placeholder="100日チャレンジの振り返り"
             value={settings.subtitle ?? ""}
             onChange={(event) => update("subtitle", event.target.value)}
+            className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100 outline-none transition min-h-[44px]"
           />
         </label>
-        <label className="field">
+        <label className="flex flex-col gap-1.5 text-xs font-semibold text-slate-700">
           <span>著者名</span>
           <input
             type="text"
             placeholder="@your_account"
             value={settings.author}
             onChange={(event) => update("author", event.target.value)}
+            className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100 outline-none transition min-h-[44px]"
           />
         </label>
-        <label className="field">
+        <label className="flex flex-col gap-1.5 text-xs font-semibold text-slate-700">
           <span>連絡先（メールなど）</span>
           <input
             type="text"
             placeholder="you@example.com"
             value={settings.contact ?? ""}
             onChange={(event) => update("contact", event.target.value)}
+            className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100 outline-none transition min-h-[44px]"
           />
         </label>
-        <label className="field">
+        <label className="flex flex-col gap-1.5 text-xs font-semibold text-slate-700 sm:col-span-2">
           <span>Instagram URL</span>
           <input
             type="url"
             placeholder="https://instagram.com/your_account"
             value={settings.instagramUrl ?? ""}
             onChange={(event) => update("instagramUrl", event.target.value)}
+            className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100 outline-none transition min-h-[44px]"
           />
         </label>
       </div>
 
-      <div className="stack">
-        <fieldset className="choice-group">
-          <legend>掲載順序</legend>
-          <label className="choice-card">
-            <input
-              type="radio"
-              name="sortOrder"
-              value="asc"
-              checked={settings.sortOrder === "asc"}
-              onChange={() => update("sortOrder", "asc")}
-            />
-            <span>
-              <strong>古い順（Day 1 → 100 推奨）</strong>
-              <small>日々の積み重ねを時系列で読み返しやすい並びです。</small>
+      <div className="space-y-4 pt-1">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-700 block">表紙テーマ</span>
+            <span className="text-[11px] text-slate-400">
+              ※ 投稿は時系列（古い順）で自動組版されます
             </span>
-          </label>
-          <label className="choice-card">
-            <input
-              type="radio"
-              name="sortOrder"
-              value="desc"
-              checked={settings.sortOrder === "desc"}
-              onChange={() => update("sortOrder", "desc")}
-            />
-            <span>
-              <strong>新しい順</strong>
-              <small>最近の投稿からすぐに読み始めたい場合に向いています。</small>
-            </span>
-          </label>
-        </fieldset>
-
-        <div className="field">
-          <span>表紙テーマ</span>
+          </div>
           <CoverThemeSelector
             selectedTheme={settings.coverTheme}
             onChange={(themeId) => update("coverTheme", themeId)}

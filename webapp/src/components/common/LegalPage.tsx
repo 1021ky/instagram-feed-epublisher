@@ -34,7 +34,7 @@ export function LegalPage({
       <div className="mb-6">
         <Link
           href={backHref}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 bg-white/80 transition cursor-pointer min-h-[36px] shadow-2xs"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 bg-white/80 transition cursor-pointer min-h-[36px] shadow-2xs"
           aria-label={backLabel}
         >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />
@@ -44,13 +44,13 @@ export function LegalPage({
 
       <article className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-xs p-6 sm:p-10 md:p-12">
         <header className="border-b border-slate-200/80 pb-6 sm:pb-8 mb-8 sm:mb-10">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-700">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
             {categoryLabel}
           </span>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight mt-3 mb-3">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-tight mt-3 mb-2.5">
             {title}
           </h1>
-          <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl m-0">
+          <p className="text-slate-500 text-xs sm:text-sm leading-relaxed max-w-2xl m-0">
             {description}
           </p>
           <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-4 font-medium">
@@ -71,14 +71,14 @@ export function LegalPage({
 export function LegalSection({ children, title }: LegalSectionProps) {
   return (
     <section className="pt-8 first:pt-0 space-y-3">
-      <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2.5 m-0">
+      <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2 m-0">
         <span
-          className="w-1.5 h-5 bg-blue-600 rounded-full inline-block shrink-0"
+          className="w-1.5 h-4 bg-slate-900 rounded-full inline-block shrink-0"
           aria-hidden="true"
         />
         <span>{title}</span>
       </h2>
-      <div className="text-slate-600 text-sm sm:text-base leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-2 [&_li]:leading-relaxed [&_:where(a)]:text-blue-600 [&_:where(a)]:underline hover:[&_:where(a)]:text-blue-800">
+      <div className="text-slate-600 text-xs sm:text-sm leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-2 [&_li]:leading-relaxed [&_:where(a)]:text-slate-900 [&_:where(a)]:underline [&_:where(a)]:font-medium hover:[&_:where(a)]:text-slate-700">
         {children}
       </div>
     </section>

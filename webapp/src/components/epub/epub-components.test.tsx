@@ -21,7 +21,7 @@ describe("EPUB UI components", () => {
     expect(html).toContain("紫: ダーク");
   });
 
-  test("EpubCustomizeStep renders title, order, and theme controls", () => {
+  test("EpubCustomizeStep renders title, metadata, and theme controls", () => {
     const html = renderToStaticMarkup(
       <EpubCustomizeStep
         defaultTitle="@demo_userの投稿記録"
@@ -39,7 +39,7 @@ describe("EPUB UI components", () => {
     );
 
     expect(html).toContain("EPUBの装丁を整える");
-    expect(html).toContain("古い順（Day 1 → 100 推奨）");
+    expect(html).toContain("古い順）で自動組版されます");
     expect(html).toContain("表紙テーマ");
   });
 

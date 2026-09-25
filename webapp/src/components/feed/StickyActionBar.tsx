@@ -42,7 +42,7 @@ export function StickyActionBar({
 
   return (
     <aside
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] px-4 py-3 pb-safe transition-all"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 shadow-[0_-4px_20px_rgba(15,23,42,0.06)] px-4 py-3 pb-safe transition-all"
       aria-label="操作アクションバー"
     >
       <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
@@ -51,7 +51,7 @@ export function StickyActionBar({
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition min-h-[44px] cursor-pointer shrink-0 focus:outline-none focus:ring-2 focus:ring-slate-400"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition min-h-[44px] cursor-pointer shrink-0 focus:outline-none focus:ring-2 focus:ring-slate-400"
             aria-label={backLabel}
           >
             <ArrowLeft className="w-4 h-4" aria-hidden="true" />
@@ -60,18 +60,18 @@ export function StickyActionBar({
         )}
 
         {/* 選択件数ステータス表示 */}
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200/80">
             <BookOpen className="w-4 h-4" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide block">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide block">
               収録対象
             </span>
-            <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+            <p className="text-xs sm:text-sm font-bold text-slate-900 truncate m-0">
               {typeof totalCount === "number" ? (
                 <>
-                  <span className="text-blue-600 text-sm sm:text-base font-extrabold">
+                  <span className="text-slate-900 text-sm sm:text-base font-extrabold">
                     {selectedCount}
                   </span>
                   <span className="text-slate-400 font-normal text-xs sm:text-sm">
@@ -82,7 +82,7 @@ export function StickyActionBar({
               ) : (
                 <>
                   選択中:{" "}
-                  <span className="text-blue-600 font-extrabold text-sm sm:text-base">
+                  <span className="text-slate-900 font-extrabold text-sm sm:text-base">
                     {selectedCount}
                   </span>{" "}
                   件
@@ -97,7 +97,7 @@ export function StickyActionBar({
           type="button"
           onClick={onNext}
           disabled={isNextDisabled}
-          className="flex-1 xs:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed shadow-sm transition min-h-[48px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="flex-1 xs:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 active:bg-slate-950 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed shadow-xs transition min-h-[48px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
           aria-label={`${nextLabel} (選択中 ${selectedCount} 件)`}
         >
           <span>{nextLabel}</span>

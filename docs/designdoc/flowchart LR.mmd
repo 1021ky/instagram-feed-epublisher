@@ -3,17 +3,19 @@ flowchart LR
     actor((User))
     login["Instagram SSO login"]
     demo["デモデータで体験"]
-    filters["ハッシュタグ・期間・最大件数設定"]
+    filters["ハッシュタグ・期間設定"]
     meta["タイトル/著者/連絡先/IG URL入力"]
     fetch["フィード取得 (Graph API / Demo)"]
     banner["Instagram / Facebook WebViewなら外部ブラウザを案内"]
     build["サーバでEPUB生成"]
     download["EPUBダウンロード"]
     logout["ログアウト"]
+    withdraw["退会（連携解除）"]
     legal["フッターから法的ページを確認"]
     actor --> login --> filters
     actor --> demo --> filters
     fetch --> banner --> build --> download
     filters --> meta --> fetch
     login --> logout
+    login --> withdraw
     actor --> legal
