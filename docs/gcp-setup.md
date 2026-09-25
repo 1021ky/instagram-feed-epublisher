@@ -73,53 +73,68 @@ terraform apply -var="project_id=${PROJECT_ID}"
 
 ## 4. Secret Manager への本番機密値の登録
 
-Terraform では初期値としてプレースホルダーが登録されているため、実際の機密値を登録します。
-（※ `terraform/secrets.tf` に `lifecycle { ignore_changes = [secret_data] }` が設定されているため、登録後に `terraform apply` を再実行しても値は上書きされません）
+Terraform では初回 apply 時の Cloud Run エラーを防止するため初期バージョン（プレースホルダー）が登録されています。
+実際の値は Secret Manager の新バージョン（version 2 以降）として `gcloud` コマンド等で注入します。
+（※ `terraform/secrets.tf` に `lifecycle { ignore_changes = [secret_data] }` が設定されているため、登録後に `terraform apply` を再実行しても値は上書きされず保護されます）
+
+### 登録コマンド（末尾の改行を含めない `echo -n` で実行）
 
 ```bash
-# Instagram App Credentials
-gcloud secrets versions add INSTAGRAM_CLIENT_ID --data-file=- <<EOF
-YOUR_INSTAGRAM_CLIENT_ID
-EOF
+PROJECT_ID="feeds-to-book"
 
-gcloud secrets versions add INSTAGRAM_CLIENT_SECRET --data-file=- <<EOF
-YOUR_INSTAGRAM_CLIENT_SECRET
-EOF
+# 1. Better Auth Secret (32バイト以上のランダム暗号鍵を自動生成して登録)
+openssl rand -hex 32 | gcloud secrets versions add BETTER_AUTH_SECRET \
+  --project="${PROJECT_ID}" --data-file=-
 
-# Better Auth Secret (32バイト以上のランダム文字列)
-export BETTER_AUTH_SECRET_VAL=$(openssl rand -hex 32)
-gcloud secrets versions add BETTER_AUTH_SECRET --data-file=- <<EOF
-${BETTER_AUTH_SECRET_VAL}
-EOF
+# 2. 本番用公開 URL (独自ドメイン開通前は Cloud Run デフォルト URL、開通後にドメインへ更新可能)
+echo -n "https://feedstobook-qzjrsxqziq-an.a.run.app" | gcloud secrets versions add BETTER_AUTH_URL \
+  --project="${PROJECT_ID}" --data-file=-
 
-# 本番用公開 URL (独自ドメイン)
-gcloud secrets versions add BETTER_AUTH_URL --data-file=- <<EOF
-https://feedstobook.ksanchu.info
-EOF
+# 3. Instagram App ID (Meta for Developers)
+echo -n "YOUR_INSTAGRAM_CLIENT_ID" | gcloud secrets versions add INSTAGRAM_CLIENT_ID \
+  --project="${PROJECT_ID}" --data-file=-
 
-# お問い合わせフォーム URL (Google Forms 等)
-gcloud secrets versions add NEXT_PUBLIC_CONTACT_FORM_URL --data-file=- <<EOF
-https://forms.gle/YOUR_FORM_ID
-EOF
+# 4. Instagram App Secret (Meta for Developers)
+echo -n "YOUR_INSTAGRAM_CLIENT_SECRET" | gcloud secrets versions add INSTAGRAM_CLIENT_SECRET \
+  --project="${PROJECT_ID}" --data-file=-
+
+# 5. お問い合わせフォーム URL (Google Forms 等)
+echo -n "https://forms.gle/YOUR_FORM_ID" | gcloud secrets versions add NEXT_PUBLIC_CONTACT_FORM_URL \
+  --project="${PROJECT_ID}" --data-file=-
 ```
 
 ---
 
-## 5. GitHub リポジトリの Secrets 登録
+## 5. GitHub リポジトリの Variables（環境変数）登録
 
-`terraform output` を実行すると、GitHub Actions に設定すべき値が出力されます。
+GitHub Actions から GCP への認証には **Workload Identity Federation (WIF)** を使用します。
+WIF は秘密鍵（サービスアカウントキー JSON）を発行せず、GitHub の OIDC トークンとリポジトリ名を GCP 側で検証するセキュアな仕組みです。
+そのため、プロバイダ名や SA メールアドレスは秘密情報ではなく設定値であるため、Secrets ではなく **Variables (`vars`)** で管理します。
+
+### GitHub CLI (`gh`) での登録（推奨）
+
+リポジトリルートで以下のコマンドを実行します：
 
 ```bash
-terraform output
+gh variable set GCP_PROJECT_ID --body "feeds-to-book"
+gh variable set WIF_PROVIDER --body "projects/240898930397/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+gh variable set WIF_SERVICE_ACCOUNT --body "github-actions-deployer@240898930397.iam.gserviceaccount.com"
 ```
 
-出力された値を、GitHub リポジトリの **Settings > Secrets and variables > Actions** に登録します：
+### GitHub Web UI からの登録
 
-| シークレット名        | 設定する値（terraform output）               |
-| :-------------------- | :------------------------------------------- |
-| `GCP_PROJECT_ID`      | `output.project_id` の値                     |
-| `WIF_SERVICE_ACCOUNT` | `output.deployer_service_account_email` の値 |
-| `WIF_PROVIDER`        | `output.wif_provider` の値                   |
+1. GitHub リポジトリの **Settings > Secrets and variables > Actions** を開く。
+2. **「Variables」タブ**（Secrets タブの隣）を選択。
+3. **「New repository variable」** をクリックし、以下の 3 つを追加：
+
+| 変数名 (Name)         | 設定値 (Value)                                                                                       | 説明                                             |
+| :-------------------- | :--------------------------------------------------------------------------------------------------- | :----------------------------------------------- |
+| `GCP_PROJECT_ID`      | `feeds-to-book`                                                                                      | GCP プロジェクト ID                              |
+| `WIF_PROVIDER`        | `projects/240898930397/locations/global/workloadIdentityPools/github-pool/providers/github-provider` | Workload Identity プロバイダのリソース名         |
+| `WIF_SERVICE_ACCOUNT` | `github-actions-deployer@240898930397.iam.gserviceaccount.com`                                       | デプロイ実行用サービスアカウントのメールアドレス |
+
+> [!NOTE]
+> `.github/workflows/deploy.yml` 内では `${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}` のように記述されており、Variables と Secrets のどちらに設定されていても動作するようフォールバック設計になっています。
 
 ---
 
