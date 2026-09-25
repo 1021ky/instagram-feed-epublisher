@@ -29,6 +29,7 @@ jobs:
         name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
+          project_id: ${{ env.PROJECT_ID }}
           workload_identity_provider: ${{ vars.WIF_PROVIDER || secrets.WIF_PROVIDER }}
           service_account: ${{ vars.WIF_SERVICE_ACCOUNT || secrets.WIF_SERVICE_ACCOUNT }}
 
@@ -53,6 +54,7 @@ jobs:
           region: ${{ env.REGION }}
           image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
           flags: |
+            --project=${{ env.PROJECT_ID }}
             --min-instances=0
             --max-instances=10
             --timeout=300s
