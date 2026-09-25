@@ -15,7 +15,9 @@ export async function renderCoverJpg(
   outputDir: string,
   themeId?: CoverThemeId,
 ): Promise<string> {
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+  });
   try {
     const page = await browser.newPage({ viewport: { width: 1200, height: 1600 } });
     const html = buildCoverHtml(metadata, themeId);

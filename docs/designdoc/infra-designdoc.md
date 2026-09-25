@@ -90,10 +90,10 @@ flowchart TD
 通常の Next.js は本番環境でも巨大な `node_modules` を必要としますが、`next.config.mjs` で `output: "standalone"` を指定することで、Next.js は依存関係を静的解析し、**本番実行に本当に必要な最小限のファイル群のみ** を `.next/standalone` に出力します。
 これにより、コンテナイメージサイズを **約 90MB** まで大幅削減し、Cloud Run のコールドスタート起動時間を劇的に短縮させています。
 
-#### ② セキュリティと Alpine Linux
+#### ② セキュリティとベースイメージ (Debian Bookworm Slim + Playwright)
 
 - **非 root ユーザー実行**: コンテナ内部では `nodejs:nodejs`（UID 1001）ユーザーを作成し、一般ユーザーとして Next.js を実行しています。万が一アプリケーションに脆弱性があった場合でも、コンテナエスケープやホスト侵害を防止します。
-- **Node.js 24 Alpine**: パッケージマネージャー `pnpm 10` の動作要件とセキュリティアップデートを両立する最新 LTS を採用しています。
+- **Node.js 24 Bookworm Slim & Playwright Chromium**: EPUB の表紙画像を動的に生成するレンダラー（`cover-renderer.ts`）が Headless Chromium を必要とするため、Playwright 公式推奨の Debian ベースイメージを採用しています。コンテナ内に Chromium と実行依存ライブラリをプリインストールし、さらに日本語の文字化けを防ぐため `fonts-noto-cjk` を導入しています。
 
 ---
 

@@ -1,9 +1,8 @@
 # syntax=docker/dockerfile:1
 
 # 1. Base stage
-FROM node:24-alpine AS base
+FROM node:24-bookworm-slim AS base
 WORKDIR /app
-RUN apk add --no-cache libc6-compat
 RUN npm install -g pnpm@10.26.0
 
 # 2. Dependencies stage
@@ -33,7 +32,7 @@ ENV NODE_ENV=production
 RUN pnpm --filter instagram-feed-epublisher-webapp build
 
 # 4. Runner stage
-FROM node:24-alpine AS runner
+FROM node:24-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -41,9 +40,17 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=8080
 ENV HOSTNAME="0.0.0.0"
 
+# Playwright のブラウザとシステム依存ライブラリ、および日本語フォントをインストール
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends fonts-noto-cjk && \
+    npx -y playwright@1.63.0 install --with-deps chromium && \
+    rm -rf /var/lib/apt/lists/* && \
+    chmod -R 777 /ms-playwright
+
 # セキュリティ向上のため非 root ユーザーを作成
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 -g nodejs nextjs
 
 # 静的アセットと standalone 成果物をコピー
 COPY --from=builder --chown=nextjs:nodejs /app/webapp/.next/standalone ./
