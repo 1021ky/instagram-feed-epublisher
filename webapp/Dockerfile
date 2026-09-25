@@ -57,6 +57,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/webapp/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/webapp/.next/static ./webapp/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/webapp/public* ./webapp/public/
 
+# EPUB 生成に必要なレイアウトテンプレートと html-to-epub テンプレートを確実に配置
+COPY --from=builder --chown=nextjs:nodejs /app/book_layout ./book_layout
+COPY --from=builder --chown=nextjs:nodejs /app/webapp/node_modules/@lesjoursfr/html-to-epub/templates ./webapp/node_modules/@lesjoursfr/html-to-epub/templates
+COPY --from=builder --chown=nextjs:nodejs /app/webapp/node_modules/@lesjoursfr/html-to-epub/templates ./node_modules/@lesjoursfr/html-to-epub/templates
+
 USER nextjs
 
 EXPOSE 8080
