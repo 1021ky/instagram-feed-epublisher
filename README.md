@@ -24,6 +24,7 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 ├── docs/                 # 設計資産・ドキュメント更新ポリシー
 │   ├── designdoc/        # 設計ドキュメント・Mermaid 図面
 │   │   ├── designDoc.md      # Webapp 詳細設計書
+│   │   ├── ui-ux-guidelines.md # UI/UX 設計ガイドライン
 │   │   ├── erDiagram.mmd     # データモデル・ER図
 │   │   ├── flowchart LR.mmd  # ユーザーフロー図
 │   │   └── sequenceDiagram.mmd # 認証・API連携シーケンス図
@@ -43,6 +44,8 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 
 - 📘 [Webapp 詳細設計書](docs/designdoc/designDoc.md)
   - 目的・要件、モジュール構成、技術選定の経緯（Vite から Next.js への移行、Instagram Login 対応）、トラブルシューティング。
+- 🎨 [UI/UX 設計ガイドライン](docs/designdoc/ui-ux-guidelines.md)
+  - プロダクト哲学（作り込むツールを目指さない）、ターゲットユーザー、デザインシステム（Apple HIG基調×Instagramアクセント）、各画面の役割、レイアウト規約。
 - 🔀 [ユーザーフロー図 (Mermaid)](docs/designdoc/flowchart%20LR.mmd)
   - ログインから条件指定、フィード取得、EPUB ダウンロードまでの全体フロー。
 - 🗂 [データモデル・ER図 (Mermaid)](docs/designdoc/erDiagram.mmd)

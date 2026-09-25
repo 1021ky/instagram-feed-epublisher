@@ -10,7 +10,7 @@ sequenceDiagram
     FE->>BA: Start OAuth dance
     BA-->>FE: Access token
     FE-->>U: Logged-in session
-    U->>FE: Set hashtag/date range/max count
+    U->>FE: Set hashtag/date range
     U->>FE: Enter title/author/contact/IG URL
     FE->>IG: Fetch feed with filters
     IG-->>FE: Filtered posts

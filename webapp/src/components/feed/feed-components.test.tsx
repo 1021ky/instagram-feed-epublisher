@@ -61,10 +61,10 @@ describe("FeedFilterStep コンポーネント描画", () => {
     hashtag: "100日チャレンジ",
     startDate: "2026-06-13",
     endDate: "2026-09-21",
-    maxCount: 100,
+    maxCount: 200,
   };
 
-  it("展開状態（デフォルト）で入力項目、プリセット、スライダー、ボタンが描画されること", () => {
+  it("展開状態（デフォルト）で入力項目、期間プリセット、取得ボタンが描画されること", () => {
     const html = renderToStaticMarkup(
       <FeedFilterStep
         filter={defaultFilter}
@@ -80,7 +80,7 @@ describe("FeedFilterStep コンポーネント描画", () => {
     expect(html).toContain("直近100日");
     expect(html).toContain("直近30日");
     expect(html).toContain("全期間");
-    expect(html).toContain("100 件");
+    expect(html).toContain("最大200件");
     expect(html).toContain("この条件で投稿を取得");
 
     // タップ領域 44px 以上の確保クラスが含まれること
@@ -121,6 +121,25 @@ describe("FeedFilterStep コンポーネント描画", () => {
 
     expect(html).toContain("投稿を取得中...");
     expect(html).toContain("disabled");
+  });
+
+  it("デモモード（isDemoMode=true）のとき、案内バナーが表示され入力がreadonlyになること", () => {
+    const html = renderToStaticMarkup(
+      <FeedFilterStep
+        filter={defaultFilter}
+        onFilterChange={vi.fn()}
+        onSubmit={vi.fn()}
+        isCollapsed={false}
+        isDemoMode={true}
+      />,
+    );
+
+    expect(html).toContain(
+      "デモ体験モード：条件は固定サンプルです（ログイン後に自由に変更できます）",
+    );
+    expect(html).toMatch(/readonly/i);
+    expect(html).toContain("cursor-not-allowed");
+    expect(html).toContain("この条件で投稿を取得");
   });
 });
 
@@ -250,6 +269,23 @@ describe("PostListStep コンポーネント", () => {
 
     expect(html).toContain("投稿が見つかりませんでした");
     expect(html).toContain("選択中: 0 / 0 件");
+  });
+
+  it("フィード未取得（isFetched=false）のときに未取得案内が表示されること", () => {
+    const html = renderToStaticMarkup(
+      <PostListStep
+        posts={[]}
+        isFetched={false}
+        onToggleSelect={vi.fn()}
+        onSelectAll={vi.fn()}
+        onDeselectAll={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain("Step 2: 投稿の確認・選択");
+    expect(html).toContain("未取得");
+    expect(html).toContain("投稿はまだ取得されていません");
+    expect(html).toContain("この条件で投稿を取得");
   });
 });
 

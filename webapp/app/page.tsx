@@ -24,7 +24,7 @@ import type {
   UserProfile,
 } from "@/types/ui";
 
-const defaultMaxCount = 100;
+const defaultMaxCount = 200;
 const defaultBookTitle = "私のInstagramフィード";
 
 const dateISO = (d: Date) => d.toISOString().slice(0, 10);
@@ -59,6 +59,7 @@ export default function Page() {
   const [loadingFeed, setLoadingFeed] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasFetched, setHasFetched] = useState(false);
 
   const [customSettings, setCustomSettings] = useState<EpubCustomSettings>({
     title: defaultBookTitle,
@@ -147,6 +148,7 @@ export default function Page() {
     });
     setFeed([]);
     setIsFilterCollapsed(false);
+    setHasFetched(false);
     setError(null);
   }, [defaultDates.end, defaultDates.start]);
 
@@ -173,13 +175,14 @@ export default function Page() {
     await authClient.signOut();
     setFeed([]);
     setIsFilterCollapsed(false);
+    setHasFetched(false);
   };
 
   /**
    * 退会（連携解除）操作を実行する。
    *
    * 確認ダイアログを表示し、同意が得られた場合のみ退会 API を呼び出して
-   * 認可失効と Cookie 破棄を行い、完了後はトップページへ遷移する。
+   * 認可失効と Cookie 破棄を行い、完了後はトップページ（ログイン前）へ確実に遷移する。
    *
    * @returns 完了を表す Promise
    */
@@ -192,19 +195,44 @@ export default function Page() {
     setError(null);
 
     try {
-      const response = await fetch("/api/user/delete", {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? "退会処理に失敗しました");
+      // 1. サーバー側の Instagram 認可失効 & Cookie 破棄 API を呼び出す
+      try {
+        const response = await fetch("/api/user/delete", {
+          method: "POST",
+        });
+        if (!response.ok) {
+          const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+          console.warn(
+            `退会 API がエラー応答を返しました (status: ${response.status}):`,
+            payload?.error ?? "不明なエラー",
+          );
+        }
+      } catch (apiError) {
+        console.warn("退会 API 呼び出しで例外が発生しました:", apiError);
       }
 
-      window.location.assign("/");
+      // 2. クライアント側の Better Auth セッションを破棄
+      try {
+        await authClient.signOut();
+      } catch (authError) {
+        console.warn("クライアント サインアウトで例外が発生しました:", authError);
+      }
+
+      // 3. ローカルのフィードやフィルターなどの状態をクリア
+      setFeed([]);
+      setIsFilterCollapsed(false);
+      setHasFetched(false);
+      setAppMode("real");
+
+      // 4. TOP（ログイン前）へ確実に遷移（URLパラメータ等をリセット）
+      if (window.location.pathname === "/" && !window.location.search && !window.location.hash) {
+        window.location.reload();
+      } else {
+        window.location.href = "/";
+      }
     } catch (e) {
-      console.error(e);
-      setError(e instanceof Error ? e.message : "退会処理に失敗しました");
+      console.error("退会後遷移処理でエラーが発生しました:", e);
+      window.location.href = "/";
     } finally {
       setDeletingAccount(false);
     }
@@ -243,7 +271,7 @@ export default function Page() {
       hashtag: "100日チャレンジ",
       startDate: demoStartDate,
       endDate: demoEndDate,
-      maxCount: 100,
+      maxCount: 200,
     });
     setCustomSettings({
       title: "100日チャレンジの記録",
@@ -257,9 +285,9 @@ export default function Page() {
 
     // デモ投稿を初期全選択状態でセット
     setFeed(sampleDemoFeedData.posts.map((p) => ({ ...p, selected: true })));
-    // Step 1 を自動折りたたみ、Step 2 へスクロール
-    setIsFilterCollapsed(true);
-    scrollToSection("post-list");
+    setHasFetched(true);
+    // Step 1 は折りたたまず、通常時と同じように検索条件を表示
+    setIsFilterCollapsed(false);
   };
 
   const handleFetch = async () => {
@@ -288,6 +316,7 @@ export default function Page() {
           }));
 
       setFeed(items);
+      setHasFetched(true);
       if (items.length === 0) {
         setError(
           "フィードが取得できませんでした。指定した条件に該当する投稿がないか、アカウントに投稿がありません。",
@@ -436,7 +465,11 @@ export default function Page() {
 
   return (
     <div className={`page ${feed.length > 0 ? "pb-28 sm:pb-32" : ""}`}>
-      <div aria-hidden={isExportModalOpen} inert={isExportModalOpen}>
+      <div
+        aria-hidden={isExportModalOpen}
+        inert={isExportModalOpen}
+        className="max-w-3xl mx-auto w-full"
+      >
         <InAppBrowserAlert />
         <Navbar
           user={activeProfile}
@@ -455,7 +488,7 @@ export default function Page() {
           </div>
         )}
 
-        <main className="panel space-y-6">
+        <main className="max-w-3xl mx-auto w-full space-y-6">
           {!canUseApp && (
             <LoginCard loadingLogin={loadingLogin} onLogin={handleLogin} onDemo={handleDemo} />
           )}
@@ -474,20 +507,20 @@ export default function Page() {
                   isCollapsed={isFilterCollapsed}
                   onToggleCollapse={() => setIsFilterCollapsed((prev) => !prev)}
                   disabled={isGeneratingEpub}
+                  isDemoMode={isDemoMode}
                 />
               </div>
 
               {/* Step 2: 投稿確認・選択リスト */}
-              {feed.length > 0 && (
-                <div id="post-list">
-                  <PostListStep
-                    posts={feed}
-                    onToggleSelect={handleToggleSelect}
-                    onSelectAll={handleSelectAll}
-                    onDeselectAll={handleDeselectAll}
-                  />
-                </div>
-              )}
+              <div id="post-list">
+                <PostListStep
+                  posts={feed}
+                  isFetched={hasFetched || feed.length > 0}
+                  onToggleSelect={handleToggleSelect}
+                  onSelectAll={handleSelectAll}
+                  onDeselectAll={handleDeselectAll}
+                />
+              </div>
 
               {/* Step 3: EPUB装丁・メタデータ設定 */}
               <div id="book-settings" className="space-y-4">
@@ -497,16 +530,25 @@ export default function Page() {
                   defaultTitle={recommendedTitle}
                 />
 
-                <div className="actions pt-4">
+                <div className="pt-2">
                   <button
                     type="button"
-                    className="primary"
+                    className="w-full sm:w-auto px-6 py-3 rounded-xl text-white font-medium text-sm bg-gradient-to-r from-[#405DE6] via-[#C13584] to-[#E1306C] hover:opacity-95 transition flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-50 min-h-[44px]"
                     onClick={handleGenerate}
-                    disabled={isGeneratingEpub || (feed.length > 0 && selectedPosts.length === 0)}
+                    disabled={isGeneratingEpub || selectedPosts.length === 0}
                   >
-                    {isGeneratingEpub
-                      ? "EPUB生成中..."
-                      : `EPUBを生成してダウンロード (${selectedPosts.length}件収録)`}
+                    <svg
+                      className="w-4 h-4 fill-current shrink-0"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                    </svg>
+                    <span>
+                      {isGeneratingEpub
+                        ? "EPUB生成中..."
+                        : `EPUBを生成してダウンロード (${selectedPosts.length}件収録)`}
+                    </span>
                   </button>
                 </div>
 
