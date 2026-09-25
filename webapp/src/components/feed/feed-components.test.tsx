@@ -137,7 +137,7 @@ describe("FeedFilterStep コンポーネント描画", () => {
     expect(html).toContain(
       "デモ体験モード：条件は固定サンプルです（ログイン後に自由に変更できます）",
     );
-    expect(html).toContain("readOnly");
+    expect(html).toMatch(/readonly/i);
     expect(html).toContain("cursor-not-allowed");
     expect(html).toContain("この条件で投稿を取得");
   });

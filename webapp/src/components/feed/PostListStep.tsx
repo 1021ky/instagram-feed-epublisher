@@ -42,6 +42,22 @@ export function PostListStep({
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputId = useId();
 
+  // 選択件数の集計
+  const selectedCount = useMemo(() => {
+    return posts.filter((p) => p.selected !== false).length;
+  }, [posts]);
+
+  // キーワードによるリアルタイムフィルタリング
+  const filteredPosts = useMemo(() => {
+    const trimmed = searchQuery.trim().toLowerCase();
+    if (!trimmed) return posts;
+
+    return posts.filter((post) => {
+      const caption = (post.caption || "").toLowerCase();
+      return caption.includes(trimmed);
+    });
+  }, [posts, searchQuery]);
+
   // フィード未取得状態のプレースホルダー表示
   if (!isFetched && posts.length === 0) {
     return (
@@ -82,22 +98,6 @@ export function PostListStep({
       </section>
     );
   }
-
-  // 選択件数の集計
-  const selectedCount = useMemo(() => {
-    return posts.filter((p) => p.selected !== false).length;
-  }, [posts]);
-
-  // キーワードによるリアルタイムフィルタリング
-  const filteredPosts = useMemo(() => {
-    const trimmed = searchQuery.trim().toLowerCase();
-    if (!trimmed) return posts;
-
-    return posts.filter((post) => {
-      const caption = (post.caption || "").toLowerCase();
-      return caption.includes(trimmed);
-    });
-  }, [posts, searchQuery]);
 
   const isAllSelected = posts.length > 0 && selectedCount === posts.length;
   const isNoneSelected = selectedCount === 0;

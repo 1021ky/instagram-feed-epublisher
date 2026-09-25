@@ -197,9 +197,16 @@ export default function Page() {
     try {
       // 1. サーバー側の Instagram 認可失効 & Cookie 破棄 API を呼び出す
       try {
-        await fetch("/api/user/delete", {
+        const response = await fetch("/api/user/delete", {
           method: "POST",
         });
+        if (!response.ok) {
+          const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+          console.warn(
+            `退会 API がエラー応答を返しました (status: ${response.status}):`,
+            payload?.error ?? "不明なエラー",
+          );
+        }
       } catch (apiError) {
         console.warn("退会 API 呼び出しで例外が発生しました:", apiError);
       }
