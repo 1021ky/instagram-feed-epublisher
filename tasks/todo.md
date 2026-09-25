@@ -246,3 +246,54 @@
   - [x] 採用方針（GDPR・CCPA・日本法の網羅、ステートレス整合、日英2言語、Googleフォーム、リンク切れ自動テスト）
   - [x] 検討した選択肢と却下・改善理由（審査用ラベルの削除、電子書籍への表記一般化、next/link SPA遷移）
 - [x] コミット & プッシュ
+
+---
+
+## Issue #57: Dockerfile 作成 & Cloud Run / CI/CD 環境構築
+
+- [x] Next.js 15 standalone 出力対応
+  - [x] `webapp/next.config.mjs` に `output: "standalone"` と適切な `outputFileTracingRoot` を設定
+- [x] 本番用マルチステージ Dockerfile 作成
+  - [x] `webapp/Dockerfile` の作成 (Node.js 24, pnpm, 非rootユーザー, 最小イメージ)
+  - [x] `.dockerignore` の作成
+- [x] ローカル開発用 Docker Compose 環境構築（ホットリロード対応）
+  - [x] `compose.yaml` の作成 (ソースコードバインドマウント, node_modules/ .next ボリューム保護, WATCHPACK_POLLING, HTTPS 証明書・ポート設定)
+  - [x] `webapp/Dockerfile.dev` の作成
+- [x] ローカル Docker 動作確認
+  - [x] 本番用イメージのローカルビルド・起動確認 (コンテンツサイズ 90MB、HTTP 200 応答確認)
+  - [x] compose 起動によるホットリロード検証 (Fast Refresh 反応確認)
+- [x] GitHub Actions CI/CD ワークフロー作成
+  - [x] `.github/workflows/deploy.yml` の作成 (WIF キーレス認証, Artifact Registry push, Cloud Run デプロイ)
+- [x] Terraform によるインフラ・権限 IaC 化
+  - [x] `terraform/` に Cloud Run, Secret Manager, Artifact Registry, WIF, サービスアカウント, 独自ドメインマッピングのリソース定義を作成
+  - [x] `terraform fmt` および `terraform validate` の構文・型検証通過確認
+- [x] インフラ基本設計書・恒久的運用手順の作成
+  - [x] `docs/designdoc/infra-designdoc.md` の作成 (アーキテクチャ図、コンポーネント別設計根拠・選定理由、シークレット更新や独自ドメイン有効化等の運用手順)
+- [x] ドキュメント更新
+  - [x] `README.md` に Docker ローカル開発手順および Cloud Run デプロイ構成を追記
+- [x] 品質ゲート・全検証
+  - [x] lint / format / test / typecheck / build
+- [x] コミット & プッシュ
+
+---
+
+## PR #63 レビュー指摘対応 (Copilot Review: #pullrequestreview-5315832638)
+
+- [x] 指摘 1 対応: `NEXT_PUBLIC_CONTACT_FORM_URL` のビルド時埋め込み化
+  - [x] `webapp/Dockerfile` に `ARG NEXT_PUBLIC_CONTACT_FORM_URL` と `ENV NEXT_PUBLIC_CONTACT_FORM_URL` を追加
+  - [x] `.github/workflows/deploy.yml` の `docker build` に `--build-arg` を追加
+  - [x] `.github/workflows/deploy.yml` の `--set-secrets` から `NEXT_PUBLIC_CONTACT_FORM_URL` を削除
+  - [x] `terraform/secrets.tf` の `local.secrets` から `NEXT_PUBLIC_CONTACT_FORM_URL` を削除
+- [x] 指摘 2 対応: デプロイヤ用サービスアカウントの最小権限化
+  - [x] `terraform/wif.tf` から不要な `deployer_secret_accessor` を削除
+  - [x] `terraform/wif.tf` の `deployer_sa_user` をプロジェクト全体から Cloud Run ランタイム SA 限定（`google_service_account_iam_member`）に変更
+- [x] ドキュメント更新
+  - [x] `docs/designdoc/infra-designdoc.md` のシークレット定義・テーブル・運用手順を更新
+  - [x] `README.md` の環境変数説明を整理
+- [x] 知見の記録
+  - [x] `tasks/lessons.md` にビルド時インライン化と Secret 分離、CI デプロイヤの最小権限化の知見を記録
+- [x] 全検証の実行
+  - [x] `pnpm terraform:fmt:check` & `pnpm terraform:validate`
+  - [x] `pnpm test`
+  - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md`
+  - [x] ローカルでの Docker build 引数検証

@@ -64,3 +64,27 @@
   - 連絡窓口を GitHub Issues に限定すると、GitHub アカウントを持たない一般利用者から連絡を受け付けられないと審査員に指摘されるケースがある。Googleフォーム等の汎用フォームを用意し、環境変数（`NEXT_PUBLIC_CONTACT_FORM_URL`）経由で差し替え可能に設計することで、開発・本番の切り替えや運用変更に柔軟に対応できる。
 - **Next.js App Router における静的ページの配信**:
   - 動的関数を使用しない Server Component は、ビルド時に自動的に静的HTML（Static Rendering）として事前生成される。クローラーやボットがアクセスした際も初回から完全なHTMLが即時返却されるため、Meta審査のボット巡回やSEO、表示パフォーマンスのすべてにおいて最適となる。
+
+## コンテナ化・Cloud Run デプロイ・Docker 開発基盤
+
+- **Next.js 15 standalone 出力とモノレポ構成**:
+  - `pnpm` ワークスペース（モノレポ）構成下では、`next.config.mjs` で `output: "standalone"` に加えて `outputFileTracingRoot: path.resolve(__dirname, "..")`（リポジトリルート）を指定することで、親ディレクトリの lockfile や共有設定が正しくトレースされ、`.next/standalone` 配下に完全な実行ファイル群が生成される。
+  - 静的アセット（`.next/static`）および `public` ディレクトリは standalone 出力に自動コピーされないため、Dockerfile の runner ステージで明示的に `COPY` する必要がある。また `public` ディレクトリが存在しない場合のビルド失敗を防ぐため、`.gitkeep` やワイルドカード（`public*`）による防御的コピーが有効。
+- **Docker ローカル開発におけるホットリロードとボリューム分離**:
+  - ホスト側ソースコードをバインドマウント（`-v .:/app`）する際、ホスト（macOS）の `node_modules` や `.next` でコンテナ内（Linux）の依存関係が上書きされないよう、匿名ボリューム（`/app/node_modules`, `/app/webapp/node_modules`, `/app/webapp/.next`）で保護する。
+  - macOS の Docker Desktop 上でのファイル変更検知を安定させるため `WATCHPACK_POLLING=true` を指定し、HTTPS 開発サーバーではコンテナ外（ホストブラウザ）からの接続を許可するため `HTTPS_HOST=0.0.0.0` にバインドする。
+- **Google Cloud Run へのキーレス CI/CD (Workload Identity Federation)**:
+  - 永続的なサービスアカウントキー（JSON）を発行せず、GitHub Actions の OIDC トークンと GCP Workload Identity Pool を連携させることで、鍵漏洩リスクを排除したセキュアな自動デプロイを実現できる。
+  - 機密情報（Instagram クレデンシャルやセッション暗号化鍵）は Secret Manager で集中管理し、Cloud Run のデプロイフラグ（`--set-secrets`）で環境変数としてセキュアに注入する。
+- **コンテナ内での Playwright Chromium の動作要件と日本語フォント**:
+  - Alpine Linux では musl libc の制約により Playwright 公式の Chromium バイナリが動作しないため、Debian (`node:24-bookworm-slim`) をベースイメージとして採用する。
+  - Dockerfile 内で `npx -y playwright@<version> install --with-deps chromium` を実行して Chromium ヘッドレスバイナリと共有ライブラリをプリインストールし、表紙レンダリング時の日本語文字化け（豆腐）を防ぐため `fonts-noto-cjk` を同時に導入する。
+  - コンテナ内で Chromium を起動する際は、sandbox 権限エラーや共有メモリ不足を防ぐため `args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]` を指定する。
+- **Next.js の公開環境変数（NEXT_PUBLIC\_*）とコンテナビルド時の注意点**:
+  - `NEXT_PUBLIC_*` プレフィックスの環境変数は、Next.js のビルド時（`next build`）に Webpack / Turbopack の DefinePlugin によりクライアントバンドルおよび静的生成（SSG）ページ内にインライン展開（ハードコード）される。
+  - 実行時（Cloud Run 起動時や Secret Manager マウント）に注入しても、クライアントバンドルや SSG 成果物には反映されず、コード上のデフォルトフォールバック値が固定化されてしまう。
+  - お問い合わせフォーム URL のような公開設定は機密情報（Secret）ではないため、Secret Manager ではなく GitHub Actions の Repository Variables（`vars`）から Dockerfile の `ARG` / `ENV` を通じてビルド時に埋め込むのが適切な設計である。
+- **CI/CD デプロイ用サービスアカウントの最小権限（Least Privilege）徹底**:
+  - Workload Identity Federation で GitHub Actions に権限を付与する際、デプロイヤ SA に不要な権限（Secret Manager の Secret Accessor など）を付与しない（実行時にシークレットを読むのは Cloud Run ランタイム SA であるため）。
+  - 特に `roles/iam.serviceAccountUser`（サービスアカウントの借用権限）をプロジェクト全体（`google_project_iam_member`）で付与すると、プロジェクト内のあらゆるサービスアカウント（Default Compute SA 等）になりすませる過剰権限となる。
+  - デプロイ対象の Cloud Run サービスに指定するランタイム SA（`feedstobook-runner`）に対してのみリソースレベル（`google_service_account_iam_member`）で `roles/iam.serviceAccountUser` をスコープ限定して付与することで、強固な最小権限モデルを実現できる。

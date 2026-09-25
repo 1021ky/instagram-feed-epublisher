@@ -1,0 +1,96 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID || vars.GCP_PROJECT_ID }}
+  REGION: asia-northeast1
+  SERVICE_NAME: feedstobook
+  GAR_REPOSITORY: feedstobook
+
+jobs:
+  deploy:
+    name: Build & Deploy to Cloud Run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ vars.WIF_PROVIDER || secrets.WIF_PROVIDER }}
+          service_account: ${{ vars.WIF_SERVICE_ACCOUNT || secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and Push Docker Image
+        env:
+          IMAGE_TAG: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+          IMAGE_LATEST: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE_NAME }}:latest
+          CONTACT_FORM_URL: ${{ vars.NEXT_PUBLIC_CONTACT_FORM_URL }}
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_CONTACT_FORM_URL="${CONTACT_FORM_URL}" \
+            -f webapp/Dockerfile \
+            -t "${IMAGE_TAG}" \
+            -t "${IMAGE_LATEST}" .
+          docker push "${IMAGE_TAG}"
+          docker push "${IMAGE_LATEST}"
+
+      - id: deploy
+        name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          region: ${{ env.REGION }}
+          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+          flags: |
+            --project=${{ env.PROJECT_ID }}
+            --min-instances=0
+            --max-instances=10
+            --timeout=300s
+            --memory=2Gi
+            --cpu=1
+            --allow-unauthenticated
+            --set-secrets=INSTAGRAM_CLIENT_ID=INSTAGRAM_CLIENT_ID:latest,INSTAGRAM_CLIENT_SECRET=INSTAGRAM_CLIENT_SECRET:latest,BETTER_AUTH_SECRET=BETTER_AUTH_SECRET:latest,BETTER_AUTH_URL=BETTER_AUTH_URL:latest
+
+      - name: Verify Deployment Health
+        run: |
+          DEPLOY_URL="${{ steps.deploy.outputs.url }}"
+          echo "Verifying health of ${DEPLOY_URL}..."
+          for i in {1..12}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${DEPLOY_URL}")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Health check passed with HTTP 200 OK!"
+              exit 0
+            fi
+            echo "Waiting for service to become healthy (status: $STATUS)... attempt $i/12"
+            sleep 3
+          done
+          echo "❌ Health check timed out!"
+          exit 1
+
+      - name: Export Deployment Summary
+        if: always()
+        run: |
+          echo "### 🚀 Cloud Run デプロイ結果" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 項目 | 設定値 |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **サービス名** | \`${{ env.SERVICE_NAME }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **リージョン** | \`${{ env.REGION }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **サービス URL** | [${{ steps.deploy.outputs.url }}](${{ steps.deploy.outputs.url }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **コミット SHA** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY

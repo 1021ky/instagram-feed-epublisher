@@ -2,6 +2,7 @@
  * @file html-to-epubを利用したEPUBビルダー。
  */
 import { EPub } from "@lesjoursfr/html-to-epub";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { getLogger } from "@/lib/logger";
 import type { InstagramMedia } from "@/lib/instagram/types";
@@ -14,7 +15,24 @@ import { downloadMedia } from "@/lib/epub/media-downloader";
 import { renderCoverJpg } from "@/lib/epub/cover-renderer";
 
 function getTemplatesDir(): string {
-  return path.resolve(process.cwd(), "node_modules", "@lesjoursfr", "html-to-epub", "templates");
+  const candidates = [
+    path.resolve(
+      process.cwd(),
+      "webapp",
+      "node_modules",
+      "@lesjoursfr",
+      "html-to-epub",
+      "templates",
+    ),
+    path.resolve(process.cwd(), "node_modules", "@lesjoursfr", "html-to-epub", "templates"),
+    path.resolve(process.cwd(), "templates"),
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return candidates[0];
 }
 
 /**
@@ -70,6 +88,7 @@ export async function buildEpub(input: EpubInput, outputDir: string): Promise<st
       customOpfTemplatePath: path.join(templatesDir, "epub3", "content.opf.ejs"),
       customNcxTocTemplatePath: path.join(templatesDir, "toc.ncx.ejs"),
       customHtmlTocTemplatePath: path.join(templatesDir, "epub3", "toc.xhtml.ejs"),
+      customHtmlCoverTemplatePath: path.join(templatesDir, "epub3", "cover.xhtml.ejs"),
     },
     outputPath,
   );

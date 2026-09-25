@@ -5,7 +5,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  outputFileTracingRoot: path.resolve(__dirname),
+  output: "standalone",
+  outputFileTracingRoot: path.resolve(__dirname, ".."),
   images: {
     remotePatterns: [
       {

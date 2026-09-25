@@ -1,0 +1,5 @@
+project_id        = "feedstobook-xxxx"
+region            = "asia-northeast1"
+app_name          = "feedstobook"
+domain_name       = "feedstobook.ksanchu.info"
+github_repository = "1021ky/instagram-feed-epublisher"
