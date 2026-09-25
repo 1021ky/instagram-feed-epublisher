@@ -62,3 +62,31 @@ jobs:
             --cpu=1
             --allow-unauthenticated
             --set-secrets=INSTAGRAM_CLIENT_ID=INSTAGRAM_CLIENT_ID:latest,INSTAGRAM_CLIENT_SECRET=INSTAGRAM_CLIENT_SECRET:latest,BETTER_AUTH_SECRET=BETTER_AUTH_SECRET:latest,BETTER_AUTH_URL=BETTER_AUTH_URL:latest,NEXT_PUBLIC_CONTACT_FORM_URL=NEXT_PUBLIC_CONTACT_FORM_URL:latest
+
+      - name: Verify Deployment Health
+        run: |
+          DEPLOY_URL="${{ steps.deploy.outputs.url }}"
+          echo "Verifying health of ${DEPLOY_URL}..."
+          for i in {1..12}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${DEPLOY_URL}")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Health check passed with HTTP 200 OK!"
+              exit 0
+            fi
+            echo "Waiting for service to become healthy (status: $STATUS)... attempt $i/12"
+            sleep 3
+          done
+          echo "❌ Health check timed out!"
+          exit 1
+
+      - name: Export Deployment Summary
+        if: always()
+        run: |
+          echo "### 🚀 Cloud Run デプロイ結果" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 項目 | 設定値 |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **サービス名** | \`${{ env.SERVICE_NAME }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **リージョン** | \`${{ env.REGION }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **サービス URL** | [${{ steps.deploy.outputs.url }}](${{ steps.deploy.outputs.url }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **コミット SHA** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
