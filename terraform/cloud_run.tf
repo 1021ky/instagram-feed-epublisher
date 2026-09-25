@@ -83,8 +83,9 @@ resource "google_cloud_run_v2_service_iam_member" "public_access" {
   member   = "allUsers"
 }
 
-# 独自ドメインマッピング
+# 独自ドメインマッピング (所有権確認後に enable_custom_domain = true で有効化)
 resource "google_cloud_run_domain_mapping" "domain" {
+  count    = var.enable_custom_domain ? 1 : 0
   location = var.region
   name     = var.domain_name
 

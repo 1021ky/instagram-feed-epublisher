@@ -5,12 +5,12 @@ output "cloud_run_url" {
 
 output "custom_domain" {
   description = "設定された独自ドメイン"
-  value       = var.domain_name
+  value       = var.enable_custom_domain ? var.domain_name : "未設定 (enable_custom_domain = false)"
 }
 
 output "dns_records" {
   description = "独自ドメイン接続に必要な DNS レコード（A / AAAA 等）"
-  value       = google_cloud_run_domain_mapping.domain.status[0].resource_records
+  value       = var.enable_custom_domain ? try(google_cloud_run_domain_mapping.domain[0].status[0].resource_records, []) : []
 }
 
 output "wif_provider" {

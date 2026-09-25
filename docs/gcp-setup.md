@@ -123,25 +123,29 @@ terraform output
 
 ---
 
-## 6. 独自ドメイン (`ksanchu.info`) の DNS 設定
+## 6. 独自ドメイン (`feedstobook.ksanchu.info`) の有効化と DNS 設定
 
-`terraform output dns_records` で出力される DNS レコードを確認します。
+独自ドメインマッピングは、Google Search Console での所有権確認に時間がかかる場合があるため、**初期構築時はデフォルト無効（`enable_custom_domain = false`）** となっています。
+初期構築完了後、Cloud Run のデフォルト URL（`https://feedstobook-xxxxx-an.a.run.app`）で先行して稼働・CI/CD テストを行えます。
+
+### 6-1. ドメイン所有権確認後の有効化
+
+Search Console で親ドメイン `ksanchu.info` の所有権が確認できたら、以下のコマンドでドメインマッピングを追加作成します：
+
+```bash
+cd terraform
+terraform apply -var="project_id=${PROJECT_ID}" -var="enable_custom_domain=true"
+```
+
+### 6-2. DNS レコードの設定
+
+apply 完了後、`terraform output dns_records` で DNS 設定レコードが出力されます：
 
 ```bash
 terraform output dns_records
 ```
 
-例として、以下のような A レコードおよび AAAA レコードが出力されます：
-
-```text
-Record Type: A
-Values: 216.239.32.21, 216.239.34.21, 216.239.36.21, 216.239.38.21
-
-Record Type: AAAA
-Values: 2001:4860:4802:32::15, ...
-```
-
-お使いのドメイン管理サービス（お名前.com、Cloudflare 等）の DNS 設定画面で、`ksanchu.info` に対して上記のレコードを追加してください。
+お使いのドメイン管理サービス（Cloudflare 等）の DNS 管理画面で、サブドメイン `feedstobook` に対して出力された CNAME レコード（または A / AAAA レコード）を追加してください。
 
 > [!NOTE]
 > DNS レコードの設定後、Google のマネージド SSL/TLS 証明書が自動発行され、HTTPS アクセス（`https://feedstobook.ksanchu.info`）が有効化されます（反映まで通常 15分〜数時間程度かかります）。

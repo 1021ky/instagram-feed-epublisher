@@ -31,3 +31,10 @@ variable "github_repository" {
   description = "GitHub リポジトリ (owner/repo)"
   default     = "1021ky/instagram-feed-epublisher"
 }
+
+variable "enable_custom_domain" {
+  type        = bool
+  description = "独自ドメインマッピングを有効化するかどうか（Search Console での所有権確認後に true に設定）"
+  default     = false
+}
+
