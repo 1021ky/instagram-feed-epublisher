@@ -267,8 +267,8 @@
 - [x] Terraform によるインフラ・権限 IaC 化
   - [x] `terraform/` に Cloud Run, Secret Manager, Artifact Registry, WIF, サービスアカウント, 独自ドメインマッピングのリソース定義を作成
   - [x] `terraform fmt` および `terraform validate` の構文・型検証通過確認
-- [x] GCP リソースセットアップガイド・スクリプトの作成
-  - [x] `docs/gcp-setup.md` の作成 (Terraform による一括プロビジョニング手順、シークレット登録、DNS設定)
+- [x] インフラ基本設計書・恒久的運用手順の作成
+  - [x] `docs/designdoc/infra-designdoc.md` の作成 (アーキテクチャ図、コンポーネント別設計根拠・選定理由、シークレット更新や独自ドメイン有効化等の運用手順)
 - [x] ドキュメント更新
   - [x] `README.md` に Docker ローカル開発手順および Cloud Run デプロイ構成を追記
 - [x] 品質ゲート・全検証

@@ -24,6 +24,7 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 ├── docs/                 # 設計資産・ドキュメント更新ポリシー
 │   ├── designdoc/        # 設計ドキュメント・Mermaid 図面
 │   │   ├── designDoc.md      # Webapp 詳細設計書
+│   │   ├── infra-designdoc.md # インフラ基本設計書・運用手順
 │   │   ├── ui-ux-guidelines.md # UI/UX 設計ガイドライン
 │   │   ├── erDiagram.mmd     # データモデル・ER図
 │   │   ├── flowchart LR.mmd  # ユーザーフロー図
@@ -44,6 +45,8 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 
 - 📘 [Webapp 詳細設計書](docs/designdoc/designDoc.md)
   - 目的・要件、モジュール構成、技術選定の経緯（Vite から Next.js への移行、Instagram Login 対応）、トラブルシューティング。
+- ☁️ [インフラ基本設計書・運用手順](docs/designdoc/infra-designdoc.md)
+  - Cloud Run, Secret Manager, WIF, Terraform によるインフラ構成、設計判断の根拠（なぜこの設定なのか）、恒久的メンテナンス手順。
 - 🎨 [UI/UX 設計ガイドライン](docs/designdoc/ui-ux-guidelines.md)
   - プロダクト哲学（作り込むツールを目指さない）、ターゲットユーザー、デザインシステム（Apple HIG基調×Instagramアクセント）、各画面の役割、レイアウト規約。
 - 🔀 [ユーザーフロー図 (Mermaid)](docs/designdoc/flowchart%20LR.mmd)
@@ -243,8 +246,8 @@ pnpm e2etest
 - **キーレス CI/CD**: Workload Identity Federation (OIDC) を利用し、永続的なサービスアカウントキーを発行せずに GitHub Actions から自動デプロイ。
 - **Secret Manager 連携**: Instagram API キーやセッション暗号化鍵などの機密情報を安全に注入。
 
-### 詳細な環境構築・リソース設定手順
+### 詳細な設計仕様・運用メンテナンス手順
 
-GCP プロジェクト作成、Artifact Registry、Secret Manager、WIF 設定、独自ドメインマッピング（DNS）の完全な手順は以下を参照してください：
+インフラアーキテクチャ、各コンポーネントの設計根拠、シークレット更新・独自ドメイン有効化等の運用手順は以下を参照してください：
 
-- 📖 [Google Cloud & CI/CD 環境構築手順書 (docs/gcp-setup.md)](docs/gcp-setup.md)
+- 📖 [インフラ基本設計書・運用手順 (docs/designdoc/infra-designdoc.md)](docs/designdoc/infra-designdoc.md)
