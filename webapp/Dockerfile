@@ -25,6 +25,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/webapp/node_modules ./webapp/node_modules
 COPY . .
 
+# ビルド時環境変数（Next.js クライアントバンドル・静的ページへのインライン埋め込み）
+ARG NEXT_PUBLIC_CONTACT_FORM_URL
+ENV NEXT_PUBLIC_CONTACT_FORM_URL=$NEXT_PUBLIC_CONTACT_FORM_URL
+
 # ビルド実行
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production

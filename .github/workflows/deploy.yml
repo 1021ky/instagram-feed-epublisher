@@ -40,8 +40,13 @@ jobs:
         env:
           IMAGE_TAG: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
           IMAGE_LATEST: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE_NAME }}:latest
+          CONTACT_FORM_URL: ${{ vars.NEXT_PUBLIC_CONTACT_FORM_URL }}
         run: |
-          docker build -f webapp/Dockerfile -t "${IMAGE_TAG}" -t "${IMAGE_LATEST}" .
+          docker build \
+            --build-arg NEXT_PUBLIC_CONTACT_FORM_URL="${CONTACT_FORM_URL}" \
+            -f webapp/Dockerfile \
+            -t "${IMAGE_TAG}" \
+            -t "${IMAGE_LATEST}" .
           docker push "${IMAGE_TAG}"
           docker push "${IMAGE_LATEST}"
 
@@ -60,7 +65,7 @@ jobs:
             --memory=2Gi
             --cpu=1
             --allow-unauthenticated
-            --set-secrets=INSTAGRAM_CLIENT_ID=INSTAGRAM_CLIENT_ID:latest,INSTAGRAM_CLIENT_SECRET=INSTAGRAM_CLIENT_SECRET:latest,BETTER_AUTH_SECRET=BETTER_AUTH_SECRET:latest,BETTER_AUTH_URL=BETTER_AUTH_URL:latest,NEXT_PUBLIC_CONTACT_FORM_URL=NEXT_PUBLIC_CONTACT_FORM_URL:latest
+            --set-secrets=INSTAGRAM_CLIENT_ID=INSTAGRAM_CLIENT_ID:latest,INSTAGRAM_CLIENT_SECRET=INSTAGRAM_CLIENT_SECRET:latest,BETTER_AUTH_SECRET=BETTER_AUTH_SECRET:latest,BETTER_AUTH_URL=BETTER_AUTH_URL:latest
 
       - name: Verify Deployment Health
         run: |

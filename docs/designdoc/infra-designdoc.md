@@ -110,19 +110,24 @@ Cloud Run は、環境変数として指定されたシークレットが存在�
 そのため、Terraform（`terraform/secrets.tf`）側で初期バージョン（プレースホルダー）を一度だけ自動作成し、同時に `lifecycle { ignore_changes = [secret_data] }` を指定しています。
 この設計により、**開発者が `gcloud` コマンド等で後から本物の機密値を注入しても、以降の `terraform apply` で値がリセットされる事故を完全に防止** しています。
 
-#### ③ 管理対象の環境変数一覧
+#### ③ 管理対象の機密環境変数一覧 (Secret Manager)
 
-| 環境変数名                     | 用途                                      | 補足                                                          |
-| :----------------------------- | :---------------------------------------- | :------------------------------------------------------------ |
-| `INSTAGRAM_CLIENT_ID`          | Meta for Developers のアプリ ID           | 数値文字列。Meta 親アプリIDではなく Instagram API 設定側の ID |
-| `INSTAGRAM_CLIENT_SECRET`      | Meta for Developers のアプリ シークレット | 機密値                                                        |
-| `BETTER_AUTH_SECRET`           | セッション署名・暗号化用のランダム文字列  | 32バイト以上（`openssl rand -hex 32`）                        |
-| `BETTER_AUTH_URL`              | 認証コールバックベース URL                | 独自ドメイン開通前は Cloud Run URL、開通後はカスタムドメイン  |
-| `NEXT_PUBLIC_CONTACT_FORM_URL` | お問い合わせフォームのリンク先            | 法的ページからの問い合わせ導線（Google Forms 等）             |
+| 環境変数名                | 用途                                      | 補足                                                          |
+| :------------------------ | :---------------------------------------- | :------------------------------------------------------------ |
+| `INSTAGRAM_CLIENT_ID`     | Meta for Developers のアプリ ID           | 数値文字列。Meta 親アプリIDではなく Instagram API 設定側の ID |
+| `INSTAGRAM_CLIENT_SECRET` | Meta for Developers のアプリ シークレット | 機密値                                                        |
+| `BETTER_AUTH_SECRET`      | セッション署名・暗号化用のランダム文字列  | 32バイト以上（`openssl rand -hex 32`）                        |
+| `BETTER_AUTH_URL`         | 認証コールバックベース URL                | 独自ドメイン開通前は Cloud Run URL、開通後はカスタムドメイン  |
+
+#### ④ 公開環境変数（`NEXT_PUBLIC_*`）のビルド時注入方針
+
+`NEXT_PUBLIC_CONTACT_FORM_URL`（法的ページからのお問い合わせ Google フォーム等のリンク先）は、Next.js の仕様上 `next build` 時にクライアントバンドルおよび静的生成（SSG）ページ内にインライン展開（DefinePlugin でハードコード）されます。
+そのため、実行時に Secret Manager 経由でマウントしても反映されません。また、本 URL はブラウザ上でエンドユーザーに公開されるものであり機密値ではありません。
+したがって、Secret Manager ではなく GitHub Actions の **Repository Variables (`vars.NEXT_PUBLIC_CONTACT_FORM_URL`)** で管理し、Docker ビルド時の引数（`--build-arg NEXT_PUBLIC_CONTACT_FORM_URL=...`）として注入する構成を採用しています（未設定時はコードデフォルトの GitHub Issues URL へ安全にフォールバック）。
 
 ---
 
-### 3.4 CI/CD 認証: Workload Identity Federation (WIF)
+### 3.4 CI/CD 認証 & 権限: Workload Identity Federation (WIF)
 
 #### ① なぜサービスアカウントキー（JSON）を廃止したのか
 
@@ -134,6 +139,15 @@ WIF を採用することで、GitHub Actions の実行ごとに **GitHub が発
 WIF プロバイダ名（`projects/xxx/...`）やサービスアカウントのメールアドレスは、接続先のリソース識別子（アドレス）に過ぎず、**それ単体では秘密情報ではありません**。
 第三者にこの文字列が漏洩しても、GitHub 側のリポジトリ名（`repo:1021ky/instagram-feed-epublisher:*`）が一致する GitHub Actions からでなければ GCP 側で拒否されます。
 そのため、GitHub 側で不要な Secrets を増やさず、設定値として **Variables (`vars`)** で透明性高く管理するのがベストプラクティスです。
+
+#### ③ デプロイ用サービスアカウントの最小権限（Least Privilege）徹底
+
+デプロイ担当のサービスアカウント（`github-actions-deployer`）には、必要最小限の権限のみを付与しています：
+
+- `roles/run.admin`: Cloud Run サービス・リビジョンの更新に必要。
+- `roles/artifactregistry.writer`: ビルドした Docker イメージの push に必要。
+- `roles/iam.serviceAccountUser`: **プロジェクト全体ではなく、Cloud Run ランタイムサービスアカウント（`feedstobook-runner`）に対してのみリソースレベルで付与**。これにより、プロジェクト内の他サービスアカウント（Default Compute SA 等）への不正な権限借用を防止。
+- ※ `roles/secretmanager.secretAccessor` はデプロイヤには付与していません（デプロイフローでシークレットの値を読み取る必要はなく、実行時に読み取るのは Cloud Run ランタイム SA であるため）。
 
 ---
 
@@ -153,15 +167,15 @@ DNS 伝播や所有権確認には時間がかかるため、**初期構築時�
 
 ## 4. 恒久的メンテナンス・運用手順 (Operations Runbook)
 
-### 4.1 機密値（環境変数）の更新手順
+### 4.1 機密値（APIシークレット等）の更新手順
 
-API シークレットの再発行や、お問い合わせ URL を変更する場合は、末尾改行（`\n`）の混入を防ぐため `echo -n` を用いて Secret Manager に新しいバージョンを追加します。
+Instagram API シークレットの再発行や認証暗号鍵を変更する場合は、末尾改行（`\n`）の混入を防ぐため `echo -n` を用いて Secret Manager に新しいバージョンを追加します。
 
 ```bash
 PROJECT_ID="feeds-to-book"
 
-# 例: お問い合わせ URL を更新する場合
-echo -n "https://forms.gle/NEW_FORM_ID" | gcloud secrets versions add NEXT_PUBLIC_CONTACT_FORM_URL \
+# 例: Instagram API シークレットを再発行した場合
+echo -n "NEW_INSTAGRAM_CLIENT_SECRET" | gcloud secrets versions add INSTAGRAM_CLIENT_SECRET \
   --project="${PROJECT_ID}" --data-file=-
 
 # 例: BETTER_AUTH_URL を独自ドメインに更新する場合
@@ -178,7 +192,17 @@ echo -n "https://feedstobook.ksanchu.info" | gcloud secrets versions add BETTER_
 
 ---
 
-### 4.2 独自ドメイン (`feedstobook.ksanchu.info`) の有効化手順
+### 4.2 お問い合わせ URL（公開環境変数）の変更手順
+
+お問い合わせフォーム（Google Forms 等）の URL は、Next.js のビルド時に埋め込まれる公開設定です。変更する場合は GitHub リポジトリの Variables を更新し、再デプロイを実行します。
+
+1. GitHub リポジトリの **Settings** → **Secrets and variables** → **Actions** → **Variables** タブを開きます。
+2. `NEXT_PUBLIC_CONTACT_FORM_URL` の値を新しいフォーム URL（例: `https://forms.gle/NEW_FORM_ID`）に更新します（初回は「New repository variable」から追加）。
+3. GitHub Actions の `deploy.yml` ワークフローを手動実行（または `main` への push）すると、新しい URL を引数としてコンテナイメージが再ビルドされ、自動的に本番へ反映されます。
+
+---
+
+### 4.3 独自ドメイン (`feedstobook.ksanchu.info`) の有効化手順
 
 Google Search Console で親ドメイン `ksanchu.info` の所有権確認（TXT レコード認証）が完了した後の手順です。
 
@@ -202,7 +226,7 @@ Cloudflare の DNS 管理画面を開き、サブドメイン `feedstobook` に�
 
 ---
 
-### 4.3 CI/CD の手動デプロイ手順
+### 4.4 CI/CD の手動デプロイ手順
 
 デプロイワークフロー（`.github/workflows/deploy.yml`）は通常 `main` ブランチへの push 時に自動実行されますが、手動で任意のブランチからデプロイすることも可能です。
 
@@ -216,7 +240,7 @@ gh run watch
 
 ---
 
-### 4.4 インフラ設定（スペック・環境変数等）の変更フロー
+### 4.5 インフラ設定（スペック・環境変数等）の変更フロー
 
 インフラリソース（メモリ、CPU、環境変数定義等）を変更する際は、必ず Terraform コード経由で反映します。
 

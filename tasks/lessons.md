@@ -80,3 +80,11 @@
   - Alpine Linux では musl libc の制約により Playwright 公式の Chromium バイナリが動作しないため、Debian (`node:24-bookworm-slim`) をベースイメージとして採用する。
   - Dockerfile 内で `npx -y playwright@<version> install --with-deps chromium` を実行して Chromium ヘッドレスバイナリと共有ライブラリをプリインストールし、表紙レンダリング時の日本語文字化け（豆腐）を防ぐため `fonts-noto-cjk` を同時に導入する。
   - コンテナ内で Chromium を起動する際は、sandbox 権限エラーや共有メモリ不足を防ぐため `args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]` を指定する。
+- **Next.js の公開環境変数（NEXT_PUBLIC\_*）とコンテナビルド時の注意点**:
+  - `NEXT_PUBLIC_*` プレフィックスの環境変数は、Next.js のビルド時（`next build`）に Webpack / Turbopack の DefinePlugin によりクライアントバンドルおよび静的生成（SSG）ページ内にインライン展開（ハードコード）される。
+  - 実行時（Cloud Run 起動時や Secret Manager マウント）に注入しても、クライアントバンドルや SSG 成果物には反映されず、コード上のデフォルトフォールバック値が固定化されてしまう。
+  - お問い合わせフォーム URL のような公開設定は機密情報（Secret）ではないため、Secret Manager ではなく GitHub Actions の Repository Variables（`vars`）から Dockerfile の `ARG` / `ENV` を通じてビルド時に埋め込むのが適切な設計である。
+- **CI/CD デプロイ用サービスアカウントの最小権限（Least Privilege）徹底**:
+  - Workload Identity Federation で GitHub Actions に権限を付与する際、デプロイヤ SA に不要な権限（Secret Manager の Secret Accessor など）を付与しない（実行時にシークレットを読むのは Cloud Run ランタイム SA であるため）。
+  - 特に `roles/iam.serviceAccountUser`（サービスアカウントの借用権限）をプロジェクト全体（`google_project_iam_member`）で付与すると、プロジェクト内のあらゆるサービスアカウント（Default Compute SA 等）になりすませる過剰権限となる。
+  - デプロイ対象の Cloud Run サービスに指定するランタイム SA（`feedstobook-runner`）に対してのみリソースレベル（`google_service_account_iam_member`）で `roles/iam.serviceAccountUser` をスコープ限定して付与することで、強固な最小権限モデルを実現できる。

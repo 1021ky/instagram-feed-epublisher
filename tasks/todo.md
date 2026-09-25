@@ -274,3 +274,26 @@
 - [x] 品質ゲート・全検証
   - [x] lint / format / test / typecheck / build
 - [x] コミット & プッシュ
+
+---
+
+## PR #63 レビュー指摘対応 (Copilot Review: #pullrequestreview-5315832638)
+
+- [x] 指摘 1 対応: `NEXT_PUBLIC_CONTACT_FORM_URL` のビルド時埋め込み化
+  - [x] `webapp/Dockerfile` に `ARG NEXT_PUBLIC_CONTACT_FORM_URL` と `ENV NEXT_PUBLIC_CONTACT_FORM_URL` を追加
+  - [x] `.github/workflows/deploy.yml` の `docker build` に `--build-arg` を追加
+  - [x] `.github/workflows/deploy.yml` の `--set-secrets` から `NEXT_PUBLIC_CONTACT_FORM_URL` を削除
+  - [x] `terraform/secrets.tf` の `local.secrets` から `NEXT_PUBLIC_CONTACT_FORM_URL` を削除
+- [x] 指摘 2 対応: デプロイヤ用サービスアカウントの最小権限化
+  - [x] `terraform/wif.tf` から不要な `deployer_secret_accessor` を削除
+  - [x] `terraform/wif.tf` の `deployer_sa_user` をプロジェクト全体から Cloud Run ランタイム SA 限定（`google_service_account_iam_member`）に変更
+- [x] ドキュメント更新
+  - [x] `docs/designdoc/infra-designdoc.md` のシークレット定義・テーブル・運用手順を更新
+  - [x] `README.md` の環境変数説明を整理
+- [x] 知見の記録
+  - [x] `tasks/lessons.md` にビルド時インライン化と Secret 分離、CI デプロイヤの最小権限化の知見を記録
+- [x] 全検証の実行
+  - [x] `pnpm terraform:fmt:check` & `pnpm terraform:validate`
+  - [x] `pnpm test`
+  - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md`
+  - [x] ローカルでの Docker build 引数検証
