@@ -16,7 +16,7 @@ function getLayoutDir(): string {
     path.resolve(process.cwd(), "..", "book_layout"),
   ];
   for (const candidate of candidates) {
-    if (existsSync(candidate)) {
+    if (existsSync(/*turbopackIgnore: true*/ candidate)) {
       return candidate;
     }
   }
