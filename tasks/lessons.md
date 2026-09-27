@@ -134,3 +134,13 @@
   - `Noto Sans JP`（Bold / Regular）の TTF を `webapp/public/fonts/` に配置することで、Next.js standalone ビルド時に `public/` の自動コピーによってコンテナ環境へもシームレスに同封・解決できる。
   - フォントファイルを動的読み込み（`readFile`）する際は、Next.js 16 (Turbopack) のプロジェクト全体トレース警告を防ぐため `/*turbopackIgnore: true*/` を付与する。
   - また、Satori の内部 wasm（`harfbuzzjs` 等）や sharp の native prebuilds をバンドラーから除外して Node.js ネイティブ環境で解決させるため、`next.config.mjs` の `serverExternalPackages` に `["@lesjoursfr/html-to-epub", "satori", "sharp"]` を指定する。
+
+## OAuth / Instagram API の認可失効仕様と退会 UX 設計
+
+- **Instagram Graph API における認可失効（Revoke）エンドポイントの不在**:
+  - Facebook ログインでは `DELETE /{user-id}/permissions` を介してサードパーティアプリ側からユーザーの認可（アプリアンインストール）をリモートで失効させることが可能である一方、Instagram Graph API（`graph.instagram.com`）にはパーミッション失効用の DELETE エンドポイントは提供されていない。
+  - そのため、サーバー側で `graph.instagram.com/me/permissions` 等をコールしても 400/404 等で失敗し、ステートレスセッション破棄処理に不必要な 502 エラーを発生させる原因となる。
+  - アプリ側の退会責務は「保持しているセッション情報・暗号化 Cookie の完全破棄」に徹し、Instagram 側の連携レコード自体を削除する処理はユーザー自身の Instagram アカウント設定操作に委ねるのが正しい設計である。
+- **退会フローにおけるユーザーへの情報提供と心理的安全性の担保**:
+  - `window.confirm` 等の画一的なダイアログで「連携を解除します」とだけ伝えると、ユーザーは「Instagram 側のアカウント設定からもアプリが自動削除された」と認識し、次回アクセス時に Instagram の再認証画面（「feeds2epub - IG はすでにリンクされています」）が表示された際に「退会したのになぜまだ紐づいているのか？」と不信感を抱く。
+  - 退会モーダルを導入し、(1) 自社サービス内でのデータ・セッション破棄の完了、(2) Meta の仕様上 Instagram アカウント側の連携登録を完全に解除するには Instagram 側の「アプリとウェブサイト」設定から削除する必要がある旨、(3) Instagram 設定画面（`https://www.instagram.com/accounts/manage_access/`）への直接リンク、を明示することで、OAuth 2.0 の仕様制約に対する透明性とユーザーの心理的安全性を両立できる。
