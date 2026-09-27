@@ -297,3 +297,21 @@
   - [x] `pnpm test`
   - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md`
   - [x] ローカルでの Docker build 引数検証
+
+---
+
+## 独自ドメイン修正 (ksanchu.info -> ksanchu.page)
+
+- [x] Terraform 設定の修正
+  - [x] `terraform/variables.tf`: `domain_name` の default を `feedstobook.ksanchu.page` に修正
+  - [x] `terraform/terraform.tfvars.example`: `domain_name` を `feedstobook.ksanchu.page` に修正
+- [x] ドキュメントの修正
+  - [x] `README.md`: 本番独自ドメイン URL を `https://feedstobook.ksanchu.page` に修正
+  - [x] `docs/designdoc/designDoc.md`: 親ドメインを `ksanchu.page` に修正
+  - [x] `docs/designdoc/infra-designdoc.md`: 本番ドメインおよび親ドメインの言及をすべて `ksanchu.page` に修正
+- [x] 全品質検証の実行
+  - [x] `pnpm terraform:fmt:check` & `pnpm terraform:validate`
+  - [x] `pnpm test`
+  - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md`
+- [x] コミット & ブランチ push
+- [x] 修正用 Pull Request の作成

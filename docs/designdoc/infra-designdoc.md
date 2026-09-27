@@ -21,7 +21,7 @@ Instagram 投稿を取得して EPUB（電子書籍）を生成・配布する W
 | **インフラ管理 (IaC)** | **Terraform (Google Provider)**           | インフラ・権限のコード化、再現性の確保、設定ドリフト防止           |
 | **CI/CD**              | **GitHub Actions**                        | 自動テスト・コンテナビルド・Cloud Run への自動デプロイ             |
 | **CI/CD 認証**         | **Workload Identity Federation (WIF)**    | 秘密鍵（サービスアカウントキー JSON）不要のキーレス認証            |
-| **DNS / ドメイン**     | **Cloudflare + Cloud Run Domain Mapping** | 独自ドメイン (`feedstobook.ksanchu.info`)、Google 自動証明書 (SSL) |
+| **DNS / ドメイン**     | **Cloudflare + Cloud Run Domain Mapping** | 独自ドメイン (`feedstobook.ksanchu.page`)、Google 自動証明書 (SSL) |
 
 ---
 
@@ -31,7 +31,7 @@ Instagram 投稿を取得して EPUB（電子書籍）を生成・配布する W
 flowchart TD
     subgraph Client ["クライアント & DNS"]
         User["ユーザー (Browser / Mobile)"]
-        CF["Cloudflare DNS\n(feedstobook.ksanchu.info)"]
+        CF["Cloudflare DNS\n(feedstobook.ksanchu.page)"]
     end
 
     subgraph GCP ["Google Cloud (asia-northeast1)"]
@@ -155,12 +155,12 @@ WIF プロバイダ名（`projects/xxx/...`）やサービスアカウントの�
 
 #### ① 独自ドメイン構成
 
-- **本番ドメイン**: `feedstobook.ksanchu.info`
+- **本番ドメイン**: `feedstobook.ksanchu.page`
 - **SSL/TLS**: Google マネージド証明書（自動更新・無料）
 
 #### ② なぜ `enable_custom_domain` フラグでオプショナル化したのか
 
-Cloud Run のドメインマッピング（`google_cloud_run_domain_mapping`）を作成するには、親ドメイン `ksanchu.info` の所有権が Google Search Console（Webmaster Central）で事前に確認されている必要があります。
+Cloud Run のドメインマッピング（`google_cloud_run_domain_mapping`）を作成するには、親ドメイン `ksanchu.page` の所有権が Google Search Console（Webmaster Central）で事前に確認されている必要があります。
 DNS 伝播や所有権確認には時間がかかるため、**初期構築時はドメインマッピングを無効（`enable_custom_domain = false`）に設定** しています。これにより、ドメイン認証の完了を待つことなく、Cloud Run デフォルト URL（`https://feedstobook-xxxxx-an.a.run.app`）でアプリの先行稼働や CI/CD の動作確認を行えるようにしています。
 
 ---
@@ -179,7 +179,7 @@ echo -n "NEW_INSTAGRAM_CLIENT_SECRET" | gcloud secrets versions add INSTAGRAM_CL
   --project="${PROJECT_ID}" --data-file=-
 
 # 例: BETTER_AUTH_URL を独自ドメインに更新する場合
-echo -n "https://feedstobook.ksanchu.info" | gcloud secrets versions add BETTER_AUTH_URL \
+echo -n "https://feedstobook.ksanchu.page" | gcloud secrets versions add BETTER_AUTH_URL \
   --project="${PROJECT_ID}" --data-file=-
 ```
 
@@ -202,9 +202,9 @@ echo -n "https://feedstobook.ksanchu.info" | gcloud secrets versions add BETTER_
 
 ---
 
-### 4.3 独自ドメイン (`feedstobook.ksanchu.info`) の有効化手順
+### 4.3 独自ドメイン (`feedstobook.ksanchu.page`) の有効化手順
 
-Google Search Console で親ドメイン `ksanchu.info` の所有権確認（TXT レコード認証）が完了した後の手順です。
+Google Search Console で親ドメイン `ksanchu.page` の所有権確認（TXT レコード認証）が完了した後の手順です。
 
 #### 手順 1: Terraform でドメインマッピングを有効化
 

@@ -23,7 +23,7 @@ variable "app_name" {
 variable "domain_name" {
   type        = string
   description = "独自ドメイン"
-  default     = "feedstobook.ksanchu.info"
+  default     = "feedstobook.ksanchu.page"
 }
 
 variable "github_repository" {
