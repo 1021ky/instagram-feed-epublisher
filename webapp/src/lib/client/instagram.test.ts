@@ -64,6 +64,38 @@ test("requestEpub returns blob on success", async () => {
   );
 });
 
+test("requestEpub sends coverTheme and sortOrder to /api/epub/demo in demoMode", async () => {
+  const blob = new Blob(["demo-epub"]);
+  const response = {
+    ok: true,
+    status: 200,
+    blob: async () => blob,
+    headers: new Headers({ "content-type": "application/epub+zip" }),
+  } as unknown as Response;
+  const fetchMock = vi.fn().mockResolvedValue(response);
+  globalThis.fetch = fetchMock;
+
+  const request = {
+    demoMode: true,
+    filter: { maxCount: 5 },
+    metadata: {
+      title: "Demo",
+      author: "@demo",
+      contact: "demo@example.com",
+      instagramUrl: "https://instagram.com/demo",
+      coverTheme: "ivory" as const,
+    },
+    coverTheme: "ivory" as const,
+    sortOrder: "asc" as const,
+  };
+  const result = await requestEpub(request);
+  expect(result).toBe(blob);
+  expect(fetchMock).toHaveBeenCalledWith(
+    "/api/epub/demo",
+    expect.objectContaining({ body: JSON.stringify(request) }),
+  );
+});
+
 test("requestEpub throws on error", async () => {
   const response = {
     ok: false,

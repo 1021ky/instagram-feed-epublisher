@@ -387,6 +387,9 @@ export default function Page() {
           instagramUrl: customSettings.instagramUrl ?? "",
           coverTheme: customSettings.coverTheme,
         },
+        coverTheme: customSettings.coverTheme,
+        sortOrder: customSettings.sortOrder,
+        selectedMediaIds: itemsForEpub.map((item) => item.id),
         items: sortedItemsForEpub,
       });
 

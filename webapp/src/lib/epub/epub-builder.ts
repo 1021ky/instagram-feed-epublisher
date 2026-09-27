@@ -67,7 +67,7 @@ export async function buildEpub(input: EpubInput, outputDir: string): Promise<st
   const coverPath = await renderCoverJpg(
     input.metadata,
     outputDir,
-    input.coverTheme ?? DEFAULT_COVER_THEME_ID,
+    input.coverTheme ?? input.metadata.coverTheme ?? DEFAULT_COVER_THEME_ID,
   );
   logger.info("Cover generated", { coverPath });
 

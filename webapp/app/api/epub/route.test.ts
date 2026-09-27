@@ -87,10 +87,45 @@ describe("POST /api/epub", () => {
           contact: "contact@example.com",
           instagramUrl: "https://instagram.com/example",
           language: undefined,
+          coverTheme: "navy",
         },
         coverTheme: "navy",
         sortOrder: "desc",
       },
+      "/tmp/epub-workdir",
+    );
+  });
+
+  it("トップレベル未指定時にmetadata.coverThemeおよびfilter.sortOrderからフォールバック解決する", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: { maxCount: 10, sortOrder: "asc" },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+            coverTheme: "slate",
+          },
+          selectedMediaIds: ["1"],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(buildEpub).toHaveBeenCalledWith(
+      expect.objectContaining({
+        coverTheme: "slate",
+        sortOrder: "asc",
+        metadata: expect.objectContaining({
+          coverTheme: "slate",
+        }),
+      }),
       "/tmp/epub-workdir",
     );
   });

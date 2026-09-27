@@ -204,6 +204,33 @@ describe("buildEpub", () => {
     expect(capturedEpubOutputPaths[0]).toBe("/tmp/instagram-feed.epub");
   });
 
+  test("トップレベルのcoverTheme未指定時、metadata.coverThemeが表紙生成に反映される", async () => {
+    const { renderCoverJpg } = await import("@/lib/epub/cover-renderer");
+
+    await buildEpub(
+      {
+        items,
+        metadata: {
+          title: "title",
+          author: "author",
+          contact: "contact",
+          instagramUrl: "url",
+          coverTheme: "ivory",
+        },
+      },
+      "/tmp",
+    );
+
+    expect(renderCoverJpg).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "title",
+        coverTheme: "ivory",
+      }),
+      "/tmp",
+      "ivory",
+    );
+  });
+
   test("不正なtimestampを持つ投稿は末尾に元順のまま配置する", async () => {
     const { downloadMedia } = await import("@/lib/epub/media-downloader");
 

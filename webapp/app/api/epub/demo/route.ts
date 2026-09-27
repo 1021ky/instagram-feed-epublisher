@@ -7,7 +7,8 @@ import os from "node:os";
 import path from "node:path";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 import { buildEpub } from "@/lib/epub/epub-builder";
-import type { EpubMetadata } from "@/lib/epub/types";
+import { COVER_THEMES, DEFAULT_COVER_THEME_ID } from "@/lib/epub/themes";
+import type { CoverThemeId, EpubMetadata, EpubSortOrder } from "@/lib/epub/types";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";
 import { sortItemsByTimestamp } from "@/lib/epub/sort";
 import type { FeedFilter, InstagramMedia } from "@/lib/instagram/types";
@@ -51,21 +52,31 @@ export async function POST(request: Request) {
       filter: FeedFilter;
       items: InstagramMedia[];
       metadata: EpubMetadata;
+      coverTheme?: CoverThemeId;
+      sortOrder?: EpubSortOrder;
     };
+
+    const rawCoverTheme = payload.coverTheme ?? payload.metadata?.coverTheme;
+    const coverTheme =
+      rawCoverTheme && COVER_THEMES.some((t) => t.id === rawCoverTheme)
+        ? rawCoverTheme
+        : DEFAULT_COVER_THEME_ID;
+
+    const rawSortOrder = payload.sortOrder ?? payload.filter?.sortOrder;
+    const sortOrder = rawSortOrder === "asc" || rawSortOrder === "desc" ? rawSortOrder : "desc";
 
     logger.debug("Demo EPUB generation requested", {
       filter: payload.filter,
       title: payload.metadata.title,
       itemCount: payload.items?.length ?? 0,
+      coverTheme,
+      sortOrder,
     });
 
     const items = payload.items?.length
       ? resolveAllowedDemoItems(payload.items)
       : sampleDemoFeedData.posts;
-    const filtered = sortItemsByTimestamp(
-      applyFeedFilter(items, payload.filter),
-      payload.filter.sortOrder,
-    );
+    const filtered = sortItemsByTimestamp(applyFeedFilter(items, payload.filter), sortOrder);
 
     if (filtered.length === 0) {
       logger.error("No demo posts found for EPUB generation", { filter: payload.filter });
@@ -76,7 +87,18 @@ export async function POST(request: Request) {
     }
 
     workDir = await mkdtemp(path.join(os.tmpdir(), "epub-demo-"));
-    const epubPath = await buildEpub({ items: filtered, metadata: payload.metadata }, workDir);
+    const epubPath = await buildEpub(
+      {
+        items: filtered,
+        metadata: {
+          ...payload.metadata,
+          coverTheme,
+        },
+        coverTheme,
+        sortOrder,
+      },
+      workDir,
+    );
 
     logger.info("Demo EPUB generation completed", { itemCount: filtered.length, path: epubPath });
     const epubBuffer = await readFile(epubPath);
