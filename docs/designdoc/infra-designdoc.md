@@ -161,7 +161,8 @@ WIF プロバイダ名（`projects/xxx/...`）やサービスアカウントの�
 #### ② なぜ `enable_custom_domain` フラグでオプショナル化したのか
 
 Cloud Run のドメインマッピング（`google_cloud_run_domain_mapping`）を作成するには、親ドメイン `ksanchu.page` の所有権が Google Search Console（Webmaster Central）で事前に確認されている必要があります。
-DNS 伝播や所有権確認には時間がかかるため、**初期構築時はドメインマッピングを無効（`enable_custom_domain = false`）に設定** しています。これにより、ドメイン認証の完了を待つことなく、Cloud Run デフォルト URL（`https://feedstobook-xxxxx-an.a.run.app`）でアプリの先行稼働や CI/CD の動作確認を行えるようにしています。
+初期構築時は所有権確認完了前に Terraform apply が停止することを防ぐためにオプショナル化していましたが、所有権確認が完了した後は本番標準として **`enable_custom_domain = true` をデフォルト値** に設定しています。
+これにより、通常運用時はフラグを意識せず `terraform apply` を実行できます。検証・ステージング環境などでドメインマッピングの重複を回避したい場合のみ、明示的に `-var="enable_custom_domain=false"` を指定して切り離すことが可能です。
 
 ---
 
@@ -204,13 +205,13 @@ echo -n "https://feedstobook.ksanchu.page" | gcloud secrets versions add BETTER_
 
 ### 4.3 独自ドメイン (`feedstobook.ksanchu.page`) の有効化手順
 
-Google Search Console で親ドメイン `ksanchu.page` の所有権確認（TXT レコード認証）が完了した後の手順です。
+Google Search Console で親ドメイン `ksanchu.page` の所有権確認（TXT レコード認証）が完了した後の手順です。本番環境は `enable_custom_domain = true` がデフォルトとなっているため、通常の apply で作成されます。
 
-#### 手順 1: Terraform でドメインマッピングを有効化
+#### 手順 1: Terraform でドメインマッピングを適用
 
 ```bash
 cd terraform
-terraform apply -var="project_id=feeds-to-book" -var="enable_custom_domain=true"
+terraform apply -var="project_id=feeds-to-book"
 ```
 
 #### 手順 2: 出力された DNS レコードの確認

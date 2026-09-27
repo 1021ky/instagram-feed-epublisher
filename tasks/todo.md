@@ -314,4 +314,9 @@
   - [x] `pnpm test`
   - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md`
 - [x] コミット & ブランチ push
-- [x] 修正用 Pull Request の作成
+- [x] 修正用 Pull Request の作成 (#72)
+- [x] `enable_custom_domain` のデフォルト true 化
+  - [x] `terraform/variables.tf`: `enable_custom_domain` の default を `true` に変更
+  - [x] `terraform/terraform.tfvars.example`: `enable_custom_domain = true` を追加
+  - [x] `docs/designdoc/infra-designdoc.md`: デフォルト true 化の設計根拠と apply 手順の更新
+  - [x] 全品質検証（fmt, validate, test, lint, mermaid）の通過確認
