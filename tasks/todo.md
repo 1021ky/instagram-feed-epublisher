@@ -408,3 +408,14 @@
   - [x] `tsc --noEmit` & `pnpm build`
 - [x] 学びと知見（`tasks/lessons.md`）の反映
 - [x] コミット & プッシュとレビュー返信
+
+---
+
+## Issue #86: Playwright を廃止し Satori による軽量・高速な表紙画像生成に移行する
+
+- [ ] パッケージ選定と導入 (`satori`, `@resvg/resvg-js` または `sharp`)
+- [ ] `webapp/src/lib/epub/cover-renderer.ts` のリファクタリング (Satori による JSX/SVG レンダリング)
+- [ ] 不要パッケージ (`playwright`, `playwright-core`) の依存関係からの削除
+- [ ] `webapp/Dockerfile` から Chromium インストール・apt パッケージ・アセットコピー処理の全廃
+- [ ] `webapp/next.config.mjs` の整理
+- [ ] 単体テストの更新と動作検証
