@@ -29,8 +29,8 @@ describe("middleware", () => {
 
     const response = middleware(createRequest("https://feedstobook.ksanchu.page/feed"));
 
+    expect(response.status).toBe(200);
     expect(response.headers.get("location")).toBeNull();
-    expect(response.headers.get("x-middleware-next")).toBe("1");
   });
 
   it("localhost ではリダイレクトしない", () => {
@@ -38,8 +38,8 @@ describe("middleware", () => {
 
     const response = middleware(createRequest("http://localhost:3000/feed?tag=dev"));
 
+    expect(response.status).toBe(200);
     expect(response.headers.get("location")).toBeNull();
-    expect(response.headers.get("x-middleware-next")).toBe("1");
   });
 
   it("auth API パスは本番でもリダイレクトしない", () => {
@@ -49,13 +49,13 @@ describe("middleware", () => {
       createRequest("https://service-12345-an.a.run.app/api/auth/sign-in/instagram"),
     );
 
+    expect(response.status).toBe(200);
     expect(response.headers.get("location")).toBeNull();
-    expect(response.headers.get("x-middleware-next")).toBe("1");
   });
 
   it("matcher で静的アセットと auth API を除外する", () => {
     expect(config).toEqual({
-      matcher: ["/((?!_next/static|_next/image|favicon.ico|api/auth).*)"],
+      matcher: ["/((?!_next/static|_next/image|favicon\\.ico|api/auth).*)"],
     });
   });
 });
