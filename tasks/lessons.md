@@ -122,3 +122,15 @@
 - **Dockerfile における pnpm パス・パッケージバージョンのハードコード回避**:
   - `standalone` 成果物にライブラリの動的非 JS アセット（`browsers.json` 等）を補完配置する際、`.pnpm/playwright-core@1.63.0/...` のように pnpm の仮想ストア構造やバージョン番号を Dockerfile に直書きすると、バージョンアップ時やパッケージマネージャの内部仕様変更時に壊れやすい。
   - `builder` ステージで `find` を用いてアセットを一時ディレクトリ（`/app/playwright-assets/`）に抽出し、`runner` ステージで standalone 環境内のすべての対象ディレクトリ（`playwright-core`）および解決先パス（`node_modules/playwright-core`）へ動的に配置することで、将来のバージョン更新やディレクトリ構造の変更に影響されない堅牢なビルドを実現できる。
+
+## Satori と sharp によるヘッドレスブラウザレス画像生成とコンテナ最適化
+
+- **ヘッドレスブラウザから Satori + sharp への移行によるメリットと設計**:
+  - 表紙画像1枚（1200×1600px）を生成するために Headless Chromium を起動していた構成から、Vercel 製の `satori`（HTML/JSX/CSS to SVG）および `sharp`（SVG to JPEG）によるサーバーサイドインメモリ生成に刷新。
+  - レンダリング速度が 1.5〜3秒から約200ミリ秒（Satori 約80ms + sharp 約90ms）へと劇的に高速化し、Chromium 起動・終了に伴うメモリスパイクと OOM リスクを解消。
+  - Dockerfile から Chromium バイナリ本体（数百MB）、OS 依存ライブラリ、apt パッケージ、および `browsers.json` 抽出・配置ワークアラウンドを全廃でき、イメージコンテンツサイズを約 118MB まで極小化。
+- **Satori におけるフォントバイナリ要件と Next.js 16 (Turbopack) 対策**:
+  - Satori は Yoga による Flexbox レイアウト計算時に文字幅と折り返しを正確に測定するため、フォントバイナリ（`ArrayBuffer` / TTF・OTF・WOFF）の明示的提供が必須。
+  - `Noto Sans JP`（Bold / Regular）の TTF を `webapp/public/fonts/` に配置することで、Next.js standalone ビルド時に `public/` の自動コピーによってコンテナ環境へもシームレスに同封・解決できる。
+  - フォントファイルを動的読み込み（`readFile`）する際は、Next.js 16 (Turbopack) のプロジェクト全体トレース警告を防ぐため `/*turbopackIgnore: true*/` を付与する。
+  - また、Satori の内部 wasm（`harfbuzzjs` 等）や sharp の native prebuilds をバンドラーから除外して Node.js ネイティブ環境で解決させるため、`next.config.mjs` の `serverExternalPackages` に `["@lesjoursfr/html-to-epub", "satori", "sharp"]` を指定する。

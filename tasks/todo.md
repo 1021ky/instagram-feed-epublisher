@@ -413,9 +413,28 @@
 
 ## Issue #86: Playwright を廃止し Satori による軽量・高速な表紙画像生成に移行する
 
-- [ ] パッケージ選定と導入 (`satori`, `@resvg/resvg-js` または `sharp`)
-- [ ] `webapp/src/lib/epub/cover-renderer.ts` のリファクタリング (Satori による JSX/SVG レンダリング)
-- [ ] 不要パッケージ (`playwright`, `playwright-core`) の依存関係からの削除
-- [ ] `webapp/Dockerfile` から Chromium インストール・apt パッケージ・アセットコピー処理の全廃
-- [ ] `webapp/next.config.mjs` の整理
-- [ ] 単体テストの更新と動作検証
+- [x] パッケージ選定と検証
+  - [x] `satori`, `sharp` の導入・動作検証（約180msで1200x1600 JPG生成成功）
+  - [x] 日本語フォント (Noto Sans JP Bold / Regular) の配置とインメモリキャッシュ機構の実装
+- [x] 不要パッケージの削除
+  - [x] `webapp/package.json` の dependencies から `playwright` を削除
+  - [x] `pnpm-lock.yaml` の更新（Exact Version Pinning 遵守: satori 0.33.5, sharp 0.35.4）
+  - [x] `webapp/next.config.mjs` の `serverExternalPackages` から `playwright`, `playwright-core` を削除し `satori`, `sharp` を追加
+- [x] 表紙画像生成エンジン (`webapp/src/lib/epub/cover-renderer.tsx`) のリファクタリング
+  - [x] Satori による React element (JSX) / SVG レンダリング関数の実装
+  - [x] テーマ（モダン、クラシック、エレガント等）のスタイル適用（Flexboxベースのレイアウト）
+  - [x] SVG から JPEG（1200×1600px）への高速ラスタライズ処理の実装
+- [x] `webapp/Dockerfile` の軽量化・クリーンアップ
+  - [x] builder ステージから `browsers.json` 抽出処理の削除
+  - [x] runner ステージから `apt-get` による Chromium 依存・フォントインストール処理および Playwright インストール処理の全廃
+  - [x] runner ステージから `browsers.json` の配置処理の全廃
+  - [x] コンテナイメージコンテンツサイズを 118MB に削減し、ビルド時間を大幅短縮
+- [x] テストの更新と動作担保
+  - [x] `webapp/src/lib/epub/cover-renderer.test.ts` のモック・テスト更新（7テスト全通過）
+  - [x] `webapp/src/lib/epub/epub-builder.test.ts` を含む全24テストファイル・120テスト全通過確認
+  - [x] 本番 Docker コンテナ内でのデモ EPUB 生成 API (`/api/epub/demo`) 実行による HTTP 200 応答および `cover.jpg` (1200x1600) 含有・品質検証完了
+- [x] 全品質ゲート検証とドキュメント更新
+  - [x] `pnpm test`, `pnpm lint`, `pnpm format:check`, `pnpm check:mermaid`, `pnpm lint:md`
+  - [x] `tsc --noEmit` & `pnpm build`
+  - [x] `docs/designdoc/infra-designdoc.md` のベースイメージおよび表紙生成アーキテクチャの更新
+  - [x] `tasks/lessons.md` に学びと知見を記録

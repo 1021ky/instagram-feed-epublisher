@@ -1,32 +1,28 @@
-/**
- * @file 表紙レンダラーの単体テスト。
- */
-import { expect, test, vi } from "vitest";
+import path from "node:path";
+import { expect, test } from "vitest";
 
-vi.mock("playwright", () => ({
-  chromium: {
-    launch: vi.fn().mockResolvedValue({
-      newPage: vi.fn().mockResolvedValue({
-        setContent: vi.fn(),
-        screenshot: vi.fn().mockResolvedValue(Buffer.from("jpg")),
-      }),
-      close: vi.fn(),
-    }),
-  },
-}));
+import {
+  buildCoverElement,
+  escapeHtml,
+  loadFonts,
+  renderCoverJpg,
+  renderCoverSvg,
+  resolveFontPath,
+} from "./cover-renderer";
 
-vi.mock("node:fs/promises", async () => {
-  const actual = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
-  return {
-    ...actual,
-    writeFile: vi.fn(),
-  };
+test("resolveFontPathはフォントのパスを解決する", () => {
+  const fontPath = resolveFontPath("NotoSansJP-Bold.ttf");
+  expect(fontPath).toContain("NotoSansJP-Bold.ttf");
 });
 
-import { buildCoverHtml, escapeHtml, renderCoverJpg } from "./cover-renderer";
+test("loadFontsはNoto Sans JPフォントのArrayBufferを返す", async () => {
+  const fonts = await loadFonts();
+  expect(fonts.bold.byteLength).toBeGreaterThan(0);
+  expect(fonts.regular.byteLength).toBeGreaterThan(0);
+});
 
-test("buildCoverHtmlはメタデータを含む", () => {
-  const html = buildCoverHtml({
+test("buildCoverElementはメタデータとテーマスタイルを含むReact要素を生成する", () => {
+  const element = buildCoverElement({
     title: "Title",
     subtitle: "Subtitle",
     author: "Author",
@@ -34,14 +30,14 @@ test("buildCoverHtmlはメタデータを含む", () => {
     instagramUrl: "https://instagram.com",
     coverTheme: "ivory",
   });
-  expect(html).toContain("Title");
-  expect(html).toContain("Subtitle");
-  expect(html).toContain("Author");
-  expect(html).toContain("#f5efe2");
+
+  expect(element.type).toBe("div");
+  const rootProps = element.props as { style: { backgroundColor: string } };
+  expect(rootProps.style.backgroundColor).toBe("#f5efe2");
 });
 
-test("buildCoverHtmlは選択テーマの配色とタイポグラフィを反映する", () => {
-  const html = buildCoverHtml(
+test("buildCoverElementは選択テーマの配色を反映する", () => {
+  const element = buildCoverElement(
     {
       title: "Title",
       author: "Author",
@@ -51,30 +47,55 @@ test("buildCoverHtmlは選択テーマの配色とタイポグラフィを反映
     "purple",
   );
 
-  expect(html).toContain("#1e1b4b");
-  expect(html).toContain("#c4b5fd");
-  expect(html).toContain('"Trebuchet MS", "Helvetica", "Arial", sans-serif');
+  const rootProps = element.props as { style: { backgroundColor: string } };
+  expect(rootProps.style.backgroundColor).toBe("#1e1b4b");
+});
+
+test("renderCoverSvgはSatoriを用いて1200x1600のSVG文字列を生成する", async () => {
+  const svg = await renderCoverSvg(
+    {
+      title: "テスト書籍",
+      subtitle: "サブタイトル",
+      author: "著者名",
+      contact: "",
+      instagramUrl: "https://instagram.com/test",
+      coverTheme: "navy",
+    },
+    "navy",
+  );
+
+  expect(svg).toContain("<svg");
+  expect(svg).toContain('width="1200"');
+  expect(svg).toContain('height="1600"');
 });
 
 test("escapeHtmlは危険な文字をエスケープする", () => {
   expect(escapeHtml("<script>")).toBe("&lt;script&gt;");
 });
 
-test("renderCoverJpgは表紙画像のパスを返す", async () => {
-  const path = await renderCoverJpg(
-    { title: "t", author: "a", contact: "", instagramUrl: "" },
-    "/tmp",
-  );
-  expect(path).toBe("/tmp/cover.jpg");
-});
+test("renderCoverJpgは表紙画像のパスを返しJPGファイルを生成する", async () => {
+  const os = await import("node:os");
+  const fsPromises = await import("node:fs/promises");
+  const fs = await import("node:fs");
+  const tempDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), "cover-test-"));
 
-test("renderCoverJpgはPlaywright失敗時に例外を投げる", async () => {
-  const { chromium } = await import("playwright");
-  (chromium.launch as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-    new Error("launch error"),
-  );
-
-  await expect(
-    renderCoverJpg({ title: "t", author: "a", contact: "", instagramUrl: "" }, "/tmp"),
-  ).rejects.toThrow("launch error");
+  try {
+    const coverPath = await renderCoverJpg(
+      {
+        title: "Test Book",
+        subtitle: "Subtitle",
+        author: "Author",
+        contact: "",
+        instagramUrl: "https://instagram.com",
+        coverTheme: "white",
+      },
+      tempDir,
+    );
+    expect(coverPath).toBe(path.join(tempDir, "cover.jpg"));
+    expect(fs.existsSync(coverPath)).toBe(true);
+    const stats = fs.statSync(coverPath);
+    expect(stats.size).toBeGreaterThan(1000);
+  } finally {
+    await fsPromises.rm(tempDir, { recursive: true, force: true });
+  }
 });
