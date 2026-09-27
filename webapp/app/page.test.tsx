@@ -18,8 +18,8 @@ vi.mock("@/components/auth/LoginCard", () => ({
 }));
 
 vi.mock("@/components/auth/Navbar", () => ({
-  Navbar: ({ user }: { user?: { username?: string } | null }) => (
-    <div>{user ? `NAVBAR:${user.username ?? "unknown"}` : "NAVBAR:guest"}</div>
+  Navbar: ({ user }: { user?: { username?: string; displayName?: string } | null }) => (
+    <div>{user ? `NAVBAR:${user.username ?? user.displayName ?? "unknown"}` : "NAVBAR:guest"}</div>
   ),
 }));
 
