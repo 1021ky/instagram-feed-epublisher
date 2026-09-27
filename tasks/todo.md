@@ -438,3 +438,23 @@
   - [x] `tsc --noEmit` & `pnpm build`
   - [x] `docs/designdoc/infra-designdoc.md` のベースイメージおよび表紙生成アーキテクチャの更新
   - [x] `tasks/lessons.md` に学びと知見を記録
+
+---
+
+## Issue: 退会時の Instagram 連携解除案内モーダル導入と退会 API の整理
+
+- [x] 退会 API (`webapp/app/api/user/delete/route.ts`) の整理
+  - [x] Instagram Graph API 非対応のエンドポイント呼び出し（`me/permissions`）を撤廃
+  - [x] セッションおよび Better Auth Cookie の完全破棄を中心とした堅牢な設計へ整理
+  - [x] API 単体テスト (`route.test.ts`) の更新と通過確認
+- [x] 退会確認・案内モーダル (`webapp/src/components/auth/AccountDeletionModal.tsx`) の新規実装
+  - [x] 退会前確認ステップ: 本サービス内データ破棄と Instagram 側仕様の説明、キャンセル/実行
+  - [x] 退会完了ステップ: 完了通知、Instagram 管理画面 (`/accounts/manage_access/`) への直接リンク案内、データ削除手順ページへの誘導
+  - [x] WAI-ARIA 対応モーダル設計 (`role="dialog"`, `aria-modal="true"`, フォーカス制御, Esc キー)
+- [x] `webapp/app/page.tsx` へのモーダル統合
+  - [x] `window.confirm` を廃止し、`AccountDeletionModal` での確認・完了フローを適用
+- [x] 単体テストの追加と更新
+  - [x] `webapp/src/components/auth/AccountDeletionModal.test.tsx` の新規作成
+  - [x] 全テストスイートの実行・通過確認 (25ファイル 125テスト全パス)
+- [x] 全品質ゲートの検証 (test, lint, format, typecheck, build, markdown, mermaid)
+- [x] 学びと知見 (`tasks/lessons.md`) の記録

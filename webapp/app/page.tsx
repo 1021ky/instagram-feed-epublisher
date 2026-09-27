@@ -11,6 +11,10 @@ import { Navbar } from "@/components/auth/Navbar";
 import { FeedFilterStep, PostListStep, StickyActionBar } from "@/components/feed";
 import { EpubCustomizeStep } from "@/components/epub/EpubCustomizeStep";
 import { ExportModal } from "@/components/epub/ExportModal";
+import {
+  AccountDeletionModal,
+  type AccountDeletionStep,
+} from "@/components/auth/AccountDeletionModal";
 import { fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";
@@ -58,6 +62,9 @@ export default function Page() {
   const [loadingLogin, setLoadingLogin] = useState(false);
   const [loadingFeed, setLoadingFeed] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteModalStep, setDeleteModalStep] = useState<AccountDeletionStep>("confirm");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
 
@@ -179,36 +186,43 @@ export default function Page() {
   };
 
   /**
+   * 退会確認モーダルを開く。
+   */
+  const handleOpenDeleteModal = () => {
+    setDeleteModalStep("confirm");
+    setDeleteError(null);
+    setIsDeleteModalOpen(true);
+  };
+
+  /**
+   * 退会モーダルを閉じる（キャンセル）。
+   */
+  const handleCloseDeleteModal = () => {
+    if (!deletingAccount) {
+      setIsDeleteModalOpen(false);
+      setDeleteError(null);
+    }
+  };
+
+  /**
    * 退会（連携解除）操作を実行する。
    *
-   * 確認ダイアログを表示し、同意が得られた場合のみ退会 API を呼び出して
-   * 認可失効と Cookie 破棄を行い、完了後はトップページ（ログイン前）へ確実に遷移する。
-   *
-   * @returns 完了を表す Promise
+   * サーバー側の認証 Cookie 破棄 API を呼び出し、クライアントセッションを破棄したうえで
+   * 退会完了ステップ（Instagram 側の連携解除案内）へ遷移する。
    */
-  const handleDeleteAccount = async () => {
-    if (!window.confirm("Instagram 連携を解除し、ログアウトします。この操作を続けますか？")) {
-      return;
-    }
-
+  const handleConfirmDeleteAccount = async () => {
     setDeletingAccount(true);
-    setError(null);
+    setDeleteError(null);
 
     try {
-      // 1. サーバー側の Instagram 認可失効 & Cookie 破棄 API を呼び出す
-      try {
-        const response = await fetch("/api/user/delete", {
-          method: "POST",
-        });
-        if (!response.ok) {
-          const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-          console.warn(
-            `退会 API がエラー応答を返しました (status: ${response.status}):`,
-            payload?.error ?? "不明なエラー",
-          );
-        }
-      } catch (apiError) {
-        console.warn("退会 API 呼び出しで例外が発生しました:", apiError);
+      // 1. サーバー側の Cookie 破棄 API を呼び出す
+      const response = await fetch("/api/user/delete", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? "退会処理に失敗しました");
       }
 
       // 2. クライアント側の Better Auth セッションを破棄
@@ -224,17 +238,26 @@ export default function Page() {
       setHasFetched(false);
       setAppMode("real");
 
-      // 4. TOP（ログイン前）へ確実に遷移（URLパラメータ等をリセット）
-      if (window.location.pathname === "/" && !window.location.search && !window.location.hash) {
-        window.location.reload();
-      } else {
-        window.location.href = "/";
-      }
+      // 4. 退会完了ステップへ遷移
+      setDeleteModalStep("completed");
     } catch (e) {
-      console.error("退会後遷移処理でエラーが発生しました:", e);
-      window.location.href = "/";
+      console.error("退会処理でエラーが発生しました:", e);
+      const message = e instanceof Error ? e.message : "退会処理に失敗しました";
+      setDeleteError(message);
     } finally {
       setDeletingAccount(false);
+    }
+  };
+
+  /**
+   * 退会完了モーダルを閉じ、トップページ（ログイン前）へ確実に遷移する。
+   */
+  const handleCompleteCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    if (window.location.pathname === "/" && !window.location.search && !window.location.hash) {
+      window.location.reload();
+    } else {
+      window.location.href = "/";
     }
   };
 
@@ -469,8 +492,8 @@ export default function Page() {
   return (
     <div className={`page ${feed.length > 0 ? "pb-28 sm:pb-32" : ""}`}>
       <div
-        aria-hidden={isExportModalOpen}
-        inert={isExportModalOpen}
+        aria-hidden={isExportModalOpen || isDeleteModalOpen}
+        inert={isExportModalOpen || isDeleteModalOpen}
         className="max-w-3xl mx-auto w-full"
       >
         <InAppBrowserAlert />
@@ -478,7 +501,7 @@ export default function Page() {
           user={activeProfile}
           isDemoMode={isDemoMode}
           onLogout={canUseApp ? handleLogout : undefined}
-          onDeleteAccount={!isDemoMode && isLoggedIn ? handleDeleteAccount : undefined}
+          onDeleteAccount={!isDemoMode && isLoggedIn ? handleOpenDeleteModal : undefined}
           disabled={loadingLogin || loadingFeed || isGeneratingEpub || deletingAccount}
         />
         {error && (
@@ -602,6 +625,16 @@ export default function Page() {
             triggerDownload(downloadUrlRef.current, downloadFilename);
           }
         }}
+      />
+
+      <AccountDeletionModal
+        isOpen={isDeleteModalOpen}
+        step={deleteModalStep}
+        isDeleting={deletingAccount}
+        error={deleteError}
+        onConfirm={handleConfirmDeleteAccount}
+        onClose={handleCloseDeleteModal}
+        onCompleteClose={handleCompleteCloseDeleteModal}
       />
     </div>
   );
