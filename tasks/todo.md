@@ -394,3 +394,17 @@
   - [x] `tsc --noEmit` & `pnpm build` 成功確認
 - [x] 学びと知見（`tasks/lessons.md`）の記録
 - [x] Issue #84 に対する Pull Request #85 の作成
+
+---
+
+## PR #85 レビュー指摘対応 (Copilot Review: #pullrequestreview-5328911563)
+
+- [x] 指摘対応: `webapp/Dockerfile` でのバージョン・pnpmフォルダ名ハードコードの解消
+  - [x] builder ステージで `find` を用いて `browsers.json` をバージョン非依存で抽出
+  - [x] runner ステージで standalone 環境内のすべての `playwright-core` フォルダに動的配置
+- [x] テスト・検証
+  - [x] `pnpm test`
+  - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md`
+  - [x] `tsc --noEmit` & `pnpm build`
+- [x] 学びと知見（`tasks/lessons.md`）の反映
+- [x] コミット & プッシュとレビュー返信

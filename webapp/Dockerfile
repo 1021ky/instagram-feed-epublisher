@@ -35,6 +35,10 @@ ENV NODE_ENV=production
 
 RUN pnpm --filter instagram-feed-epublisher-webapp build
 
+# Playwright の browsers.json をバージョン・pnpmパス非依存で抽出
+RUN mkdir -p /app/playwright-assets && \
+    find /app/node_modules -name "browsers.json" -path "*/playwright-core/*" -exec cp {} /app/playwright-assets/browsers.json \;
+
 # 4. Runner stage
 FROM node:24-bookworm-slim AS runner
 WORKDIR /app
@@ -66,10 +70,14 @@ COPY --from=builder --chown=nextjs:nodejs /app/book_layout ./book_layout
 COPY --from=builder --chown=nextjs:nodejs /app/webapp/node_modules/@lesjoursfr/html-to-epub/templates ./webapp/node_modules/@lesjoursfr/html-to-epub/templates
 COPY --from=builder --chown=nextjs:nodejs /app/webapp/node_modules/@lesjoursfr/html-to-epub/templates ./node_modules/@lesjoursfr/html-to-epub/templates
 
-# Playwright のブラウザ定義ファイル (browsers.json) を standalone 環境に確実に配置
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/browsers.json ./node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/browsers.json
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/browsers.json ./node_modules/playwright-core/browsers.json
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/browsers.json ./webapp/node_modules/playwright-core/browsers.json
+# Playwright のブラウザ定義ファイル (browsers.json) を standalone 環境にバージョン非依存で確実に配置
+COPY --from=builder /app/playwright-assets/browsers.json /tmp/browsers.json
+RUN find /app/node_modules -type d -name "playwright-core" -exec cp /tmp/browsers.json {}/browsers.json \; && \
+    mkdir -p /app/node_modules/playwright-core /app/webapp/node_modules/playwright-core && \
+    cp /tmp/browsers.json /app/node_modules/playwright-core/browsers.json && \
+    cp /tmp/browsers.json /app/webapp/node_modules/playwright-core/browsers.json && \
+    rm /tmp/browsers.json && \
+    chown -R nextjs:nodejs /app/node_modules
 
 USER nextjs
 
