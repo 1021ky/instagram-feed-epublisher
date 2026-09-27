@@ -373,3 +373,38 @@
 - [x] 全品質ゲート検証（test, lint, format, tsc, build）
 - [x] 学びと知見（`tasks/lessons.md`）の記録
 - [x] Issue #80 に対する Pull Request #81 の作成
+
+---
+
+## Issue #84 (PR #85): standalone コンテナ上で Playwright の browsers.json 不足による EPUB 生成 500 エラーの解消およびデプロイヘルスチェック改善
+
+- [x] 現象確認と原因調査
+  - [x] Cloud Run stderr ログ（`Cannot find module '.../playwright-core/browsers.json'`）の確認
+  - [x] Next.js `standalone` 出力で動的読み込みされる `browsers.json` が除外される仕様の確認
+  - [x] GitHub Actions デプロイワークフローでのヘルスチェック（301 リダイレクトによるタイムアウト）の確認
+- [x] GitHub Issue #84 の起票
+- [x] 作業ブランチ `fix/issue-84-playwright-browsers-json-healthcheck` の作成
+- [x] 修正実装
+  - [x] `webapp/Dockerfile`: runner ステージで `browsers.json` を standalone 成果物にコピー配置
+  - [x] `webapp/next.config.mjs`: `serverExternalPackages` に `playwright`, `playwright-core` を追加
+  - [x] `.github/workflows/deploy.yml`: ヘルスチェック curl に `-L`（リダイレクト追従）を追加
+- [x] テスト・検証
+  - [x] `pnpm test` 全通過確認
+  - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md` 全通過確認
+  - [x] `tsc --noEmit` & `pnpm build` 成功確認
+- [x] 学びと知見（`tasks/lessons.md`）の記録
+- [x] Issue #84 に対する Pull Request #85 の作成
+
+---
+
+## PR #85 レビュー指摘対応 (Copilot Review: #pullrequestreview-5328911563)
+
+- [x] 指摘対応: `webapp/Dockerfile` でのバージョン・pnpmフォルダ名ハードコードの解消
+  - [x] builder ステージで `find` を用いて `browsers.json` をバージョン非依存で抽出
+  - [x] runner ステージで standalone 環境内のすべての `playwright-core` フォルダに動的配置
+- [x] テスト・検証
+  - [x] `pnpm test`
+  - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md`
+  - [x] `tsc --noEmit` & `pnpm build`
+- [x] 学びと知見（`tasks/lessons.md`）の反映
+- [x] コミット & プッシュとレビュー返信
