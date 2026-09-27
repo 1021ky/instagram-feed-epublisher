@@ -110,3 +110,12 @@
   - JavaScript の WHATWG URL 仕様では、ポートが存在する URL オブジェクトに対して `url.host = "canonical.domain"` とポート無しの値を代入しても、**既存の `port` はクリアされず保持される**ため、`canonical.domain:8080` が生成されてしまう。
   - GFE はポート 8080 での外部アクセスを受け付けないため、アクセス不能（タイムアウト/接続拒否）の原因となる。
   - リダイレクト先 URL を生成する際は、`nextUrl.clone()` を安易に使わず、`new URL(request.nextUrl.pathname + request.nextUrl.search, "https://" + CANONICAL_HOST)` でプロトコルとホストを明示して新規構築するか、`redirectUrl.port = ""` を明示的に指定してポート番号の混入を根絶する。
+
+## Next.js Standalone ビルドと CI/CD デプロイ運用
+
+- **Next.js Standalone ビルドにおける動的非 JS アセット（Playwright `browsers.json`）の欠落対策**:
+  - Playwright はブラウザ管理情報を動的に読み込むため、Next.js の `output: "standalone"` による静的依存追跡（`@vercel/nft`）で `node_modules/playwright-core/browsers.json` がバンドル対象外となり、コンテナ起動後の Playwright 呼び出し時に `Cannot find module .../browsers.json`（HTTP 500）が発生する。
+  - 対策として、`next.config.mjs` の `serverExternalPackages` への指定と同時に、Dockerfile の runner ステージで `builder` から `browsers.json` を standalone 環境の `node_modules` パス（`.pnpm/playwright-core@<version>/node_modules/playwright-core/browsers.json` および `playwright-core/browsers.json`）に明示的に COPY 配置する。
+- **独自ドメイン正規化（Canonical Host Redirect）下での CI/CD デプロイヘルスチェック**:
+  - 本番アプリで非正規ホスト（`*.run.app` 等）から独自ドメインへの 301 リダイレクトを行う場合、CI/CD ワークフローで Cloud Run サービス URL（`*.run.app`）を直接 curl すると `301` が返り、HTTP 200 判定のヘルスチェックがタイムアウト失敗する。
+  - `curl -L`（`--location`）を付与してリダイレクトを追従させ、最終転送先の 200 OK を検証するようにヘルスチェックを設計する。

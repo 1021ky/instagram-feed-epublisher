@@ -66,6 +66,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/book_layout ./book_layout
 COPY --from=builder --chown=nextjs:nodejs /app/webapp/node_modules/@lesjoursfr/html-to-epub/templates ./webapp/node_modules/@lesjoursfr/html-to-epub/templates
 COPY --from=builder --chown=nextjs:nodejs /app/webapp/node_modules/@lesjoursfr/html-to-epub/templates ./node_modules/@lesjoursfr/html-to-epub/templates
 
+# Playwright のブラウザ定義ファイル (browsers.json) を standalone 環境に確実に配置
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/browsers.json ./node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/browsers.json
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/browsers.json ./node_modules/playwright-core/browsers.json
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/browsers.json ./webapp/node_modules/playwright-core/browsers.json
+
 USER nextjs
 
 EXPOSE 8080
