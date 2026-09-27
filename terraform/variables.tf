@@ -23,7 +23,7 @@ variable "app_name" {
 variable "domain_name" {
   type        = string
   description = "独自ドメイン"
-  default     = "feedstobook.ksanchu.info"
+  default     = "feedstobook.ksanchu.page"
 }
 
 variable "github_repository" {
@@ -34,7 +34,7 @@ variable "github_repository" {
 
 variable "enable_custom_domain" {
   type        = bool
-  description = "独自ドメインマッピングを有効化するかどうか（Search Console での所有権確認後に true に設定）"
-  default     = false
+  description = "独自ドメインマッピングを有効化するかどうか（本番環境はデフォルトで true。ドメイン重複を避けたいテスト・ステージング環境では false に設定）"
+  default     = true
 }
 

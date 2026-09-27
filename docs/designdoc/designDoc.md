@@ -140,7 +140,7 @@
 ### 9.1 採用構成
 
 - **基盤**: **Google Cloud Run**（単体コンテナ構成、東京リージョン `asia-northeast1`）
-- **ドメイン**: 独自ドメイン `ksanchu.info`（Cloudflare にて取得・DNS管理済み。Cloudflare 経由で Cloud Run に接続し、SSL/TLS、DDoS防御、静的アセットのCDNキャッシュを併用）
+- **ドメイン**: 独自ドメイン `ksanchu.page`（Cloudflare にて取得・DNS管理済み。Cloudflare 経由で Cloud Run に接続し、SSL/TLS、DDoS防御、静的アセットのCDNキャッシュを併用）
 - **シークレット管理**: **Google Cloud Secret Manager**（機密環境変数を安全にマウント）
 - **CI/CD**: GitHub Actions（Workload Identity Federation によるキーレス連携で、`main` マージ時に即時自動デプロイ）
 
