@@ -99,3 +99,14 @@
   - API ハンドラ側で事前ソートを行い、下流のビルダー関数（`buildEpub`）でも再度ソートを行うような二重処理は、冗長であるだけでなく、それぞれの並び替え仕様や不正値ハンドリングに将来的な乖離が生じた際に予期せぬ不整合を招く。データ変換処理の責務は下流のビルダー関数側に集約・一本化することが望ましい。
 - **型アサーションとフォールバック実装の整合**:
   - リクエストボディの型アサーションでプロパティを必須（`items: InstagramMedia[]`）と定義しながら、実装上で未指定時のフォールバック（`payload.items?.length ? ... : fallback`）を行っていると型と実装の乖離が生じる。省略を許容する項目は型定義上もオプショナル（`items?: InstagramMedia[]`）に揃えることで、安全なリファクタリングを担保できる。
+
+## Cloud Run / リバースプロキシ環境と Next.js Middleware のリダイレクト設計
+
+- **Cloud Run のプロキシヘッダーと Next.js のホスト解決**:
+  - Cloud Run では、Google Frontend（GFE）からコンテナインスタンス（ポート 8080）へリクエストを転送する際、コンテナに届く `Host` ヘッダーは内部サービスホスト（`*.run.app` や `localhost` 等）になる。クライアントが実際にアクセスした外部ドメインは `X-Forwarded-Host` ヘッダーに格納される。
+  - Next.js の `request.nextUrl.hostname` は HTTP の `Host` ヘッダーを参照するため、Cloud Run 上ではクライアントのアクセスドメインと一致しない。独自ドメインへの正規化判定（Canonical Host 判定）では、`request.headers.get("x-forwarded-host")?.split(",")[0].trim().split(":")[0]` を優先して解決する必要がある。
+- **WHATWG URL 仕様における既存ポートの残留と安全なリダイレクト URL 構築**:
+  - Next.js コンテナがポート 8080 でリッスンしている場合、`nextUrl` の内部ポートは `"8080"` となる。
+  - JavaScript の WHATWG URL 仕様では、ポートが存在する URL オブジェクトに対して `url.host = "canonical.domain"` とポート無しの値を代入しても、**既存の `port` はクリアされず保持される**ため、`canonical.domain:8080` が生成されてしまう。
+  - GFE はポート 8080 での外部アクセスを受け付けないため、アクセス不能（タイムアウト/接続拒否）の原因となる。
+  - リダイレクト先 URL を生成する際は、`nextUrl.clone()` を安易に使わず、`new URL(request.nextUrl.pathname + request.nextUrl.search, "https://" + CANONICAL_HOST)` でプロトコルとホストを明示して新規構築するか、`redirectUrl.port = ""` を明示的に指定してポート番号の混入を根絶する。

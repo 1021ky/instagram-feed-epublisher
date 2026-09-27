@@ -8,16 +8,24 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const { nextUrl } = request;
-  const { hostname } = nextUrl;
+  // Cloud Run やリバースプロキシ環境では x-forwarded-host にクライアントのアクセスドメインが入る
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const hostHeader = request.headers.get("host");
+  const currentHost = (forwardedHost || hostHeader || request.nextUrl.host)
+    .split(",")[0]
+    .trim()
+    .split(":")[0]
+    .toLowerCase();
 
-  if (hostname === CANONICAL_HOST) {
+  if (currentHost === CANONICAL_HOST) {
     return NextResponse.next();
   }
 
-  const redirectUrl = nextUrl.clone();
-  redirectUrl.protocol = "https";
-  redirectUrl.host = CANONICAL_HOST;
+  // ポート番号（Cloud Run コンテナの 8080 等）が混入しないよう、プロトコルとホストを明示して新規構築
+  const redirectUrl = new URL(
+    request.nextUrl.pathname + request.nextUrl.search,
+    `https://${CANONICAL_HOST}`,
+  );
 
   return NextResponse.redirect(redirectUrl, 301);
 }
