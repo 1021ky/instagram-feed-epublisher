@@ -355,7 +355,7 @@
 
 ---
 
-## Issue #80: 独自ドメインアクセス時に :8080 へリダイレクトされアクセス不能になる不具合の修正
+## Issue #80 (PR #81): 独自ドメインアクセス時に :8080 へリダイレクトされアクセス不能になる不具合の修正
 
 - [x] 現象確認と原因調査
   - [x] GCP Cloud Logging による HTTP 301 レスポンス確認
@@ -372,4 +372,4 @@
   - [x] `webapp/middleware.test.ts`: ポート 8080 が混入しないことのテスト
 - [x] 全品質ゲート検証（test, lint, format, tsc, build）
 - [x] 学びと知見（`tasks/lessons.md`）の記録
-- [ ] Pull Request の作成
+- [x] Issue #80 に対する Pull Request #81 の作成
