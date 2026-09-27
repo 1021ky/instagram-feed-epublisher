@@ -125,4 +125,32 @@ describe("POST /api/epub/demo", () => {
       "/tmp/epub-demo-workdir",
     );
   });
+
+  it("itemsが未送信の場合はサンプルデータ全体にフォールバックして処理される", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/epub/demo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: { maxCount: 10 },
+          metadata: {
+            title: "Demo Book",
+            author: "@demo",
+            contact: "demo@example.com",
+            instagramUrl: "https://instagram.com/demo",
+          },
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(buildEpub).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: expect.arrayContaining([sampleDemoFeedData.posts[0]]),
+      }),
+      "/tmp/epub-demo-workdir",
+    );
+  });
 });

@@ -10,7 +10,6 @@ import { buildEpub } from "@/lib/epub/epub-builder";
 import { COVER_THEMES, DEFAULT_COVER_THEME_ID } from "@/lib/epub/themes";
 import type { CoverThemeId, EpubMetadata, EpubSortOrder } from "@/lib/epub/types";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";
-import { sortItemsByTimestamp } from "@/lib/epub/sort";
 import type { FeedFilter, InstagramMedia } from "@/lib/instagram/types";
 import { getLogger } from "@/lib/logger";
 
@@ -50,7 +49,7 @@ export async function POST(request: Request) {
   try {
     const payload = (await request.json()) as {
       filter: FeedFilter;
-      items: InstagramMedia[];
+      items?: InstagramMedia[];
       metadata: EpubMetadata;
       coverTheme?: CoverThemeId;
       sortOrder?: EpubSortOrder;
@@ -76,7 +75,7 @@ export async function POST(request: Request) {
     const items = payload.items?.length
       ? resolveAllowedDemoItems(payload.items)
       : sampleDemoFeedData.posts;
-    const filtered = sortItemsByTimestamp(applyFeedFilter(items, payload.filter), sortOrder);
+    const filtered = applyFeedFilter(items, payload.filter);
 
     if (filtered.length === 0) {
       logger.error("No demo posts found for EPUB generation", { filter: payload.filter });

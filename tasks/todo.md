@@ -323,7 +323,7 @@
 
 ---
 
-## Issue #78: 表紙テーマの選択結果がEPUB出力に反映されない不具合の修正
+## Issue #78 (PR #79): 表紙テーマの選択結果がEPUB出力に反映されない不具合の修正
 
 - [x] 現象確認と原因特定
   - [x] `page.tsx` における `requestEpub` 呼び出しのパラメータ確認
@@ -341,4 +341,14 @@
   - [x] `webapp/app/api/epub/demo/route.test.ts`: デモAPIで `coverTheme` が渡されることのテスト作成
 - [x] 全品質ゲート検証（test, lint, format, tsc, build）
 - [x] 学びと知見（`tasks/lessons.md`）の記録
-- [x] Pull Request #79 の作成
+- [x] Issue #78 に対する Pull Request #79 の作成
+
+---
+
+## PR #79 レビュー指摘対応 (Copilot Review: #pullrequestreview-5328624375)
+
+- [x] 指摘 1: `webapp/app/api/epub/demo/route.ts` での二重ソートを解消し `buildEpub` に一本化
+- [x] 指摘 2: `webapp/app/api/epub/demo/route.ts` の型アサーションで `items?: InstagramMedia[]` に修正
+- [x] 指摘 3: `tasks/todo.md` の見出しと項目で Issue #78 と PR #79 の対応関係を明記
+- [x] 全品質ゲート検証（test, lint, format, tsc, build）
+- [x] コミット & プッシュとレビュー返信
