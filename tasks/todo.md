@@ -341,3 +341,4 @@
   - [x] `webapp/app/api/epub/demo/route.test.ts`: デモAPIで `coverTheme` が渡されることのテスト作成
 - [x] 全品質ゲート検証（test, lint, format, tsc, build）
 - [x] 学びと知見（`tasks/lessons.md`）の記録
+- [x] Pull Request #79 の作成
