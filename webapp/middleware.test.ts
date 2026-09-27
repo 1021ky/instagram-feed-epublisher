@@ -53,9 +53,9 @@ describe("middleware", () => {
     expect(response.headers.get("location")).toBeNull();
   });
 
-  it("matcher で静的アセットと auth API を除外する", () => {
+  it("matcher で静的アセットを除外し、auth API はミドルウェア本体でバイパスする", () => {
     expect(config).toEqual({
-      matcher: ["/((?!_next/static|_next/image|favicon\\.ico|api/auth).*)"],
+      matcher: ["/((?!_next/static|_next/image|favicon\\.ico).*)"],
     });
   });
 });
