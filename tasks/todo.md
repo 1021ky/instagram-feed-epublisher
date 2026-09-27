@@ -352,3 +352,24 @@
 - [x] 指摘 3: `tasks/todo.md` の見出しと項目で Issue #78 と PR #79 の対応関係を明記
 - [x] 全品質ゲート検証（test, lint, format, tsc, build）
 - [x] コミット & プッシュとレビュー返信
+
+---
+
+## Issue #80: 独自ドメインアクセス時に :8080 へリダイレクトされアクセス不能になる不具合の修正
+
+- [x] 現象確認と原因調査
+  - [x] GCP Cloud Logging による HTTP 301 レスポンス確認
+  - [x] curl による `Location: https://feedstobook.ksanchu.page:8080/` 確認
+  - [x] Cloud Run / Google Frontend のプロキシヘッダー（`Host` と `X-Forwarded-Host`）仕様調査
+  - [x] WHATWG URL 仕様（既存ポート保持）による `:8080` 残留原因の特定
+- [x] GitHub Issue #80 の起票
+- [x] 作業ブランチ `fix/issue-80-canonical-host-redirect-port` の作成
+- [x] 修正実装
+  - [x] `webapp/middleware.ts`: `x-forwarded-host` 優先でのホスト判定
+  - [x] `webapp/middleware.ts`: ポート 8080 を含まない安全なリダイレクト URL 構築
+- [x] テストの追加・更新
+  - [x] `webapp/middleware.test.ts`: `x-forwarded-host` による正規ドメイン判定テスト
+  - [x] `webapp/middleware.test.ts`: ポート 8080 が混入しないことのテスト
+- [x] 全品質ゲート検証（test, lint, format, tsc, build）
+- [x] 学びと知見（`tasks/lessons.md`）の記録
+- [ ] Pull Request の作成
