@@ -320,3 +320,35 @@
   - [x] `terraform/terraform.tfvars.example`: `enable_custom_domain = true` を追加
   - [x] `docs/designdoc/infra-designdoc.md`: デフォルト true 化の設計根拠と apply 手順の更新
   - [x] 全品質検証（fmt, validate, test, lint, mermaid）の通過確認
+
+---
+
+## Issue #78 (PR #79): 表紙テーマの選択結果がEPUB出力に反映されない不具合の修正
+
+- [x] 現象確認と原因特定
+  - [x] `page.tsx` における `requestEpub` 呼び出しのパラメータ確認
+  - [x] `/api/epub` および `/api/epub/demo` の `coverTheme` / `sortOrder` 処理確認
+  - [x] `epub-builder.ts` における `coverTheme` 解決順序の確認
+- [x] GitHub Issue #78 の起票
+- [x] 修正実装
+  - [x] `webapp/app/page.tsx`: `requestEpub` に `coverTheme` と `sortOrder` をトップレベルで渡す
+  - [x] `webapp/app/api/epub/route.ts`: `validatePayload` で `value.coverTheme ?? value.metadata?.coverTheme` をフォールバック許容
+  - [x] `webapp/app/api/epub/demo/route.ts`: `coverTheme` と `sortOrder` を受け取り `buildEpub` に渡す
+  - [x] `webapp/src/lib/epub/epub-builder.ts`: `input.coverTheme ?? input.metadata?.coverTheme ?? DEFAULT_COVER_THEME_ID` で解決
+- [x] テストの追加・更新
+  - [x] `webapp/src/lib/epub/epub-builder.test.ts`: `input.metadata.coverTheme` が反映されることのテスト
+  - [x] `webapp/app/api/epub/route.test.ts`: `metadata.coverTheme` からのフォールバックテスト
+  - [x] `webapp/app/api/epub/demo/route.test.ts`: デモAPIで `coverTheme` が渡されることのテスト作成
+- [x] 全品質ゲート検証（test, lint, format, tsc, build）
+- [x] 学びと知見（`tasks/lessons.md`）の記録
+- [x] Issue #78 に対する Pull Request #79 の作成
+
+---
+
+## PR #79 レビュー指摘対応 (Copilot Review: #pullrequestreview-5328624375)
+
+- [x] 指摘 1: `webapp/app/api/epub/demo/route.ts` での二重ソートを解消し `buildEpub` に一本化
+- [x] 指摘 2: `webapp/app/api/epub/demo/route.ts` の型アサーションで `items?: InstagramMedia[]` に修正
+- [x] 指摘 3: `tasks/todo.md` の見出しと項目で Issue #78 と PR #79 の対応関係を明記
+- [x] 全品質ゲート検証（test, lint, format, tsc, build）
+- [x] コミット & プッシュとレビュー返信

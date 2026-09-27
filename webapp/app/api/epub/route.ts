@@ -100,12 +100,16 @@ function validatePayload(value: unknown): EpubRequestPayload {
     throw new Error("filter.maxCount は 1 以上の数値で指定してください");
   }
 
-  const coverTheme = value.coverTheme ?? DEFAULT_COVER_THEME_ID;
+  const rawCoverTheme =
+    value.coverTheme ?? (isObject(value.metadata) ? value.metadata.coverTheme : undefined);
+  const coverTheme = rawCoverTheme ?? DEFAULT_COVER_THEME_ID;
   if (!isCoverThemeId(coverTheme)) {
     throw new Error("coverTheme の値が不正です");
   }
 
-  const sortOrder = value.sortOrder ?? "desc";
+  const rawSortOrder =
+    value.sortOrder ?? (isObject(value.filter) ? value.filter.sortOrder : undefined);
+  const sortOrder = rawSortOrder ?? "desc";
   if (!isSortOrder(sortOrder)) {
     throw new Error("sortOrder の値が不正です");
   }
@@ -129,6 +133,7 @@ function validatePayload(value: unknown): EpubRequestPayload {
       contact: requiredString(value.metadata.contact, "metadata.contact"),
       instagramUrl: requiredString(value.metadata.instagramUrl, "metadata.instagramUrl"),
       language: optionalString(value.metadata.language),
+      coverTheme,
     },
     coverTheme,
     sortOrder,

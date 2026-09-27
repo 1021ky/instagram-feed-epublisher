@@ -88,3 +88,14 @@
   - Workload Identity Federation で GitHub Actions に権限を付与する際、デプロイヤ SA に不要な権限（Secret Manager の Secret Accessor など）を付与しない（実行時にシークレットを読むのは Cloud Run ランタイム SA であるため）。
   - 特に `roles/iam.serviceAccountUser`（サービスアカウントの借用権限）をプロジェクト全体（`google_project_iam_member`）で付与すると、プロジェクト内のあらゆるサービスアカウント（Default Compute SA 等）になりすませる過剰権限となる。
   - デプロイ対象の Cloud Run サービスに指定するランタイム SA（`feedstobook-runner`）に対してのみリソースレベル（`google_service_account_iam_member`）で `roles/iam.serviceAccountUser` をスコープ限定して付与することで、強固な最小権限モデルを実現できる。
+
+## API ペイロード設計と階層構造のフォールバック
+
+- **ネストされたメタデータとトップレベルプロパティの乖離防止**:
+  - `coverTheme` や `sortOrder` のような設定項目が、UIステート・リクエストボディのトップレベル・ネストされた `metadata` や `filter` に分散して存在する場合、受け渡しレイヤーごとに参照先が異なるとサイレントにデフォルト値へフォールバックするバグが発生しやすい。
+  - サーバー側バリデーション（`validatePayload`）やビルダー関数（`buildEpub`）では、トップレベルとネストされたプロパティの双方（`value.coverTheme ?? value.metadata?.coverTheme`）を適切にフォールバック解決する耐障害性を持たせる。
+  - フロントエンド側でも型定義に沿ってトップレベルおよびネスト双方で確実に値を送信し、デモ用API（`/api/epub/demo`）と本番用API（`/api/epub`）で引数取り扱いの乖離を作らないように一貫したテストを作成することが重要である。
+- **データ変換処理（並び替え等）の責務一本化**:
+  - API ハンドラ側で事前ソートを行い、下流のビルダー関数（`buildEpub`）でも再度ソートを行うような二重処理は、冗長であるだけでなく、それぞれの並び替え仕様や不正値ハンドリングに将来的な乖離が生じた際に予期せぬ不整合を招く。データ変換処理の責務は下流のビルダー関数側に集約・一本化することが望ましい。
+- **型アサーションとフォールバック実装の整合**:
+  - リクエストボディの型アサーションでプロパティを必須（`items: InstagramMedia[]`）と定義しながら、実装上で未指定時のフォールバック（`payload.items?.length ? ... : fallback`）を行っていると型と実装の乖離が生じる。省略を許容する項目は型定義上もオプショナル（`items?: InstagramMedia[]`）に揃えることで、安全なリファクタリングを担保できる。
