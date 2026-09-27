@@ -376,7 +376,7 @@
 
 ---
 
-## Issue #84: standalone コンテナ上で Playwright の browsers.json 不足による EPUB 生成 500 エラーの解消およびデプロイヘルスチェック改善
+## Issue #84 (PR #85): standalone コンテナ上で Playwright の browsers.json 不足による EPUB 生成 500 エラーの解消およびデプロイヘルスチェック改善
 
 - [x] 現象確認と原因調査
   - [x] Cloud Run stderr ログ（`Cannot find module '.../playwright-core/browsers.json'`）の確認
@@ -393,4 +393,4 @@
   - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md` 全通過確認
   - [x] `tsc --noEmit` & `pnpm build` 成功確認
 - [x] 学びと知見（`tasks/lessons.md`）の記録
-- [ ] Pull Request の作成
+- [x] Issue #84 に対する Pull Request #85 の作成
