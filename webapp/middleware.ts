@@ -9,13 +9,9 @@ export function middleware(request: NextRequest) {
   }
 
   const { nextUrl } = request;
-  const { hostname, pathname } = nextUrl;
+  const { hostname } = nextUrl;
 
-  /**
-   * Better Auth handles both GET and POST requests under /api/auth.
-   * Because this canonicalization uses 301, redirecting those endpoints risks method rewriting.
-   */
-  if (hostname === CANONICAL_HOST || pathname.startsWith("/api/auth")) {
+  if (hostname === CANONICAL_HOST) {
     return NextResponse.next();
   }
 

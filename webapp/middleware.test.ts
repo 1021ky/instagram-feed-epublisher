@@ -42,18 +42,22 @@ describe("middleware", () => {
     expect(response.headers.get("location")).toBeNull();
   });
 
-  it("auth API パスは本番でもリダイレクトしない", () => {
+  it("auth API パスも本番では正規ホストへリダイレクトする", () => {
     process.env.NODE_ENV = "production";
 
     const response = middleware(
-      createRequest("https://service-12345-an.a.run.app/api/auth/sign-in/instagram"),
+      createRequest(
+        "https://service-12345-an.a.run.app/api/auth/sign-in/instagram?provider=instagram",
+      ),
     );
 
-    expect(response.status).toBe(200);
-    expect(response.headers.get("location")).toBeNull();
+    expect(response.status).toBe(301);
+    expect(response.headers.get("location")).toBe(
+      "https://feedstobook.ksanchu.page/api/auth/sign-in/instagram?provider=instagram",
+    );
   });
 
-  it("matcher で静的アセットを除外し、auth API はミドルウェア本体でバイパスする", () => {
+  it("matcher で静的アセットのみを除外する", () => {
     expect(config).toEqual({
       matcher: ["/((?!_next/static|_next/image|favicon\\.ico).*)"],
     });
