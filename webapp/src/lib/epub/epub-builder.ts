@@ -28,7 +28,7 @@ function getTemplatesDir(): string {
     path.resolve(process.cwd(), "templates"),
   ];
   for (const candidate of candidates) {
-    if (existsSync(candidate)) {
+    if (existsSync(/*turbopackIgnore: true*/ candidate)) {
       return candidate;
     }
   }
