@@ -3,9 +3,6 @@ import type { NextRequest } from "next/server";
 
 const CANONICAL_HOST = "feedstobook.ksanchu.page";
 
-const isLocalRequest = (hostname: string) =>
-  hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
-
 export function middleware(request: NextRequest) {
   if (process.env.NODE_ENV !== "production") {
     return NextResponse.next();
@@ -14,7 +11,7 @@ export function middleware(request: NextRequest) {
   const { nextUrl } = request;
   const { hostname, pathname } = nextUrl;
 
-  if (hostname === CANONICAL_HOST || isLocalRequest(hostname) || pathname.startsWith("/api/auth")) {
+  if (hostname === CANONICAL_HOST || pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
 

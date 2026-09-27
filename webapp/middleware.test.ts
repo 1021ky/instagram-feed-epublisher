@@ -33,8 +33,8 @@ describe("middleware", () => {
     expect(response.headers.get("location")).toBeNull();
   });
 
-  it("localhost ではリダイレクトしない", () => {
-    process.env.NODE_ENV = "production";
+  it("localhost の開発環境ではリダイレクトしない", () => {
+    process.env.NODE_ENV = "development";
 
     const response = middleware(createRequest("http://localhost:3000/feed?tag=dev"));
 
