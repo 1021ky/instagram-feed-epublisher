@@ -19,7 +19,7 @@ index bb8e231..c3d25a3 100644
      date: string;
      lang: string;
 diff --git a/lib/index.js b/lib/index.js
-index efb26da..a10f98c 100644
+index efb26da..6162ef9 100644
 --- a/lib/index.js
 +++ b/lib/index.js
 @@ -240,7 +240,14 @@ function uuid() {
@@ -54,21 +54,25 @@ index efb26da..a10f98c 100644
          this.showToC = options.hideToC !== true;
          this.date = options.date ?? new Date().toISOString();
          this.lang = options.lang ?? "en";
-@@ -351,7 +360,12 @@ export class EPub {
+@@ -351,7 +360,16 @@ export class EPub {
              .use(rehypeParse, { fragment: true })
              .use(plugins)
              // Voids: [] is required for epub generation, and causes little/no harm for non-epub usage
 -            .use(rehypeStringify, { allowDangerousHtml: true, voids: [], collapseBooleanAttributes: false })
 +            .use(rehypeStringify, {
 +            allowDangerousHtml: true,
-+            voids: [],
 +            collapseBooleanAttributes: false,
-+            ...(this.strictXhtml ? { closeSelfClosing: true } : {}),
++            ...(this.strictXhtml
++                ? { closeSelfClosing: true }
++                : {
++                    // Voids: [] is required for epub generation, and causes little/no harm for non-epub usage
++                    voids: [],
++                }),
 +        })
              .processSync(content)
              .toString();
          this.images = [];
-@@ -744,15 +758,14 @@ export class EPub {
+@@ -744,15 +762,14 @@ export class EPub {
              archive.directory(`${cwd}/META-INF`, "META-INF");
              archive.directory(`${cwd}/OEBPS`, "OEBPS");
              archive.pipe(output);
