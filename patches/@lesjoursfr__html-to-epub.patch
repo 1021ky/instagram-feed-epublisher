@@ -19,7 +19,7 @@ index bb8e231..c3d25a3 100644
      date: string;
      lang: string;
 diff --git a/lib/index.js b/lib/index.js
-index efb26da..a514a39 100644
+index efb26da..c5f9efb 100644
 --- a/lib/index.js
 +++ b/lib/index.js
 @@ -240,7 +240,14 @@ function uuid() {
@@ -54,7 +54,7 @@ index efb26da..a514a39 100644
          this.showToC = options.hideToC !== true;
          this.date = options.date ?? new Date().toISOString();
          this.lang = options.lang ?? "en";
-@@ -347,13 +356,24 @@ export class EPub {
+@@ -347,13 +356,27 @@ export class EPub {
              this.coverMediaType = null;
              this.coverExtension = null;
          }
@@ -81,12 +81,15 @@ index efb26da..a514a39 100644
 +            if (!this.strictXhtml) {
 +                return html;
 +            }
++            // With `voids: []` enabled for EPUB compatibility, rehype-stringify emits
++            // `<tag></tag>` for void elements even when `closeSelfClosing` is true.
++            // Normalize these to XHTML-compatible self-closing syntax in strict mode.
 +            return html.replace(/<(area|base|br|col|embed|hr|img|input|link|meta|source|track|wbr)(\b[^>]*)><\/\1>/g, "<$1$2 />");
 +        };
          this.images = [];
          this.audioVideo = [];
          this.content = [];
-@@ -744,15 +764,14 @@ export class EPub {
+@@ -744,15 +767,14 @@ export class EPub {
              archive.directory(`${cwd}/META-INF`, "META-INF");
              archive.directory(`${cwd}/OEBPS`, "OEBPS");
              archive.pipe(output);

@@ -9,7 +9,7 @@ overrides:
 
 patchedDependencies:
   '@lesjoursfr/html-to-epub':
-    hash: 73eda4dec89c01c731a2e6769f699cf7066a6badc61ef67442acadf63c3d135e
+    hash: 9deaf50c0afaf782bd3af57b2b9894217fdff5ea54f747f0d33c10fbf6a64f89
     path: patches/@lesjoursfr__html-to-epub.patch
 
 importers:
@@ -39,7 +39,7 @@ importers:
     dependencies:
       '@lesjoursfr/html-to-epub':
         specifier: 6.2.0
-        version: 6.2.0(patch_hash=73eda4dec89c01c731a2e6769f699cf7066a6badc61ef67442acadf63c3d135e)
+        version: 6.2.0(patch_hash=9deaf50c0afaf782bd3af57b2b9894217fdff5ea54f747f0d33c10fbf6a64f89)
       '@logtape/adaptor-winston':
         specifier: 2.3.6
         version: 2.3.6(@logtape/logtape@2.3.6)(winston@3.19.0)
@@ -3621,7 +3621,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@lesjoursfr/html-to-epub@6.2.0(patch_hash=73eda4dec89c01c731a2e6769f699cf7066a6badc61ef67442acadf63c3d135e)':
+  '@lesjoursfr/html-to-epub@6.2.0(patch_hash=9deaf50c0afaf782bd3af57b2b9894217fdff5ea54f747f0d33c10fbf6a64f89)':
     dependencies:
       archiver: 8.0.0
       axios: 1.20.0
