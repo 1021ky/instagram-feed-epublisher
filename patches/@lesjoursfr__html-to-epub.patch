@@ -1,5 +1,25 @@
+diff --git a/lib/index.d.ts b/lib/index.d.ts
+index bb8e231..c3d25a3 100644
+--- a/lib/index.d.ts
++++ b/lib/index.d.ts
+@@ -23,6 +23,7 @@ export interface EpubOptions {
+     hideToC?: boolean;
+     date?: string;
+     lang?: string;
++    strictXhtml?: boolean;
+     css?: string;
+     fonts?: Array<string>;
+     content: Array<EpubContentOptions>;
+@@ -81,6 +82,7 @@ export declare class EPub {
+     author: Array<string>;
+     tocTitle: string;
+     appendChapterTitles: boolean;
++    strictXhtml: boolean;
+     showToC: boolean;
+     date: string;
+     lang: string;
 diff --git a/lib/index.js b/lib/index.js
-index efb26da1b2cd21f4c70afb5d3cd6d23d04ec5905..8c9dcf9170f64e7e3c9cb8a6774238d7cbe0ed9f 100644
+index efb26da..a10f98c 100644
 --- a/lib/index.js
 +++ b/lib/index.js
 @@ -240,7 +240,14 @@ function uuid() {
@@ -18,16 +38,37 @@ index efb26da1b2cd21f4c70afb5d3cd6d23d04ec5905..8c9dcf9170f64e7e3c9cb8a6774238d7
  export class EPub {
      uuid;
      title;
-@@ -351,7 +358,7 @@ export class EPub {
+@@ -259,6 +266,7 @@ export class EPub {
+     author;
+     tocTitle;
+     appendChapterTitles;
++    strictXhtml;
+     showToC;
+     date;
+     lang;
+@@ -312,6 +320,7 @@ export class EPub {
+         }
+         this.tocTitle = options.tocTitle ?? "Table Of Contents";
+         this.appendChapterTitles = options.appendChapterTitles ?? true;
++        this.strictXhtml = options.strictXhtml === true;
+         this.showToC = options.hideToC !== true;
+         this.date = options.date ?? new Date().toISOString();
+         this.lang = options.lang ?? "en";
+@@ -351,7 +360,12 @@ export class EPub {
              .use(rehypeParse, { fragment: true })
              .use(plugins)
              // Voids: [] is required for epub generation, and causes little/no harm for non-epub usage
 -            .use(rehypeStringify, { allowDangerousHtml: true, voids: [], collapseBooleanAttributes: false })
-+            .use(rehypeStringify, { allowDangerousHtml: true, voids: [], collapseBooleanAttributes: false, closeSelfClosing: true })
++            .use(rehypeStringify, {
++            allowDangerousHtml: true,
++            voids: [],
++            collapseBooleanAttributes: false,
++            ...(this.strictXhtml ? { closeSelfClosing: true } : {}),
++        })
              .processSync(content)
              .toString();
          this.images = [];
-@@ -744,15 +751,14 @@ export class EPub {
+@@ -744,15 +758,14 @@ export class EPub {
              archive.directory(`${cwd}/META-INF`, "META-INF");
              archive.directory(`${cwd}/OEBPS`, "OEBPS");
              archive.pipe(output);

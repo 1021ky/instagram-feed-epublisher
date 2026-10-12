@@ -231,6 +231,23 @@ describe("buildEpub", () => {
     );
   });
 
+  test("html-to-epubのstrictXhtmlは指定せず既存互換のデフォルト挙動を維持する", async () => {
+    await buildEpub(
+      {
+        items,
+        metadata: {
+          title: "title",
+          author: "author",
+          contact: "contact",
+          instagramUrl: "url",
+        },
+      },
+      "/tmp",
+    );
+
+    expect(capturedEpubOptions[0]?.strictXhtml).toBeUndefined();
+  });
+
   test("不正なtimestampを持つ投稿は末尾に元順のまま配置する", async () => {
     const { downloadMedia } = await import("@/lib/epub/media-downloader");
 

@@ -3,8 +3,13 @@
  */
 
 declare module "@lesjoursfr/html-to-epub" {
+  export interface EpubOptions {
+    strictXhtml?: boolean;
+    [key: string]: unknown;
+  }
+
   export class EPub {
-    constructor(options: Record<string, unknown>, output?: string);
+    constructor(options: EpubOptions, output?: string);
     render(): Promise<void>;
   }
 }
