@@ -130,6 +130,6 @@
   - Dockerfile から Chromium バイナリ本体（数百MB）、OS 依存ライブラリ、apt パッケージ、および `browsers.json` 抽出・配置ワークアラウンドを全廃でき、イメージコンテンツサイズを約 118MB まで極小化。
 - **Satori におけるフォントバイナリ要件と Next.js 16 (Turbopack) 対策**:
   - Satori は Yoga による Flexbox レイアウト計算時に文字幅と折り返しを正確に測定するため、フォントバイナリ（`ArrayBuffer` / TTF・OTF・WOFF）の明示的提供が必須。
-  - `Noto Sans JP`（Bold / Regular）の TTF を `webapp/public/fonts/` に配置することで、Next.js standalone ビルド時に `public/` の自動コピーによってコンテナ環境へもシームレスに同封・解決できる。
+  - `Noto Sans JP`（Bold / Regular）の TTF を `webapp/public/fonts/` に配置する。Next.js standalone ビルドは `public/` を自動コピーしないため、Dockerfile の runner ステージで `public/` を明示的に COPY 配置することでコンテナ環境へ同封・解決する。
   - フォントファイルを動的読み込み（`readFile`）する際は、Next.js 16 (Turbopack) のプロジェクト全体トレース警告を防ぐため `/*turbopackIgnore: true*/` を付与する。
   - また、Satori の内部 wasm（`harfbuzzjs` 等）や sharp の native prebuilds をバンドラーから除外して Node.js ネイティブ環境で解決させるため、`next.config.mjs` の `serverExternalPackages` に `["@lesjoursfr/html-to-epub", "satori", "sharp"]` を指定する。
