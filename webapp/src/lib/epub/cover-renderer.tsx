@@ -230,15 +230,3 @@ export async function renderCoverJpg(
   logger.info("Cover JPEG written successfully", { coverPath, size: jpegBuffer.length });
   return coverPath;
 }
-
-/**
- * HTMLエンティティをエスケープします（後方互換用）。
- */
-export function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
