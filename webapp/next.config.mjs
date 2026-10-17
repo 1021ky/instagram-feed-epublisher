@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   output: "standalone",
   outputFileTracingRoot: path.resolve(__dirname, ".."),
-  serverExternalPackages: ["@lesjoursfr/html-to-epub", "playwright", "playwright-core"],
+  serverExternalPackages: ["@lesjoursfr/html-to-epub", "satori", "sharp"],
   images: {
     remotePatterns: [
       {
