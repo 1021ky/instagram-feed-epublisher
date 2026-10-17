@@ -441,6 +441,19 @@
 
 ---
 
+## PR #87 レビュー指摘対応 (Copilot Review: #discussion_r4114275608)
+
+- [x] 指摘対応: `cover-renderer.tsx` から不要な `escapeHtml` 関数およびテストを削除
+  - [x] `webapp/src/lib/epub/cover-renderer.tsx`: 未使用となった `escapeHtml` 関数を削除
+  - [x] `webapp/src/lib/epub/cover-renderer.test.ts`: `escapeHtml` のインポートおよびテストケースを削除
+- [x] テスト・検証
+  - [x] `pnpm test`
+  - [x] `pnpm lint` & `pnpm format:check`
+  - [x] `pnpm build`
+- [x] コミット & プッシュ
+
+---
+
 ## Issue: 退会時の Instagram 連携解除案内モーダル導入と退会 API の整理
 
 - [x] 退会 API (`webapp/app/api/user/delete/route.ts`) の整理

@@ -3,7 +3,6 @@ import { expect, test } from "vitest";
 
 import {
   buildCoverElement,
-  escapeHtml,
   loadFonts,
   renderCoverJpg,
   renderCoverSvg,
@@ -67,10 +66,6 @@ test("renderCoverSvgはSatoriを用いて1200x1600のSVG文字列を生成する
   expect(svg).toContain("<svg");
   expect(svg).toContain('width="1200"');
   expect(svg).toContain('height="1600"');
-});
-
-test("escapeHtmlは危険な文字をエスケープする", () => {
-  expect(escapeHtml("<script>")).toBe("&lt;script&gt;");
 });
 
 test("renderCoverJpgは表紙画像のパスを返しJPGファイルを生成する", async () => {

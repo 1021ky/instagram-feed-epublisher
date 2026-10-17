@@ -89,6 +89,7 @@ export default function Page() {
 
   const session = authClient.useSession();
   const isLoggedIn = Boolean(session.data);
+  const isSessionPending = session.isPending;
   const isDemoMode = appMode === "demo";
   const canUseApp = isLoggedIn || isDemoMode;
   const isGeneratingEpub = exportProgress.status === "generating";
@@ -515,7 +516,7 @@ export default function Page() {
         )}
 
         <main className="max-w-3xl mx-auto w-full space-y-6">
-          {!canUseApp && (
+          {!canUseApp && !isSessionPending && (
             <LoginCard loadingLogin={loadingLogin} onLogin={handleLogin} onDemo={handleDemo} />
           )}
 
