@@ -1,17 +1,19 @@
 /**
  * @file 退会 API ルート。
- * Instagram 側の認可失効を試行し、Better Auth の認証 Cookie を破棄する。
+ * Better Auth の認証 Cookie を破棄し、サーバー側のステートレスセッションを完全クリアする。
+ *
+ * 【Instagram 側の認可失効に関する仕様上の注意】
+ * Meta / Instagram Graph API では、サードパーティアプリからユーザーの認可（許可済みアプリ）を
+ * リモートで抹消・アンインストールする API エンドポイント（DELETE /me/permissions）は提供されていません。
+ * そのため、本アプリ側の退会責務は保持しているセッション・暗号化 Cookie を破棄して
+ * トークン利用を終了することであり、Instagram アカウント側の連携登録を完全に解除するには
+ * ユーザー本人が Instagram の「設定 > アプリとウェブサイト」から削除する必要があります。
  */
 import { NextResponse } from "next/server";
 import { resolveInstagramAccessToken } from "@/lib/auth/session-service";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger("api.user.delete");
-
-const revokeEndpoints = [
-  "https://graph.instagram.com/me/permissions",
-  "https://graph.facebook.com/me/permissions",
-] as const;
 
 const betterAuthCookieNames = [
   "better-auth.session_token",
@@ -66,81 +68,30 @@ function clearBetterAuthCookies(response: NextResponse, request: Request) {
 }
 
 /**
- * Instagram / Facebook Graph API に対して認可失効を順次試行する。
- *
- * 先に Instagram Graph API のエンドポイントを試し、失敗した場合のみ
- * Facebook Graph API 側へフォールバックする責務を持つ。
- *
- * @param accessToken - 現在のログインセッションから解決した Instagram アクセストークン
- * @returns 失効に成功した時点で `Promise<void>` を完了する
- * @throws Error すべての失効先で失敗した場合
- */
-async function revokeInstagramAuthorization(accessToken: string) {
-  const failures: Array<{ endpoint: string; status?: number; body?: string; error?: string }> = [];
-
-  for (const endpoint of revokeEndpoints) {
-    try {
-      const url = new URL(endpoint);
-      url.searchParams.set("access_token", accessToken);
-
-      const response = await fetch(url.toString(), {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        logger.info("Instagram authorization revoked", { endpoint });
-        return;
-      }
-
-      const body = await response.text();
-      failures.push({ endpoint, status: response.status, body });
-      logger.debug("Instagram revoke endpoint failed", {
-        endpoint,
-        status: response.status,
-        body,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "unknown";
-      failures.push({ endpoint, error: message });
-      logger.debug("Instagram revoke endpoint failed with exception", {
-        endpoint,
-        error: message,
-      });
-    }
-  }
-
-  throw new Error(
-    failures.some((failure) => failure.status === 401 || failure.status === 403)
-      ? "Instagram 連携の解除権限が確認できませんでした"
-      : "Instagram 連携の解除に失敗しました",
-  );
-}
-
-/**
  * `POST /api/user/delete` を処理する。
  *
- * 現在のセッションからアクセストークンを取得し、Instagram 側の認可失効を試みたうえで
- * Better Auth Cookie を削除し、クライアントを未ログイン状態へ戻す責務を持つ。
+ * 現在のセッション（ログイン状態）を確認し、Better Auth Cookie を削除して
+ * クライアントを未ログイン状態へ戻す責務を持つ。
  *
  * @param request - 呼び出し元の HTTP リクエスト
- * @returns 成功時は `{ ok: true }`、失敗時はエラー内容を含む JSON レスポンス
+ * @returns 成功時は `{ ok: true }`、未ログイン時は 401 JSON レスポンス
  */
 export async function POST(request: Request) {
   try {
-    const accessToken = await resolveInstagramAccessToken(request);
-    await revokeInstagramAuthorization(accessToken);
+    // ログイン状態（有効なアクセストークンCookie）が存在することを確認
+    await resolveInstagramAccessToken(request);
 
     const response = NextResponse.json({ ok: true });
     clearBetterAuthCookies(response, request);
 
-    logger.info("User authorization deleted", {
+    logger.info("User session and cookies cleared for account deletion", {
       cookieCount: betterAuthCookieNames.length * 3,
     });
 
     return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "不明なエラー";
-    const status = message === "未ログインです" ? 401 : 502;
+    const status = message === "未ログインです" ? 401 : 500;
 
     logger.error("User deletion failed", { error: message, status });
     return NextResponse.json({ error: message }, { status });

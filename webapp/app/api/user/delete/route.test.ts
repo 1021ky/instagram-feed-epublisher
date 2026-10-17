@@ -16,13 +16,8 @@ describe("POST /api/user/delete", () => {
     vi.clearAllMocks();
   });
 
-  it("Instagram 連携解除成功時は Better Auth Cookie を破棄すること", async () => {
+  it("退会成功時は Better Auth Cookie を破棄し 200 OK を返すこと", async () => {
     mockedResolveInstagramAccessToken.mockResolvedValue("token");
-    globalThis.fetch = vi.fn().mockResolvedValue(
-      new Response(null, {
-        status: 200,
-      }),
-    );
 
     const response = await POST(
       new Request("https://localhost/api/user/delete", { method: "POST" }),
@@ -30,40 +25,24 @@ describe("POST /api/user/delete", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ ok: true });
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      "https://graph.instagram.com/me/permissions?access_token=token",
-      { method: "DELETE" },
-    );
+
     expect(response.cookies.get("better-auth.session_token")?.maxAge).toBe(0);
     expect(response.cookies.get("better-auth.account_data")?.maxAge).toBe(0);
     expect(response.cookies.get("__Secure-better-auth.session_data")?.maxAge).toBe(0);
   });
 
-  it("最初の失効先が失敗してもフォールバック先で成功すれば完了すること", async () => {
+  it("HTTPS リクエストでは Cookie に secure 属性が付与されること", async () => {
     mockedResolveInstagramAccessToken.mockResolvedValue("token");
-    globalThis.fetch = vi
-      .fn()
-      .mockResolvedValueOnce(
-        new Response("not found", {
-          status: 404,
-        }),
-      )
-      .mockResolvedValueOnce(
-        new Response(null, {
-          status: 200,
-        }),
-      );
 
     const response = await POST(
-      new Request("https://localhost/api/user/delete", { method: "POST" }),
+      new Request("https://feedstobook.ksanchu.page/api/user/delete", {
+        method: "POST",
+        headers: { "x-forwarded-proto": "https" },
+      }),
     );
 
     expect(response.status).toBe(200);
-    expect(globalThis.fetch).toHaveBeenNthCalledWith(
-      2,
-      "https://graph.facebook.com/me/permissions?access_token=token",
-      { method: "DELETE" },
-    );
+    expect(response.cookies.get("better-auth.session_token")?.secure).toBe(true);
   });
 
   it("未ログイン時は 401 を返すこと", async () => {
@@ -77,24 +56,16 @@ describe("POST /api/user/delete", () => {
     await expect(response.json()).resolves.toEqual({ error: "未ログインです" });
   });
 
-  it("すべての失効先が失敗した場合は 502 を返すこと", async () => {
-    mockedResolveInstagramAccessToken.mockResolvedValue("token");
-    globalThis.fetch = vi
-      .fn()
-      .mockResolvedValueOnce(
-        new Response("bad gateway", {
-          status: 502,
-        }),
-      )
-      .mockRejectedValueOnce(new Error("network down"));
+  it("予期せぬエラー発生時は 500 を返すこと", async () => {
+    mockedResolveInstagramAccessToken.mockRejectedValue(new Error("Database failure"));
 
     const response = await POST(
       new Request("https://localhost/api/user/delete", { method: "POST" }),
     );
 
-    expect(response.status).toBe(502);
+    expect(response.status).toBe(500);
     await expect(response.json()).resolves.toEqual({
-      error: "Instagram 連携の解除に失敗しました",
+      error: "Database failure",
     });
   });
 });
