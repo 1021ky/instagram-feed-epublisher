@@ -44,6 +44,7 @@ vi.mock("@/lib/epub/epub-builder", () => ({
 
 import { POST } from "./route";
 import { buildEpub } from "@/lib/epub/epub-builder";
+import { fetchGraphMedia } from "@/lib/instagram/graph-client";
 
 describe("POST /api/epub", () => {
   beforeEach(() => {
@@ -263,5 +264,40 @@ describe("POST /api/epub", () => {
       }),
       "/tmp/epub-workdir",
     );
+  });
+
+  it("fetchGraphMediaにフィルタ条件（期間・ハッシュタグ・件数）を引き渡す", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: {
+            hashtag: "100days",
+            startDate: "2026-09-01",
+            endDate: "2026-10-20",
+            maxCount: 200,
+          },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+          },
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(fetchGraphMedia).toHaveBeenCalledWith("token", {
+      filter: {
+        hashtag: "100days",
+        startDate: "2026-09-01",
+        endDate: "2026-10-20",
+        maxCount: 200,
+      },
+    });
   });
 });

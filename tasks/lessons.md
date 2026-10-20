@@ -143,3 +143,16 @@
 - **退会フローにおけるユーザーへの情報提供と心理的安全性の担保**:
   - `window.confirm` 等の画一的なダイアログで「連携を解除します」とだけ伝えると、ユーザーは「Instagram 側のアカウント設定からもアプリが自動削除された」と認識し、次回アクセス時に Instagram の再認証画面（「feeds2epub - IG はすでにリンクされています」）が表示された際に「退会したのになぜまだ紐づいているのか？」と不信感を抱く。
   - 退会モーダルを導入し、(1) 自社サービス内でのデータ・セッション破棄の完了、(2) Meta の仕様上 Instagram アカウント側の連携登録を完全に解除するには Instagram 側の「アプリとウェブサイト」設定から削除する必要がある旨、(3) Instagram 設定画面（`https://www.instagram.com/accounts/manage_access/`）への直接リンク、を明示することで、OAuth 2.0 の仕様制約に対する透明性とユーザーの心理的安全性を両立できる。
+
+## Meta (Instagram) Graph API ページネーション・リトライ設計とクライアント責務分離
+
+- **Meta Graph API におけるレート制限・一時障害のエラー構造とリトライ判定**:
+  - Meta Graph API はレート制限（`error.code`: `4, 17, 32, 341, 613`）や一時的なバックエンド障害（`error.is_transient: true`, `code: 1, 2`）であっても、HTTP ステータスコード `429` ではなく `400 Bad Request` で返すケースが多々ある。
+  - そのため、HTTP ステータスコードのみを参照する汎用リトライ設定ではリトライ漏れが発生する。レスポンス JSON の `error.is_transient` および `error.code` を解析して Retryable / Non-Retryable（`code: 190` トークン失効や `code: 10, 200` 権限エラー等）を判別し、Non-Retryable 時のみ `p-retry` の `AbortError` で即時中断する設計が必要である。
+- **期間ウィンドウ細分化 vs カーソル一括ページネーション＋早期終了（Early Exit）**:
+  - `/me/media` は新しい順（降順）のストリームとして 1 リクエスト最大 100 件（`limit=100`）を取得できる。期間未指定時に 1 ヶ月単位で細かく区切って API を呼ぶと、月数件しか投稿しない一般的なユーザーで最大 24 回の直列 HTTP リクエストが発生し、レイテンシ増大とレート制限枠の浪費を招く。
+  - `limit=100` のカーソルページネーションで一括取得しつつ、(1) フィルタ通過件数が目標件数（`maxCount`）に到達、(2) 累積スキャン上限（500件＝最大5リクエスト）に到達、(3) 投稿の `timestamp` が下限日時（指定 `startDate` または最大2年前）より古くなった時点で即座に打ち切る（Early Exit）方式に統一することで、最小 1〜5 リクエストで高速かつ低負荷に完結できる。
+- **Meta API 共通通信基盤とエンドポイント固有ロジックの分離**:
+  - タイムアウト（`AbortSignal.timeout`）、Exponential Backoff リトライ（`p-retry`）、エラー分類、トークン秘匿（`[REDACTED]`）、構造化ロギングは `meta-api-client.ts` に集約し、`/me/media` 固有のフィールドやページング制御のみを `graph-client.ts` に持たせることで、将来 `/me` や `/{media-id}/children` 等の他エンドポイントを追加する際も安全に共通基盤を再利用できる。
+- **Vitest における `vi.restoreAllMocks()` とトップレベル `vi.mock()` の相互作用**:
+  - `vi.mock("...", () => ({ fn: vi.fn().mockResolvedValue(...) }))` のようにファクトリ内で初期実装を与えている場合、テスト後に `vi.restoreAllMocks()` を呼ぶとモック実装がリセットされ、2つ目以降のテストで返り値が `undefined` になる。`beforeEach` 内で `vi.mocked(fn).mockResolvedValue(...)` を毎回明示的に設定することでテスト間の順序依存を排除できる。

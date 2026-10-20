@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     });
 
     const accessToken = await resolveInstagramAccessToken(request);
-    const items = await fetchGraphMedia(accessToken);
+    const items = await fetchGraphMedia(accessToken, { filter: payload.filter });
     const filtered = applyFeedFilter(items, payload.filter);
     const selectedItems = filterSelectedItems(
       filtered,
