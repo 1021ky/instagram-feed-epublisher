@@ -281,7 +281,90 @@ describe("B. 共通通信クライアントのリトライ・Exponential Backoff
     expect(graphErr.fbtraceId).toBe("trace-auth-expired");
   });
 
-  it("UT-M10: リクエストが timeoutMs を超過した場合に AbortSignal で中断されリトライされる", async () => {
+  it.each([
+    {
+      label: "non-retryable auth error",
+      payload: {
+        error: {
+          message: "Error validating access token: Session has expired",
+          type: "OAuthException",
+          code: 190,
+          is_transient: false,
+          fbtrace_id: "trace-auth-200",
+        },
+      },
+      expectedKind: "auth",
+      expectedStatus: 401,
+      expectedCalls: 1,
+    },
+    {
+      label: "retryable transient error",
+      payload: {
+        error: {
+          message: "(#2) Service temporarily unavailable",
+          type: "OAuthException",
+          code: 2,
+          is_transient: true,
+          fbtrace_id: "trace-transient-200",
+        },
+      },
+      expectedKind: "upstream",
+      expectedStatus: 502,
+      expectedCalls: 2,
+    },
+  ])(
+    "UT-M10: HTTP 200 JSON に error が含まれる場合 ($label) は 200 branch が分類される",
+    async ({ payload, expectedKind, expectedStatus, expectedCalls }) => {
+      const successResponse = {
+        ok: true,
+        status: 200,
+        json: async () => ({ id: "ok" }),
+      } as Response;
+
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: async () => payload,
+        } as Response)
+        .mockResolvedValueOnce(successResponse);
+      globalThis.fetch = fetchMock;
+
+      if (expectedKind === "auth") {
+        await expect(
+          requestMetaGraphApi({
+            path: "/me",
+            accessToken: "valid-token",
+            retries: 3,
+            minRetryDelayMs: 1,
+            maxRetryDelayMs: 5,
+            randomizeRetry: false,
+          }),
+        ).rejects.toMatchObject({
+          kind: "auth",
+          status: expectedStatus,
+          code: 190,
+          recommendedHttpStatus: expectedStatus,
+        });
+      } else {
+        await expect(
+          requestMetaGraphApi<{ id: string }>({
+            path: "/me",
+            accessToken: "valid-token",
+            retries: 3,
+            minRetryDelayMs: 1,
+            maxRetryDelayMs: 5,
+            randomizeRetry: false,
+          }),
+        ).resolves.toEqual({ id: "ok" });
+      }
+
+      expect(fetchMock).toHaveBeenCalledTimes(expectedCalls);
+    },
+  );
+
+  it("UT-M11: リクエストが timeoutMs を超過した場合に AbortSignal で中断されリトライされる", async () => {
     const fetchMock = vi
       .fn()
       .mockImplementationOnce((_url: string, init?: RequestInit) => {
@@ -312,7 +395,7 @@ describe("B. 共通通信クライアントのリトライ・Exponential Backoff
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("UT-M11: buildMetaApiUrls およびエラーメッセージで生の access_token が漏洩せずマスクされる", async () => {
+  it("UT-M12: buildMetaApiUrls およびエラーメッセージで生の access_token が漏洩せずマスクされる", async () => {
     const secretToken = "IGQVJ_SUPER_SECRET_TOKEN_12345";
     const { url, safeUrl } = buildMetaApiUrls({
       path: "/me/media",
