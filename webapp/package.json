@@ -26,6 +26,7 @@
     "linkedom": "0.18.13",
     "lucide-react": "1.47.0",
     "next": "16.3.6",
+    "p-retry": "8.0.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "satori": "0.33.5",

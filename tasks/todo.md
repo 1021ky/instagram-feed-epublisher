@@ -471,3 +471,30 @@
   - [x] 全テストスイートの実行・通過確認 (25ファイル 125テスト全パス)
 - [x] 全品質ゲートの検証 (test, lint, format, typecheck, build, markdown, mermaid)
 - [x] 学びと知見 (`tasks/lessons.md`) の記録
+
+---
+
+## Issue #90: Instagram Graph API の複数ページ取得対応（最大500件・最大2年遡及）および共通通信クライアント（リトライ・タイムアウト）の分離実装
+
+- [x] GitHub Issue #90 の起票と設計・テスト設計・実装計画の記載
+- [x] 作業ブランチ `feat/issue-90-instagram-api-pagination-retry` の作成
+- [x] パッケージ導入: `webapp/package.json` への `p-retry` 追加（Exact Version Pinning）
+- [x] Meta API 共通通信クライアント (`webapp/src/lib/instagram/meta-api-client.ts`) の新規作成
+  - [x] `InstagramGraphApiError` クラスおよび Meta API エラー分類ロジック（`classifyGraphError` / `isRetryableGraphError`）の実装
+  - [x] `p-retry` + `AbortSignal.timeout(10_000)` による Exponential Backoff リトライ＆タイムアウト処理の実装
+  - [x] アクセストークン秘匿（`redactAccessToken`）および構造化ロギングの実装
+- [x] `/me/media` クライアント (`webapp/src/lib/instagram/graph-client.ts`) の改修
+  - [x] カーソル一括ページネーション（`limit=100`、最大スキャン500件、`maxCount` 到達での早期終了）の実装
+  - [x] 期間下限（指定 `startDate` または 最大2年前）による `since` 指定と下限到達時の Early Exit 実装
+  - [x] 重複投稿排除および同一カーソル無限ループ防止の実装
+- [x] API ルートの改修
+  - [x] `webapp/app/api/instagram/media/route.ts`: `fetchGraphMedia` への `filter` 引き渡し、デフォルト `maxCount = 200` 統一、エラー種別に応じた HTTP ステータス返却（401 / 429 / 502 / 504）
+  - [x] `webapp/app/api/epub/route.ts`: `fetchGraphMedia` への `filter` 引き渡し対応
+- [x] テストピラミッド・因子分解に基づくテスト実装
+  - [x] 単体テスト① (`webapp/src/lib/instagram/meta-api-client.test.ts`): エラー分類、リトライ・バックオフ・タイムアウト、トークンマスクの全網羅
+  - [x] 単体テスト② (`webapp/src/lib/instagram/graph-client.test.ts`): `/me/media` ページネーション、最大500件、最大2年下限、Early Exit、境界値・異常系の全網羅
+  - [x] 結合テスト (`webapp/app/api/instagram/media/route.test.ts`): Meta API (`fetch`) 境界モックによる一気通貫テストの新規作成
+  - [x] 結合テスト (`webapp/app/api/epub/route.test.ts`): フィルタ引き渡し・複数ページ投稿収録の検証追加
+- [x] 全品質ゲートの検証 (test, lint, format, typecheck, build, markdown, mermaid)
+- [x] 学びと知見 (`tasks/lessons.md`) の記録
+- [x] コミット、プッシュ、および Pull Request の作成
