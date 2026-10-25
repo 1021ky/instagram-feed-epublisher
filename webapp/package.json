@@ -14,8 +14,10 @@
     "format:check": "oxfmt --check .",
     "test": "pnpm vitest run --config vitest.config.ts",
     "e2etest": "pnpm playwright test",
+    "e2etest:headed": "pnpm playwright test --headed --workers=1",
     "e2etest:ui": "pnpm playwright test --ui",
     "e2etest:debug": "pnpm playwright test --debug",
+    "e2etest:report": "pnpm playwright test",
     "prepare": "cd .. && pnpm exec husky"
   },
   "dependencies": {

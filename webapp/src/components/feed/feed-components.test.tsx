@@ -7,6 +7,8 @@ import {
   detectPreset,
   FeedFilterStep,
   formatDateToISO,
+  MAX_QUICK_SELECT_CHIPS,
+  resolveNextHashtagOnChipClick,
 } from "./FeedFilterStep";
 import { formatPostDate, PostCard } from "./PostCard";
 import { PostListStep } from "./PostListStep";
@@ -44,6 +46,13 @@ describe("FeedFilterStep ロジックおよび日付プリセット", () => {
     expect(detectPreset("2026-06-13", "2026-09-21", baseDate)).toBe("100days");
     expect(detectPreset("2026-08-22", "2026-09-21", baseDate)).toBe("30days");
     expect(detectPreset("2026-01-01", "2026-05-01", baseDate)).toBe("custom");
+  });
+
+  it("resolveNextHashtagOnChipClick が未選択タグの選択と選択中タグの再クリック解除（大文字小文字無視）を正しく判定すること", () => {
+    expect(resolveNextHashtagOnChipClick(undefined, "京都カフェ")).toBe("京都カフェ");
+    expect(resolveNextHashtagOnChipClick("朝活", "#京都カフェ")).toBe("京都カフェ");
+    expect(resolveNextHashtagOnChipClick("京都カフェ", "京都カフェ")).toBeUndefined();
+    expect(resolveNextHashtagOnChipClick("Travel", "travel")).toBeUndefined();
   });
 });
 
@@ -140,6 +149,68 @@ describe("FeedFilterStep コンポーネント描画", () => {
     expect(html).toMatch(/readonly/i);
     expect(html).toContain("cursor-not-allowed");
     expect(html).toContain("この条件で投稿を取得");
+  });
+
+  it("ハッシュタグ候補があるとき、<datalist> オプションとクイック選択チップ（最大10件・選択状態 aria-pressed）が描画されること", () => {
+    const manySuggestions = Array.from({ length: 15 }, (_, idx) => ({
+      tag: idx === 0 ? "100日チャレンジ" : `タグ${idx + 1}`,
+      count: 20 - idx,
+      lastUsedAt: "2026-09-20T09:00:00.000Z",
+    }));
+
+    const html = renderToStaticMarkup(
+      <FeedFilterStep
+        filter={defaultFilter}
+        onFilterChange={vi.fn()}
+        onSubmit={vi.fn()}
+        isCollapsed={false}
+        hashtagSuggestions={manySuggestions}
+      />,
+    );
+
+    expect(html).toContain('list="hashtag-suggestions"');
+    expect(html).toContain('<datalist id="hashtag-suggestions">');
+    // datalist には全 15 件が含まれる
+    expect(html).toContain('value="タグ15"');
+    // クイック選択チップは上位 MAX_QUICK_SELECT_CHIPS (10件) のみ描画される
+    expect(html).toContain('aria-label="よく使うハッシュタグ"');
+    expect(html).toContain("#100日チャレンジ");
+    expect(html).toContain("(20)");
+    expect(html).toContain('aria-pressed="true"');
+    expect(html).toContain("#タグ10");
+    expect(html).not.toContain("><span>#タグ11</span>");
+    expect(MAX_QUICK_SELECT_CHIPS).toBe(10);
+  });
+
+  it("ハッシュタグ集計中（isLoadingHashtags=true かつ候補未取得）のときローディングステータスメッセージが表示されること", () => {
+    const html = renderToStaticMarkup(
+      <FeedFilterStep
+        filter={defaultFilter}
+        onFilterChange={vi.fn()}
+        onSubmit={vi.fn()}
+        isCollapsed={false}
+        hashtagSuggestions={[]}
+        isLoadingHashtags={true}
+      />,
+    );
+
+    expect(html).toContain("よく使うハッシュタグを集計中...");
+  });
+
+  it("ハッシュタグ候補が 0 件かつ非ローディングのとき、クイック選択チップ領域が表示されないこと", () => {
+    const html = renderToStaticMarkup(
+      <FeedFilterStep
+        filter={defaultFilter}
+        onFilterChange={vi.fn()}
+        onSubmit={vi.fn()}
+        isCollapsed={false}
+        hashtagSuggestions={[]}
+        isLoadingHashtags={false}
+      />,
+    );
+
+    expect(html).not.toContain("よく使うタグから選択:");
+    expect(html).not.toContain("よく使うハッシュタグを集計中...");
   });
 });
 

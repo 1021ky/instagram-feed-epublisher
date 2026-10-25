@@ -12,6 +12,18 @@ const logger = getLogger("instagram.meta-api-client");
 
 export const META_GRAPH_API_BASE_URL = "https://graph.instagram.com";
 
+/**
+ * 実行時の Meta Graph API ベース URL を解決します。
+ * E2E テストや契約テスト時に `META_GRAPH_API_BASE_URL` 環境変数でモックサーバーへ切り替え可能です。
+ */
+export function resolveMetaGraphApiBaseUrl(): string {
+  const configured = process.env.META_GRAPH_API_BASE_URL?.trim();
+  if (configured) {
+    return configured.replace(/\/+$/, "");
+  }
+  return META_GRAPH_API_BASE_URL;
+}
+
 /** 1リクエストあたりのデフォルトタイムアウト（10秒） */
 export const DEFAULT_TIMEOUT_MS = 10_000;
 /** デフォルトの最大リトライ回数（初回 + 3回リトライ = 最大4回試行） */
@@ -235,11 +247,12 @@ export function buildMetaApiUrls(params: {
     }
   }
 
+  const baseUrl = resolveMetaGraphApiBaseUrl();
   const safeQueryStr = query.toString();
-  const safeUrl = `${META_GRAPH_API_BASE_URL}${normalizedPath}${safeQueryStr ? `?${safeQueryStr}` : ""}`;
+  const safeUrl = `${baseUrl}${normalizedPath}${safeQueryStr ? `?${safeQueryStr}` : ""}`;
 
   query.set("access_token", params.accessToken);
-  const url = `${META_GRAPH_API_BASE_URL}${normalizedPath}?${query.toString()}`;
+  const url = `${baseUrl}${normalizedPath}?${query.toString()}`;
 
   return { url, safeUrl };
 }

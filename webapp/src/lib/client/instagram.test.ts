@@ -2,7 +2,7 @@
  * @file クライアントAPIヘルパーの単体テスト
  */
 import { afterEach, expect, test, vi } from "vitest";
-import { fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";
+import { fetchHashtagSuggestions, fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";
 
 const originalFetch = globalThis.fetch;
 
@@ -32,6 +32,44 @@ test("fetchInstagramFeed throws on error", async () => {
   globalThis.fetch = vi.fn().mockResolvedValue(response);
 
   await expect(fetchInstagramFeed({ maxCount: 10 })).rejects.toThrow("フィード取得に失敗しました");
+});
+
+test("fetchHashtagSuggestions returns hashtags on success", async () => {
+  const fetchMock = vi.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      hashtags: [
+        { tag: "100日チャレンジ", count: 12, lastUsedAt: "2026-10-20T09:00:00.000Z" },
+        { tag: "京都カフェ", count: 5, lastUsedAt: "2026-10-18T09:00:00.000Z" },
+      ],
+      scannedPosts: 50,
+    }),
+  } as Response);
+  globalThis.fetch = fetchMock;
+
+  const suggestions = await fetchHashtagSuggestions(15);
+  expect(suggestions).toHaveLength(2);
+  expect(suggestions[0]).toEqual({
+    tag: "100日チャレンジ",
+    count: 12,
+    lastUsedAt: "2026-10-20T09:00:00.000Z",
+  });
+  expect(fetchMock).toHaveBeenCalledWith(
+    "/api/instagram/hashtags?limit=15",
+    expect.objectContaining({ credentials: "include" }),
+  );
+});
+
+test("fetchHashtagSuggestions throws descriptive error on failure", async () => {
+  globalThis.fetch = vi.fn().mockResolvedValue({
+    ok: false,
+    status: 502,
+    text: async () => JSON.stringify({ error: "Upstream unavailable" }),
+  } as Response);
+
+  await expect(fetchHashtagSuggestions()).rejects.toThrow(
+    "ハッシュタグ候補の取得に失敗しました: 502 - Upstream unavailable",
+  );
 });
 
 test("requestEpub returns blob on success", async () => {

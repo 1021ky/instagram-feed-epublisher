@@ -48,15 +48,16 @@
 ### 4.1 Web UI
 
 - ログイン/ログアウト
-- フィルタ入力
+- フィルタ入力（直近投稿からのハッシュタグ自動補完 `<datalist>`・クイック選択チップ対応）
 - フィード取得
 - EPUB生成
 
 ### 4.2 API
 
 - `/api/auth/*` 認証フロー
+- `/api/instagram/hashtags` 直近投稿からのハッシュタグ候補集計・取得
 - `/api/instagram/media` メディア取得
-- `/api/epub` EPUB生成
+- `/api/epub` EPUB生成（デモ用: `/api/epub/demo`）
 
 ### 4.3 出力仕様
 
@@ -79,10 +80,12 @@
 
 ### 5.3 モジュール構成
 
-- 認証: `webapp/server/src/lib/auth.ts`
-- セッション解決: `webapp/server/src/lib/auth/session-service.ts`
-- Graph API: `webapp/server/src/lib/instagram/graph-client.ts`
-- UI: `webapp/server/app/page.tsx`
+- 認証: `webapp/src/lib/auth.ts`
+- セッション解決: `webapp/src/lib/auth/session-service.ts`
+- Meta API 共通通信基盤: `webapp/src/lib/instagram/meta-api-client.ts`
+- Graph API メディア取得: `webapp/src/lib/instagram/graph-client.ts`
+- ハッシュタグ抽出・集計: `webapp/src/lib/instagram/hashtag-service.ts`
+- UI: `webapp/app/page.tsx`、`webapp/src/components/feed/FeedFilterStep.tsx`
 
 ## 6. 設計の経緯
 
@@ -126,8 +129,8 @@
 
 ### 8.3 テスト
 
-- ユニット: `pnpm --dir webapp/server test`
-- E2E: `pnpm --dir webapp test:e2e`
+- 単体・結合・OpenAPI 契約テスト: `pnpm test`
+- E2E テスト（OpenAPI モックサーバー連携）: `pnpm e2etest`
 
 ### 8.4 トラブルシュート
 
@@ -246,3 +249,22 @@
   - **改善理由**: 将来的な他フォーマット（PDF、Kindle Mobi 等）の追加や仕様変更を見据え、規約上の定義は「電子書籍」に一般化。
 - **外部リンク（`<a>`）によるページ遷移**:
   - **改善理由**: 内部リンクを純粋な `<a>` タグで実装するとページ全体のフルリロードが発生するため、Next.js の `next/link` へ統一し、高速な SPA 画面遷移を実現。
+
+---
+
+## 12. Playwright E2E テスト基盤および OpenAPI モック戦略
+
+### 12.1 背景と課題
+
+1. **コード保守性とベストプラクティス強制**: Playwright E2E テストの増加に伴い、Page Object Model (POM) 構造や Web-First Assertions を機械的・継続的に担保する仕組みが必要。
+2. **外部 API（Instagram Graph API）へのアクセス安全性と仕様追従の両立**: E2E テストのたびに本番 Instagram API へアクセスするとレート制限や自動化ボット検知（アカウント制限）のリスクがあり、一方で単純なブラウザモックのみでは Next.js Route Handler 以降のバックエンドコードが検証されない。
+
+### 12.2 採用アーキテクチャ
+
+1. **Oxlint カスタムプラグイン ＋ Agent-SOP による二重ガード**:
+   - `webapp/scripts/oxlint-plugin-playwright.mjs` により、`waitForTimeout` 禁止、`.spec.ts` での直接ロケータ・`goto` 禁止、Custom Fixture（`e2e/fixtures/test.ts`）インポート強制、POM 内での `expect` 禁止など 10 ルールを静的コード解析で強制。
+   - AI エージェント向けに `strands-agents/agent-sop` 形式の作成 SOP（`playwright-e2e-authoring`）およびセルフレビュー SOP（`playwright-e2e-self-review`）を整備。
+2. **OpenAPI 3.1 契約検証付きローカルモックサーバー ＋ ハイブリッド E2E（Option A）**:
+   - `docs/openapi/instagram-graph-api.openapi.yaml` に Meta OAuth / Graph API（`/me/media` 等）および内部 BFF API（`/api/instagram/hashtags`）のスキーマを定義。
+   - E2E 実行時は `playwright.config.ts` が OpenAPI スキーマ検証付きのローカルモックサーバー（`webapp/scripts/mock-instagram-server.mjs`）と E2E 専用 Next.js サーバーを自動起動し、OAuth ログインから Route Handler・`graph-client.ts`・`hashtag-service.ts` まで本番 Instagram に一切触れずに一気通貫で検証。
+   - エラー応答（502）やローディング待機などの異常系・境界値シナリオは、Custom Fixture 内の `page.route()` ゲートを用いてテストケース単位で完全分離して検証。

@@ -7,7 +7,34 @@
 
 import { useId, useMemo, useState } from "react";
 import { Calendar, ChevronDown, ChevronUp, Filter, Hash, Loader2 } from "lucide-react";
-import type { DatePreset, FeedFilterOptions } from "@/types/ui";
+import type { DatePreset, FeedFilterOptions, HashtagSuggestion } from "@/types/ui";
+
+/** クイック選択チップとして画面上に並べる最大件数 */
+export const MAX_QUICK_SELECT_CHIPS = 10;
+
+/**
+ * ハッシュタグのクイック選択チップがクリックされた際の次の入力値（選択または解除）を算出します。
+ */
+export function resolveNextHashtagOnChipClick(
+  currentHashtag: string | undefined,
+  clickedTag: string,
+): string | undefined {
+  const cleanClicked = clickedTag.replace(/^[#＃]/, "").trim();
+  if (!cleanClicked) {
+    return undefined;
+  }
+  const normalizedCurrent = (currentHashtag ?? "")
+    .replace(/^[#＃]/, "")
+    .trim()
+    .normalize("NFC")
+    .toLowerCase();
+  const normalizedClicked = cleanClicked.normalize("NFC").toLowerCase();
+
+  if (normalizedCurrent && normalizedCurrent === normalizedClicked) {
+    return undefined;
+  }
+  return cleanClicked;
+}
 
 /**
  * 日付を YYYY-MM-DD 形式の文字列に変換します。
@@ -96,6 +123,10 @@ export interface FeedFilterStepProps {
   disabled?: boolean;
   /** デモモードフラグ（変更不可・案内表示） */
   isDemoMode?: boolean;
+  /** 直近投稿から集計されたハッシュタグ候補一覧 */
+  hashtagSuggestions?: HashtagSuggestion[];
+  /** ハッシュタグ候補の読み込み中フラグ */
+  isLoadingHashtags?: boolean;
 }
 
 /**
@@ -112,6 +143,8 @@ export function FeedFilterStep({
   onToggleCollapse,
   disabled = false,
   isDemoMode = false,
+  hashtagSuggestions = [],
+  isLoadingHashtags = false,
 }: FeedFilterStepProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [showDemoNotice, setShowDemoNotice] = useState(false);
@@ -295,8 +328,9 @@ export function FeedFilterStep({
             <input
               id={hashtagId}
               type="text"
+              list="hashtag-suggestions"
               placeholder="100日チャレンジ"
-              value={filter.hashtag ? filter.hashtag.replace(/^#/, "") : ""}
+              value={filter.hashtag ? filter.hashtag.replace(/^[#＃]/, "") : ""}
               readOnly={isDemoMode}
               onClick={isDemoMode ? handleDemoBlocked : undefined}
               onFocus={isDemoMode ? handleDemoBlocked : undefined}
@@ -307,7 +341,7 @@ export function FeedFilterStep({
                 }
                 onFilterChange({
                   ...filter,
-                  hashtag: e.target.value ? e.target.value.replace(/^#/, "") : undefined,
+                  hashtag: e.target.value ? e.target.value.replace(/^[#＃]/, "") : undefined,
                 });
               }}
               className={`w-full pl-8 pr-4 py-2.5 text-sm rounded-xl outline-none transition min-h-[44px] ${
@@ -316,7 +350,81 @@ export function FeedFilterStep({
                   : "bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
               }`}
             />
+            <datalist id="hashtag-suggestions">
+              {hashtagSuggestions.map((item) => (
+                <option key={item.tag} value={item.tag} label={`#${item.tag} (${item.count}件)`} />
+              ))}
+            </datalist>
           </div>
+
+          {/* クイック選択チップ / ローディング状態 */}
+          {isLoadingHashtags && hashtagSuggestions.length === 0 && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="flex items-center gap-1.5 pt-1 text-xs text-slate-500"
+            >
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-400" aria-hidden="true" />
+              <span>よく使うハッシュタグを集計中...</span>
+            </div>
+          )}
+
+          {hashtagSuggestions.length > 0 && (
+            <div className="pt-1.5 space-y-1.5">
+              <span className="text-[11px] font-medium text-slate-500 block">
+                よく使うタグから選択:
+              </span>
+              <div
+                role="group"
+                aria-label="よく使うハッシュタグ"
+                className="flex flex-wrap gap-1.5"
+              >
+                {hashtagSuggestions.slice(0, MAX_QUICK_SELECT_CHIPS).map((item) => {
+                  const normalizedCurrent = (filter.hashtag ?? "")
+                    .replace(/^[#＃]/, "")
+                    .trim()
+                    .normalize("NFC")
+                    .toLowerCase();
+                  const isSelected =
+                    Boolean(normalizedCurrent) &&
+                    normalizedCurrent === item.tag.normalize("NFC").toLowerCase();
+
+                  return (
+                    <button
+                      key={item.tag}
+                      type="button"
+                      aria-pressed={isSelected}
+                      onClick={() => {
+                        if (isDemoMode) {
+                          handleDemoBlocked();
+                          return;
+                        }
+                        onFilterChange({
+                          ...filter,
+                          hashtag: resolveNextHashtagOnChipClick(filter.hashtag, item.tag),
+                        });
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition inline-flex items-center gap-1 min-h-[44px] sm:min-h-[36px] focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                        isDemoMode ? "cursor-not-allowed" : "cursor-pointer"
+                      } ${
+                        isSelected
+                          ? "bg-slate-900 text-white border-slate-900 shadow-xs"
+                          : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200/80 hover:border-slate-300"
+                      }`}
+                    >
+                      <span>#{item.tag}</span>
+                      <span
+                        className={`text-[11px] ${isSelected ? "text-slate-300" : "text-slate-500"}`}
+                      >
+                        ({item.count})
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <p className="text-[11px] text-slate-400 m-0">
             ご自身のアカウントでつけたハッシュタグを入力してください（未入力の場合は全投稿が対象になります）。
           </p>

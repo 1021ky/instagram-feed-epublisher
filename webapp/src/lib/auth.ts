@@ -4,6 +4,12 @@
 import { betterAuth } from "better-auth";
 import { genericOAuth } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
+import { resolveMetaGraphApiBaseUrl } from "@/lib/instagram/meta-api-client";
+
+const instagramAuthorizeUrl =
+  process.env.INSTAGRAM_OAUTH_AUTHORIZE_URL?.trim() || "https://www.instagram.com/oauth/authorize";
+const instagramTokenUrl =
+  process.env.INSTAGRAM_OAUTH_TOKEN_URL?.trim() || "https://api.instagram.com/oauth/access_token";
 
 /**
  * Better Auth instance configured for Instagram SSO with stateless session.
@@ -28,8 +34,8 @@ export const auth = betterAuth({
           providerId: "instagram",
           clientId: process.env.INSTAGRAM_CLIENT_ID as string,
           clientSecret: process.env.INSTAGRAM_CLIENT_SECRET as string,
-          authorizationUrl: "https://www.instagram.com/oauth/authorize",
-          tokenUrl: "https://api.instagram.com/oauth/access_token",
+          authorizationUrl: instagramAuthorizeUrl,
+          tokenUrl: instagramTokenUrl,
           scopes: ["instagram_business_basic"],
           authorizationUrlParams: {
             /**
@@ -59,7 +65,7 @@ export const auth = betterAuth({
               code,
             });
 
-            const shortResponse = await fetch("https://api.instagram.com/oauth/access_token", {
+            const shortResponse = await fetch(instagramTokenUrl, {
               method: "POST",
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -86,7 +92,7 @@ export const auth = betterAuth({
               throw new Error("Instagram access token missing from response");
             }
 
-            const longUrl = new URL("https://graph.instagram.com/access_token");
+            const longUrl = new URL(`${resolveMetaGraphApiBaseUrl()}/access_token`);
             longUrl.searchParams.set("grant_type", "ig_exchange_token");
             longUrl.searchParams.set("client_secret", process.env.INSTAGRAM_CLIENT_SECRET ?? "");
             longUrl.searchParams.set("access_token", shortAccessToken);
@@ -128,7 +134,7 @@ export const auth = betterAuth({
               throw new Error("Instagram access token missing for user info");
             }
 
-            const url = new URL("https://graph.instagram.com/me");
+            const url = new URL(`${resolveMetaGraphApiBaseUrl()}/me`);
             url.searchParams.set("fields", "id,username");
             url.searchParams.set("access_token", tokens.accessToken);
 

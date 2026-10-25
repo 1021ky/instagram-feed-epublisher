@@ -15,9 +15,10 @@ import {
   AccountDeletionModal,
   type AccountDeletionStep,
 } from "@/components/auth/AccountDeletionModal";
-import { fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";
+import { fetchHashtagSuggestions, fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";
+import { extractHashtagsFromPosts } from "@/lib/instagram/hashtag-service";
 import { sortItemsByTimestamp } from "@/lib/epub/sort";
 import type {
   AppMode,
@@ -25,6 +26,7 @@ import type {
   ExportProgress,
   FeedFilterOptions,
   FeedPostItem,
+  HashtagSuggestion,
   UserProfile,
 } from "@/types/ui";
 
@@ -59,6 +61,8 @@ export default function Page() {
   const [isFilterCollapsed, setIsFilterCollapsed] = useState(false);
 
   const [feed, setFeed] = useState<FeedPostItem[]>([]);
+  const [fetchedHashtags, setFetchedHashtags] = useState<HashtagSuggestion[]>([]);
+  const [loadingHashtags, setLoadingHashtags] = useState(false);
   const [loadingLogin, setLoadingLogin] = useState(false);
   const [loadingFeed, setLoadingFeed] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
@@ -121,6 +125,46 @@ export default function Page() {
 
   const username = activeProfile?.username?.replace(/^@/, "") ?? "";
   const recommendedTitle = username ? `@${username}の投稿記録` : defaultBookTitle;
+
+  const demoHashtagSuggestions = useMemo(() => {
+    if (!isDemoMode) {
+      return [];
+    }
+    return extractHashtagsFromPosts(sampleDemoFeedData.posts, { limit: 20 });
+  }, [isDemoMode]);
+
+  useEffect(() => {
+    if (!isLoggedIn || isDemoMode) {
+      setFetchedHashtags([]);
+      setLoadingHashtags(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingHashtags(true);
+
+    fetchHashtagSuggestions(20)
+      .then((suggestions) => {
+        if (!cancelled) {
+          setFetchedHashtags(suggestions);
+        }
+      })
+      .catch((err) => {
+        console.warn("ハッシュタグ候補の自動取得をスキップしました:", err);
+        if (!cancelled) {
+          setFetchedHashtags([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingHashtags(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoggedIn, isDemoMode]);
 
   const scrollToSection = useCallback((id: string) => {
     window.requestAnimationFrame(() => {
@@ -535,6 +579,8 @@ export default function Page() {
                   onToggleCollapse={() => setIsFilterCollapsed((prev) => !prev)}
                   disabled={isGeneratingEpub}
                   isDemoMode={isDemoMode}
+                  hashtagSuggestions={isDemoMode ? demoHashtagSuggestions : fetchedHashtags}
+                  isLoadingHashtags={!isDemoMode && loadingHashtags}
                 />
               </div>
 

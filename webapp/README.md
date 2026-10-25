@@ -22,8 +22,8 @@ Next.js (App Router) + TypeScript + Better Auth を採用しています。
 | `pnpm lint`          | oxlint による静的解析                                        |
 | `pnpm format`        | oxfmt によるコードフォーマット                               |
 | `pnpm format:check`  | oxfmt によるフォーマットチェック                             |
-| `pnpm test`          | Vitest による単体テスト実行                                  |
-| `pnpm e2etest`       | Playwright による E2E テスト実行（※現在整備中）              |
+| `pnpm test`          | Vitest による単体・結合・OpenAPI 契約テスト実行              |
+| `pnpm e2etest`       | Playwright によるフルスタック E2E テスト実行                 |
 | `pnpm e2etest:ui`    | Playwright UI モードでのテスト実行                           |
 | `pnpm e2etest:debug` | Playwright デバッグモードでのテスト実行                      |
 
@@ -44,8 +44,10 @@ webapp/
 │   ├── page.tsx          # メイン UI 画面
 │   └── terms/            # Meta 審査向け利用規約ページ
 ├── certs/                # ローカル HTTPS 用証明書 (mkcert)
-├── e2e/                  # Playwright E2E テスト
-├── scripts/              # 開発サーバー実行スクリプト (dev-https.mjs)
+├── e2e/                  # Playwright E2E テスト (POM + Custom Fixtures)
+│   ├── fixtures/         # Page Object・API モック注入用 Custom Fixtures
+│   └── pages/            # Page Object Model クラス群
+├── scripts/              # 開発サーバー・OpenAPI モックサーバー・Oxlint プラグイン
 └── src/
     ├── components/       # UI コンポーネント (auth, feed, epub, common)
     │   ├── auth/         # ナビゲーション、ログインカード、WebView注意バナー
@@ -63,6 +65,10 @@ webapp/
 
 ## E2E テスト（Playwright）について
 
-- テスト実行: `pnpm e2etest`
-- デフォルトの `baseURL`: `http://localhost:3000`
-- 現在は SSO ログインボタンの表示確認など簡易的なテストのみ実装されており、認証連携を含むエンドツーエンドテストはロードマップ（[ルート README.md](../README.md#7-今後やりたいこと-roadmap--todo)）として順次整備予定です。
+- テスト実行（ヘッドレス）: `pnpm e2etest`
+- ブラウザ目視実行（実ウィンドウ表示・1ワーカー・500ms スロー再生）: `pnpm e2etest:headed`
+- インタラクティブ UI モード: `pnpm e2etest:ui`
+- レポート出力付き実行（サーバーを常駐させず `webapp/playwright-report/` 配下に `index.html`・`summary.md`・`results.json`・動画・スクリーンショットを静的出力して終了）: `pnpm e2etest:report`
+- デフォルトの E2E `baseURL`: `http://localhost:3100`（ローカル開発用の `https://localhost:3000` とポート競合しない独立プロセスで自動起動）
+- 外部通信の安全性: `docs/openapi/instagram-graph-api.openapi.yaml` に準拠したローカルモックサーバー（`127.0.0.1:4010`）が自動起動し、本番 Instagram API へ一切アクセスせずに OAuth ログイン〜BFF API〜UI 操作を一気通貫で検証します。
+- コード品質ガード: `webapp/e2e/AGENTS.md` および `scripts/oxlint-plugin-playwright.mjs` により、POM 構造・User-Facing ロケータ・Web-First Assertions が `pnpm lint` で機械的に強制されます。

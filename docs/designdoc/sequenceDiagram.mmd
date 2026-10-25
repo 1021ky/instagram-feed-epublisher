@@ -4,22 +4,22 @@ sequenceDiagram
     participant FE as WebApp (Next.js)
     participant BA as BetterAuth
     participant IG as Instagram Graph API
-    participant EP as epub.js (client)
+    participant EP as EPUB Builder (server)
     U->>FE: Open app
     U->>FE: Click Instagram SSO
     FE->>BA: Start OAuth dance
-    BA-->>FE: Access token
+    BA-->>FE: Encrypted session & access token cookies
     FE-->>U: Logged-in session
-    U->>FE: Set hashtag/date range
-    U->>FE: Enter title/author/contact/IG URL
-    FE->>IG: Fetch feed with filters
+    FE->>IG: GET /me/media (via /api/instagram/hashtags)
+    IG-->>FE: Recent posts for hashtag aggregation
+    FE-->>U: Show <datalist> & quick-select hashtag chips
+    U->>FE: Select hashtag chip or type hashtag & set date range
+    FE->>IG: Fetch feed with filters (/api/instagram/media)
     IG-->>FE: Filtered posts
-    FE-->>U: Show summary/confirm
-    FE->>EP: Build EPUB with metadata+images
-    EP-->>FE: Blob URL
+    FE-->>U: Show post selection & book settings
+    U->>FE: Enter title/author/contact/IG URL & request EPUB
+    FE->>EP: Build EPUB with metadata+images (/api/epub)
+    EP-->>FE: EPUB binary (Blob)
     FE-->>U: Trigger download (EPUB)
-    U->>FE: Logout
-    U->>FE: 退会（連携解除）を実行
-    FE->>IG: DELETE /me/permissions (access_token)
-    IG-->>FE: Authorization revoked
+    U->>FE: Logout or 退会（連携解除）を実行
     FE-->>U: Better Auth Cookie を削除して未ログイン状態へ戻す

@@ -7,6 +7,15 @@
       "siblings_only": true,
     },
   },
-  "globs": ["**/*.md"],
-  "ignores": ["**/node_modules/**", "**/.next/**", "**/build/**", "**/dist/**", "**/.git/**"],
+  "globs": ["**/*.md", ".agent/**/*.md", ".github/**/*.md"],
+  "ignores": [
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/build/**",
+    "**/dist/**",
+    "**/.git/**",
+    "**/CLAUDE.md",
+    "**/test-results/**",
+    "**/playwright-report/**",
+  ],
 }

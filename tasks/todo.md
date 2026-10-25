@@ -498,3 +498,39 @@
 - [x] 全品質ゲートの検証 (test, lint, format, typecheck, build, markdown, mermaid)
 - [x] 学びと知見 (`tasks/lessons.md`) の記録
 - [x] コミット、プッシュ、および Pull Request の作成
+
+---
+
+## Issue #35: ハッシュタグ自動補完・クイック選択機能の追加 & Playwright E2E 品質基盤整備
+
+### Phase 1: Playwright ベストプラクティス（POM 構造）の静的コード解析 ＆ Agent-SOP スキル整備
+
+- [x] `oxlint` による Playwright ベストプラクティス・POM 構造強制プラグインの実装
+  - [x] `webapp/scripts/oxlint-plugin-playwright.mjs` の新規作成（Web-First Assertions、`waitForTimeout` 禁止、`force: true` 禁止、`.spec.ts` での直接ロケータ・`goto` 禁止、Fixture 利用強制、POM 内 `expect` 禁止等）
+  - [x] `webapp/.oxlintrc.json`（およびルート実行時の整合）への `jsPlugins` / `overrides` 設定追加
+  - [x] `webapp/scripts/oxlint-plugin-playwright.test.ts` の新規作成（全カスタム Lint ルールの Valid / Invalid 単体テスト）
+- [x] 既存 E2E テストの POM + Custom Fixture 化
+  - [x] `webapp/e2e/pages/TopLoginPage.ts` および `webapp/e2e/pages/FeedFilterPage.ts` の新規作成
+  - [x] `webapp/e2e/fixtures/test.ts` の新規作成（`test.extend` による Page Object 注入）
+  - [x] `webapp/e2e/sso-button.spec.ts` を POM + Fixture 構造へリファクタリング
+- [x] `strands-agents/agent-sop` 形式のスキルおよび常時発火ルールの整備
+  - [x] 実装用 SOP: `.agent/skills/playwright-e2e-authoring/SKILL.md`（および `playwright-e2e-authoring.sop.md`）の作成
+  - [x] セルフレビュー用 SOP: `.agent/skills/playwright-e2e-self-review/SKILL.md`（および `playwright-e2e-self-review.sop.md`）の作成
+  - [x] 常時発火ディレクトリルール: `webapp/e2e/AGENTS.md` および `.github/instructions/playwright.instructions.md` の作成
+- [x] ローカル & CI での静的解析・単体テスト・ドキュメント検証の通過確認
+
+### Phase 2: Instagram API 連携サービスにおける Playwright E2E テスト戦略（モック / OpenAPI 等）の調査・決定
+
+- [x] E2E における外部 API 連携テスト手法（5手法）の調査とメリット・デメリット比較
+- [x] 本プロジェクトで採用する E2E API モック／契約検証方式（Option A: OpenAPI 3.1 スキーマ + ローカルモックサーバー BFF 貫通 + 異常系 `page.route` 分離）の決定
+
+### Phase 3: Issue #35（ハッシュタグ自動補完・クイック選択機能）の実装・テスト検証
+
+- [x] OpenAPI 3.1 スキーマ定義（`docs/openapi/instagram-graph-api.openapi.yaml`）および検証器・モックサーバー実装（`webapp/scripts/openapi-contract.mjs`, `webapp/scripts/mock-instagram-server.mjs`, `webapp/scripts/openapi-contract.test.ts`）
+- [x] `HashtagSuggestion` 型定義（`webapp/src/lib/instagram/types.ts`, `webapp/src/types/ui.ts`）
+- [x] ハッシュタグ抽出サービス（`webapp/src/lib/instagram/hashtag-service.ts`）＆ 単体テスト（`hashtag-service.test.ts`）
+- [x] バックエンド API（`webapp/app/api/instagram/hashtags/route.ts`）＆ 結合・OpenAPI 契約テスト（`route.test.ts`）
+- [x] クライアント関数（`webapp/src/lib/client/instagram.ts`）＆ 単体テスト（`instagram.test.ts`）
+- [x] フロントエンド UI（`FeedFilterStep.tsx` / `page.tsx`）＆ コンポーネント単体テスト（`feed-components.test.tsx`）
+- [x] Agent-SOP に従った POM + E2E テスト実装（`FeedFilterPage.ts` / `TopLoginPage.ts` / `e2e/fixtures/test.ts` / `hashtag-suggestions.spec.ts`）とセルフレビュー SOP 実践検証
+- [x] CI への Playwright E2E ジョブ追加（`.github/workflows/webapp-ci.yml`）およびドキュメント更新・全品質ゲート通過確認
