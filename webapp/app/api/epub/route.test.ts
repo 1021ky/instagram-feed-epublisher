@@ -300,4 +300,31 @@ describe("POST /api/epub", () => {
       },
     });
   });
+
+  it("自前の前書き・あとがき・著者紹介は400文字制限内でしか受け付けない", async () => {
+    const tooLong = "あ".repeat(401);
+    const response = await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: { maxCount: 10 },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+            preface: tooLong,
+          },
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: "metadata.preface は400文字以内で指定してください",
+    });
+  });
 });

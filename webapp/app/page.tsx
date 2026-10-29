@@ -76,6 +76,11 @@ export default function Page() {
     sortOrder: "asc",
     contact: "",
     instagramUrl: "",
+    coverImageUrl: "",
+    preface: "",
+    afterword: "",
+    authorIntroduction: "",
+    backCover: "",
   });
   const [exportProgress, setExportProgress] = useState<ExportProgress>({
     status: "idle",
@@ -153,6 +158,11 @@ export default function Page() {
       sortOrder: "asc",
       contact: "",
       instagramUrl: "",
+      coverImageUrl: "",
+      preface: "",
+      afterword: "",
+      authorIntroduction: "",
+      backCover: "",
     });
     setFeed([]);
     setIsFilterCollapsed(false);
@@ -305,6 +315,11 @@ export default function Page() {
       instagramUrl: `https://www.instagram.com/${sampleDemoFeedData.username}/`,
       coverTheme: "navy",
       sortOrder: "asc",
+      coverImageUrl: "",
+      preface: "",
+      afterword: "",
+      authorIntroduction: "",
+      backCover: "",
     });
 
     // デモ投稿を初期全選択状態でセット
@@ -410,6 +425,15 @@ export default function Page() {
           contact: customSettings.contact ?? "",
           instagramUrl: customSettings.instagramUrl ?? "",
           coverTheme: customSettings.coverTheme,
+          coverImageUrl: customSettings.coverImageUrl ?? customSettings.coverImage ?? "",
+          preface: customSettings.preface ?? customSettings.foreword ?? "",
+          afterword: customSettings.afterword ?? customSettings.afterwordText ?? "",
+          authorIntroduction:
+            customSettings.authorIntroduction ??
+            customSettings.authorIntro ??
+            customSettings.authorBio ??
+            "",
+          backCover: customSettings.backCover ?? customSettings.backCoverText ?? "",
         },
         coverTheme: customSettings.coverTheme,
         sortOrder: customSettings.sortOrder,

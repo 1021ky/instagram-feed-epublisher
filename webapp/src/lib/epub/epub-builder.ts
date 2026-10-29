@@ -10,7 +10,11 @@ import { DEFAULT_COVER_THEME_ID } from "@/lib/epub/themes";
 
 const logger = getLogger("epub.builder");
 import type { EpubChapter, EpubInput } from "@/lib/epub/types";
-import { loadLayoutTemplate, renderChapterHtml } from "@/lib/epub/template-renderer";
+import {
+  loadLayoutTemplate,
+  renderChapterHtml,
+  renderTextPageHtml,
+} from "@/lib/epub/template-renderer";
 import { downloadMedia } from "@/lib/epub/media-downloader";
 import { renderCoverJpg } from "@/lib/epub/cover-renderer";
 
@@ -51,6 +55,11 @@ export async function buildEpub(input: EpubInput, outputDir: string): Promise<st
   const template = await loadLayoutTemplate();
   const chapterData: EpubChapter[] = [];
 
+  const frontMatter = buildFrontMatterPages(input.metadata);
+  for (const page of frontMatter) {
+    chapterData.push(page);
+  }
+
   logger.debug("Downloading media for chapters", { itemCount: preparedItems.length });
   for (const item of preparedItems) {
     const imagePath = await downloadMedia(item, outputDir);
@@ -62,6 +71,11 @@ export async function buildEpub(input: EpubInput, outputDir: string): Promise<st
     });
   }
   logger.info("Media download completed", { chapterCount: chapterData.length });
+
+  const backMatter = buildBackMatterPages(input.metadata);
+  for (const page of backMatter) {
+    chapterData.push(page);
+  }
 
   logger.debug("Generating cover image");
   const coverPath = await renderCoverJpg(
@@ -96,6 +110,56 @@ export async function buildEpub(input: EpubInput, outputDir: string): Promise<st
   await epub.render();
   logger.info("EPUB rendered successfully", { outputPath });
   return outputPath;
+}
+
+function buildFrontMatterPages(metadata: EpubInput["metadata"]): EpubChapter[] {
+  const pages: EpubChapter[] = [];
+  const authorText = normalizeText(metadata.authorIntroduction);
+  const prefaceText = normalizeText(metadata.preface);
+
+  if (authorText) {
+    pages.push({
+      title: "著者紹介",
+      data: renderTextPageHtml("著者紹介", authorText, "author-introduction.xhtml"),
+      filename: "author-introduction.xhtml",
+    });
+  }
+  if (prefaceText) {
+    pages.push({
+      title: "まえがき",
+      data: renderTextPageHtml("まえがき", prefaceText, "preface.xhtml"),
+      filename: "preface.xhtml",
+    });
+  }
+  return pages;
+}
+
+function buildBackMatterPages(metadata: EpubInput["metadata"]): EpubChapter[] {
+  const pages: EpubChapter[] = [];
+  const afterwordText = normalizeText(metadata.afterword);
+  const backCoverText = normalizeText(metadata.backCover);
+
+  if (afterwordText) {
+    pages.push({
+      title: "あとがき",
+      data: renderTextPageHtml("あとがき", afterwordText, "afterword.xhtml"),
+      filename: "afterword.xhtml",
+    });
+  }
+  if (backCoverText) {
+    pages.push({
+      title: "裏表紙",
+      data: renderTextPageHtml("裏表紙", backCoverText, "back-cover.xhtml"),
+      filename: "back-cover.xhtml",
+    });
+  }
+  return pages;
+}
+
+function normalizeText(value?: string): string {
+  const text = (value ?? "").replace(/\r\n?/g, "\n").trim();
+  const characters = Array.from(text);
+  return characters.length > 400 ? characters.slice(0, 400).join("") : text;
 }
 
 function prepareItems(

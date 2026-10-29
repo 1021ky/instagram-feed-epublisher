@@ -81,6 +81,37 @@ function validateXhtml(html: string): boolean {
 /**
  * Renders a chapter HTML using the book_layout template.
  */
+export function renderTextPageHtml(title: string, body: string, filename: string): string {
+  const escapedTitle = escapeXml(title);
+  const escapedBody = escapeXml(body).replace(/\n/g, "<br />");
+  const html = `<?xml version="1.0" encoding="utf-8"?>
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>${escapedTitle}</title>
+    <style>
+      body { font-family: "Noto Sans JP", sans-serif; margin: 48px; color: #0f172a; }
+      h1 { font-size: 32px; margin: 0 0 24px; }
+      p { font-size: 18px; line-height: 1.8; margin: 0; }
+    </style>
+  </head>
+  <body>
+    <h1>${escapedTitle}</h1>
+    <p>${escapedBody}</p>
+  </body>
+</html>`;
+
+  const isValid = validateXhtml(html);
+  logger.debug("テキストページHTMLを生成しました", {
+    title,
+    filename,
+    isValidXhtml: isValid,
+    bodyLength: body.length,
+  });
+
+  return html;
+}
+
 export function renderChapterHtml(
   template: { layoutHtml: string; cssContent: string },
   item: InstagramMedia,

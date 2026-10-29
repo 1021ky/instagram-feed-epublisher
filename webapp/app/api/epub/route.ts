@@ -134,6 +134,14 @@ function validatePayload(value: unknown): EpubRequestPayload {
       instagramUrl: requiredString(value.metadata.instagramUrl, "metadata.instagramUrl"),
       language: optionalString(value.metadata.language),
       coverTheme,
+      coverImageUrl: validateOptionalText(value.metadata.coverImageUrl, "metadata.coverImageUrl"),
+      preface: validateOptionalText(value.metadata.preface, "metadata.preface"),
+      afterword: validateOptionalText(value.metadata.afterword, "metadata.afterword"),
+      authorIntroduction: validateOptionalText(
+        value.metadata.authorIntroduction,
+        "metadata.authorIntroduction",
+      ),
+      backCover: validateOptionalText(value.metadata.backCover, "metadata.backCover"),
     },
     coverTheme,
     sortOrder,
@@ -181,6 +189,19 @@ function requiredString(value: unknown, fieldName: string): string {
 
 function optionalString(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function validateOptionalText(value: unknown, fieldName: string): string | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  if (typeof value !== "string") {
+    throw new Error(`${fieldName} は文字列で指定してください`);
+  }
+  if (Array.from(value).length > 400) {
+    throw new Error(`${fieldName} は400文字以内で指定してください`);
+  }
+  return value.length > 0 ? value : undefined;
 }
 
 function optionalStringArray(value: unknown, fieldName: string): string[] | undefined {

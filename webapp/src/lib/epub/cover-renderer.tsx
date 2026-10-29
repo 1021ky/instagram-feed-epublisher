@@ -219,13 +219,30 @@ export async function renderCoverJpg(
   outputDir: string,
   themeId?: CoverThemeId,
 ): Promise<string> {
+  const coverPath = path.join(outputDir, "cover.jpg");
+
+  if (metadata.coverImageUrl) {
+    const normalizedCoverUrl = metadata.coverImageUrl.trim();
+    if (!normalizedCoverUrl.startsWith("data:image/")) {
+      throw new Error("表紙画像は画像アップロードのdata URLのみ指定できます");
+    }
+    logger.debug("Rendering custom cover image", {
+      coverImageUrlLength: normalizedCoverUrl.length,
+      mimeType: normalizedCoverUrl.slice(0, 32),
+    });
+    const base64Data = normalizedCoverUrl.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, "");
+    const imageBuffer = Buffer.from(base64Data, "base64");
+    await writeFile(coverPath, imageBuffer);
+    logger.info("Custom cover image written successfully", { coverPath, size: imageBuffer.length });
+    return coverPath;
+  }
+
   logger.debug("Rendering cover SVG with Satori", { title: metadata.title, themeId });
   const svg = await renderCoverSvg(metadata, themeId);
 
   logger.debug("Rasterizing cover SVG to JPEG with sharp");
   const jpegBuffer = await sharp(Buffer.from(svg)).jpeg({ quality: 90 }).toBuffer();
 
-  const coverPath = path.join(outputDir, "cover.jpg");
   await writeFile(coverPath, jpegBuffer);
   logger.info("Cover JPEG written successfully", { coverPath, size: jpegBuffer.length });
   return coverPath;
