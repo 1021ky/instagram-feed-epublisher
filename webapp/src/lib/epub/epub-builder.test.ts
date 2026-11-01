@@ -52,7 +52,7 @@ const items = [
   },
 ];
 
-describe("buildEpub", () => {
+describe("EPUB ビルド処理 (buildEpub)", () => {
   // 各テスト前にモックの状態をリセット
   beforeEach(() => {
     vi.clearAllMocks();

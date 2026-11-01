@@ -4,6 +4,30 @@
 import { betterAuth } from "better-auth";
 import { genericOAuth } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
+import { resolveMetaGraphApiBaseUrl } from "@/lib/instagram/meta-api-client";
+
+export const DEFAULT_INSTAGRAM_OAUTH_AUTHORIZE_URL = "https://www.instagram.com/oauth/authorize";
+export const DEFAULT_INSTAGRAM_OAUTH_TOKEN_URL = "https://api.instagram.com/oauth/access_token";
+
+/**
+ * 実行時の Instagram OAuth エンドポイント URL（認可・トークン交換）を解決します。
+ * E2E テストや契約テスト時に `INSTAGRAM_OAUTH_AUTHORIZE_URL` / `INSTAGRAM_OAUTH_TOKEN_URL` で切り替え可能です。
+ */
+export function resolveInstagramOAuthUrls(): {
+  authorizeUrl: string;
+  tokenUrl: string;
+} {
+  const authorizeUrl =
+    process.env.INSTAGRAM_OAUTH_AUTHORIZE_URL?.trim().replace(/\/+$/, "") ||
+    DEFAULT_INSTAGRAM_OAUTH_AUTHORIZE_URL;
+  const tokenUrl =
+    process.env.INSTAGRAM_OAUTH_TOKEN_URL?.trim().replace(/\/+$/, "") ||
+    DEFAULT_INSTAGRAM_OAUTH_TOKEN_URL;
+  return { authorizeUrl, tokenUrl };
+}
+
+const { authorizeUrl: instagramAuthorizeUrl, tokenUrl: instagramTokenUrl } =
+  resolveInstagramOAuthUrls();
 
 /**
  * Better Auth instance configured for Instagram SSO with stateless session.
@@ -28,8 +52,8 @@ export const auth = betterAuth({
           providerId: "instagram",
           clientId: process.env.INSTAGRAM_CLIENT_ID as string,
           clientSecret: process.env.INSTAGRAM_CLIENT_SECRET as string,
-          authorizationUrl: "https://www.instagram.com/oauth/authorize",
-          tokenUrl: "https://api.instagram.com/oauth/access_token",
+          authorizationUrl: instagramAuthorizeUrl,
+          tokenUrl: instagramTokenUrl,
           scopes: ["instagram_business_basic"],
           authorizationUrlParams: {
             /**
@@ -59,7 +83,8 @@ export const auth = betterAuth({
               code,
             });
 
-            const shortResponse = await fetch("https://api.instagram.com/oauth/access_token", {
+            const { tokenUrl } = resolveInstagramOAuthUrls();
+            const shortResponse = await fetch(tokenUrl, {
               method: "POST",
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -86,7 +111,7 @@ export const auth = betterAuth({
               throw new Error("Instagram access token missing from response");
             }
 
-            const longUrl = new URL("https://graph.instagram.com/access_token");
+            const longUrl = new URL(`${resolveMetaGraphApiBaseUrl()}/access_token`);
             longUrl.searchParams.set("grant_type", "ig_exchange_token");
             longUrl.searchParams.set("client_secret", process.env.INSTAGRAM_CLIENT_SECRET ?? "");
             longUrl.searchParams.set("access_token", shortAccessToken);
@@ -128,7 +153,7 @@ export const auth = betterAuth({
               throw new Error("Instagram access token missing for user info");
             }
 
-            const url = new URL("https://graph.instagram.com/me");
+            const url = new URL(`${resolveMetaGraphApiBaseUrl()}/me`);
             url.searchParams.set("fields", "id,username");
             url.searchParams.set("access_token", tokens.accessToken);
 

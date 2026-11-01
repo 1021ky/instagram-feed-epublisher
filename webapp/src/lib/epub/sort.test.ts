@@ -5,31 +5,37 @@ import { describe, expect, it } from "vitest";
 import { sortItemsByTimestamp } from "./sort";
 import type { EpubSortOrder } from "@/types/ui";
 
-describe("sortItemsByTimestamp", () => {
+describe("投稿アイテムの日時ソート (sortItemsByTimestamp)", () => {
   const items = [
     { id: "2", timestamp: "2026-02-01T00:00:00Z" },
     { id: "1", timestamp: "2026-01-01T00:00:00Z" },
     { id: "3", timestamp: "2026-03-01T00:00:00Z" },
   ];
 
-  it("sortOrder 未指定時にデフォルトで昇順（古い順）に並び替えること", () => {
-    const result = sortItemsByTimestamp(items);
-    expect(result.map((i) => i.id)).toEqual(["1", "2", "3"]);
-  });
-
-  it("sortOrder が 'asc' の場合に昇順（古い順）に並び替えること", () => {
-    const result = sortItemsByTimestamp(items, "asc");
-    expect(result.map((i) => i.id)).toEqual(["1", "2", "3"]);
-  });
-
-  it("sortOrder が 'desc' の場合に降順（新しい順）に並び替えること", () => {
-    const result = sortItemsByTimestamp(items, "desc");
-    expect(result.map((i) => i.id)).toEqual(["3", "2", "1"]);
-  });
-
-  it("sortOrder に不正な値が渡された場合にデフォルトの昇順にフォールバックすること", () => {
-    const result = sortItemsByTimestamp(items, "invalid" as unknown as EpubSortOrder);
-    expect(result.map((i) => i.id)).toEqual(["1", "2", "3"]);
+  it.each([
+    {
+      label: "未指定時（デフォルトで昇順）",
+      sortOrder: undefined,
+      expectedIds: ["1", "2", "3"],
+    },
+    {
+      label: "明示的な昇順 ('asc')",
+      sortOrder: "asc" as const,
+      expectedIds: ["1", "2", "3"],
+    },
+    {
+      label: "降順 ('desc')",
+      sortOrder: "desc" as const,
+      expectedIds: ["3", "2", "1"],
+    },
+    {
+      label: "不正値フォールバック",
+      sortOrder: "invalid" as unknown as EpubSortOrder,
+      expectedIds: ["1", "2", "3"],
+    },
+  ])("sortOrder が $label の場合に適切な順序へ並び替えること", ({ sortOrder, expectedIds }) => {
+    const result = sortItemsByTimestamp(items, sortOrder);
+    expect(result.map((i) => i.id)).toEqual(expectedIds);
   });
 
   it("元の配列を変更しないこと（イミュータブル性）", () => {

@@ -498,3 +498,56 @@
 - [x] 全品質ゲートの検証 (test, lint, format, typecheck, build, markdown, mermaid)
 - [x] 学びと知見 (`tasks/lessons.md`) の記録
 - [x] コミット、プッシュ、および Pull Request の作成
+
+---
+
+## Issue #35: ハッシュタグ自動補完・クイック選択機能の追加 & Playwright E2E 品質基盤整備
+
+### Phase 1: Playwright ベストプラクティス（POM 構造）の静的コード解析 ＆ Agent-SOP スキル整備
+
+- [x] `oxlint` による Playwright ベストプラクティス・POM 構造強制プラグインの実装
+  - [x] `webapp/scripts/oxlint-plugin-playwright.mjs` の新規作成（Web-First Assertions、`waitForTimeout` 禁止、`force: true` 禁止、`.spec.ts` での直接ロケータ・`goto` 禁止、Fixture 利用強制、POM 内 `expect` 禁止等）
+  - [x] `webapp/.oxlintrc.json`（およびルート実行時の整合）への `jsPlugins` / `overrides` 設定追加
+  - [x] `webapp/scripts/oxlint-plugin-playwright.test.ts` の新規作成（全カスタム Lint ルールの Valid / Invalid 単体テスト）
+- [x] 既存 E2E テストの POM + Custom Fixture 化
+  - [x] `webapp/e2e/pages/TopLoginPage.ts` および `webapp/e2e/pages/FeedFilterPage.ts` の新規作成
+  - [x] `webapp/e2e/fixtures/test.ts` の新規作成（`test.extend` による Page Object 注入）
+  - [x] `webapp/e2e/sso-button.spec.ts` を POM + Fixture 構造へリファクタリング
+- [x] `strands-agents/agent-sop` 形式のスキルおよび常時発火ルールの整備
+  - [x] 実装用 SOP: `.agent/skills/playwright-e2e-authoring/SKILL.md`（および `playwright-e2e-authoring.sop.md`）の作成
+  - [x] セルフレビュー用 SOP: `.agent/skills/playwright-e2e-self-review/SKILL.md`（および `playwright-e2e-self-review.sop.md`）の作成
+  - [x] 常時発火ディレクトリルール: `webapp/e2e/AGENTS.md` および `.github/instructions/playwright.instructions.md` の作成
+- [x] ローカル & CI での静的解析・単体テスト・ドキュメント検証の通過確認
+
+### Phase 2: Instagram API 連携サービスにおける Playwright E2E テスト戦略（モック / OpenAPI 等）の調査・決定
+
+- [x] E2E における外部 API 連携テスト手法（5手法）の調査とメリット・デメリット比較
+- [x] 本プロジェクトで採用する E2E API モック／契約検証方式（Option A: OpenAPI 3.1 スキーマ + ローカルモックサーバー BFF 貫通 + 異常系 `page.route` 分離）の決定
+
+### Phase 3: Issue #35（ハッシュタグ自動補完・クイック選択機能）の実装・テスト検証
+
+- [x] OpenAPI 3.1 スキーマ定義（`docs/openapi/instagram-graph-api.openapi.yaml`）および検証器・モックサーバー実装（`webapp/scripts/openapi-contract.mjs`, `webapp/scripts/mock-instagram-server.mjs`, `webapp/scripts/openapi-contract.test.ts`）
+- [x] `HashtagSuggestion` 型定義（`webapp/src/lib/instagram/types.ts`, `webapp/src/types/ui.ts`）
+- [x] ハッシュタグ抽出サービス（`webapp/src/lib/instagram/hashtag-service.ts`）＆ 単体テスト（`hashtag-service.test.ts`）
+- [x] バックエンド API（`webapp/app/api/instagram/hashtags/route.ts`）＆ 結合・OpenAPI 契約テスト（`route.test.ts`）
+- [x] クライアント関数（`webapp/src/lib/client/instagram.ts`）＆ 単体テスト（`instagram.test.ts`）
+- [x] フロントエンド UI（`FeedFilterStep.tsx` / `page.tsx`）＆ コンポーネント単体テスト（`feed-components.test.tsx`）
+- [x] Agent-SOP に従った POM + E2E テスト実装（`FeedFilterPage.ts` / `TopLoginPage.ts` / `e2e/fixtures/test.ts` / `hashtag-suggestions.spec.ts`）とセルフレビュー SOP 実践検証
+- [x] CI への Playwright E2E ジョブ追加（`.github/workflows/webapp-ci.yml`）およびドキュメント更新・全品質ゲート通過確認
+
+---
+
+## PR #92 レビュー指摘対応・テスト漏れ横展開監査・テスト番号整理
+
+- [x] Copilot レビュー指摘対応（`resolveMetaGraphApiBaseUrl` / `buildMetaApiUrls` の境界値防御と単体テスト追加）
+  - [x] `webapp/src/lib/instagram/meta-api-client.ts`: スラッシュのみ（`"/"`, `"  ///  "`）の環境変数値でも空文字にならず本番デフォルト URL へ安全にフォールバックするよう改善
+  - [x] `webapp/src/lib/instagram/meta-api-client.test.ts`: 因子分析に基づき未設定・空白のみ・スラッシュのみ・前後空白＋複数末尾スラッシュ・サブパス・`buildMetaApiUrls` 結合の単体テストを追加
+- [x] PR #92 全体の因子分析・横展開によるテスト漏れ補強と潜在不具合修正
+  - [x] `webapp/src/lib/auth.ts` & `webapp/src/lib/auth.test.ts`: `resolveInstagramOAuthUrls()` を純粋関数として切り出し、OAuth エンドポイント URL 解決の全水準テストを新設
+  - [x] `webapp/app/api/instagram/hashtags/route.test.ts`: `InstagramGraphApiError.recommendedHttpStatus` の非 `401` ステータス（`429` / `502` / `504` / `400`）伝播および非 `Error` 例外フォールバックのテストを追加
+  - [x] `webapp/src/lib/instagram/hashtag-service.ts` & `hashtag-service.test.ts`: 降順（最新→過去）投稿入力時の `lastUsedAt` 保持、小数・不正 `limit` 正規化、および V8 非標準 `Date.parse()` 推測を排した ISO タイムスタンプ比較・ソート順序のテストと修正を反映
+  - [x] `webapp/src/lib/client/instagram.test.ts` & `webapp/src/components/feed/feed-components.test.tsx`: デフォルト `limit=20`・`hashtags` 省略・非 JSON エラー応答、空/`#`/`＃` 入力や全角・NFD/NFC 選択解除、既存候補あり時のローディング表示抑止のテストを追加
+- [x] コード上の一時的なテスト番号プレフィックスの完全削除（振る舞いベースのテスト名へ統一）
+- [x] 全単体テスト・結合テスト・E2E テストの `describe` / `it` / `test` 表記の日本語統一
+- [x] 次回以降もテストケース表記を日本語で記述するスキル・指示定義の整備（`.agent/skills/vitest-test-authoring/SKILL.md`, `playwright-e2e-authoring`, `playwright-e2e-self-review`, `.github/instructions/testing.instructions.md`）
+- [x] 全品質ゲート検証（lint, format, markdown, mermaid, typecheck, unit test, Playwright E2E）および PR #92 への反映

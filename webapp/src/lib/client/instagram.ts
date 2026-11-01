@@ -2,6 +2,9 @@
  * @file InstagramおよびEPUB向けクライアントAPIラッパー。
  */
 import type { CoverThemeId, EpubSortOrder } from "@/types/ui";
+import type { HashtagSuggestion } from "@/lib/instagram/types";
+
+export type { HashtagSuggestion };
 
 /**
  * Instagramメディア項目。
@@ -82,6 +85,36 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
 
   const payload = (await response.json()) as { items: InstagramMedia[] };
   return payload.items ?? [];
+}
+
+/**
+ * バックエンドから直近投稿のハッシュタグ候補一覧を取得します。
+ */
+export async function fetchHashtagSuggestions(limit = 20): Promise<HashtagSuggestion[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+  });
+  const response = await fetch(`/api/instagram/hashtags?${params.toString()}`, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    let errorMessage = errorText;
+    try {
+      const errorJson = JSON.parse(errorText) as { error?: string };
+      errorMessage = errorJson.error ?? errorText;
+    } catch {
+      // JSONでない場合はレスポンステキストをそのまま使う
+    }
+    throw new Error(`ハッシュタグ候補の取得に失敗しました: ${response.status} - ${errorMessage}`);
+  }
+
+  const payload = (await response.json()) as {
+    hashtags?: HashtagSuggestion[];
+    scannedPosts?: number;
+  };
+  return payload.hashtags ?? [];
 }
 
 /**

@@ -1,4 +1,38 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "ignorePatterns": ["next-env.d.ts"]
+  "ignorePatterns": ["next-env.d.ts"],
+  "overrides": [
+    {
+      "files": ["e2e/**/*.ts"],
+      "jsPlugins": ["./scripts/oxlint-plugin-playwright.mjs"],
+      "plugins": ["eslint", "typescript", "unicorn", "oxc", "vitest"],
+      "rules": {
+        "vitest/no-focused-tests": "error",
+        "vitest/no-disabled-tests": "error",
+        "vitest/no-conditional-expect": "error",
+        "playwright-best-practices/no-wait-for-timeout": "error",
+        "playwright-best-practices/no-force-option": "error",
+        "playwright-best-practices/no-element-handle": "error",
+        "playwright-best-practices/no-page-pause": "error",
+        "playwright-best-practices/prefer-web-first-assertions": "error",
+        "playwright-best-practices/missing-playwright-await": "error"
+      }
+    },
+    {
+      "files": ["e2e/**/*.spec.ts"],
+      "jsPlugins": ["./scripts/oxlint-plugin-playwright.mjs"],
+      "rules": {
+        "playwright-best-practices/no-direct-locators-in-spec": "error",
+        "playwright-best-practices/require-custom-fixture-import": "error"
+      }
+    },
+    {
+      "files": ["e2e/pages/**/*.ts"],
+      "jsPlugins": ["./scripts/oxlint-plugin-playwright.mjs"],
+      "rules": {
+        "playwright-best-practices/no-assertions-in-pom": "error",
+        "playwright-best-practices/prefer-user-facing-locators": "error"
+      }
+    }
+  ]
 }

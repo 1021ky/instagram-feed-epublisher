@@ -24,3 +24,15 @@ export type InstagramMedia = {
   permalink: string;
   timestamp: string;
 };
+
+/**
+ * 投稿キャプションから集計されたハッシュタグ候補。
+ */
+export type HashtagSuggestion = {
+  /** 先頭の `#` を除いた正規化済みタグ文字列 */
+  tag: string;
+  /** 対象期間・スキャン範囲内でこのタグが出現した投稿数 */
+  count: number;
+  /** このタグが最後に使用された投稿のタイムスタンプ（ISO 8601） */
+  lastUsedAt: string;
+};

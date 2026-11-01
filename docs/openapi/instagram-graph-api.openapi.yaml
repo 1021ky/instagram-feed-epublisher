@@ -1,0 +1,362 @@
+openapi: "3.1.0"
+info:
+  title: "Instagram Graph API & BFF Contract Specification"
+  version: "1.0.0"
+  description: "Contract specification for Meta (Instagram) OAuth / Graph API endpoints consumed by instagram-feed-epublisher and the internal Next.js BFF hashtag suggestions endpoint."
+servers:
+  - url: "https://graph.instagram.com"
+    description: "Production Meta (Instagram) Graph API"
+  - url: "http://127.0.0.1:4010"
+    description: "Local OpenAPI Mock Server for Playwright E2E"
+paths:
+  /oauth/authorize:
+    get:
+      summary: "Instagram OAuth 2.0 Authorization Endpoint"
+      parameters:
+        - name: client_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: redirect_uri
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+        - name: response_type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - code
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: scope
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "302":
+          description: "Redirects back to redirect_uri with authorization code and state"
+  /oauth/access_token:
+    post:
+      summary: "Exchange authorization code for short-lived Instagram user access token"
+      responses:
+        "200":
+          description: "Short-lived token payload"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthShortTokenResponse"
+  /access_token:
+    get:
+      summary: "Exchange short-lived token for long-lived Instagram token (ig_exchange_token)"
+      parameters:
+        - name: grant_type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - ig_exchange_token
+        - name: client_secret
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: access_token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Long-lived token payload"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthLongTokenResponse"
+  /me:
+    get:
+      summary: "Fetch authenticated Instagram user profile"
+      parameters:
+        - name: fields
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: access_token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Instagram user profile"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraphUserProfile"
+        "400":
+          description: "Meta Graph API error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraphErrorResponse"
+  /me/media:
+    get:
+      summary: "Fetch user media items with cursor pagination"
+      parameters:
+        - name: fields
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: access_token
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: since
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: until
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: after
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Paginated Instagram media list"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraphMediaListResponse"
+        "400":
+          description: "Meta Graph API error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraphErrorResponse"
+        "429":
+          description: "Rate limit exceeded"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraphErrorResponse"
+  /api/instagram/hashtags:
+    get:
+      summary: "Internal Next.js BFF endpoint returning aggregated hashtag suggestions from recent posts"
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: "Aggregated hashtag suggestions"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HashtagSuggestionsResponse"
+        "401":
+          description: "Unauthenticated or expired token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BffErrorResponse"
+        "502":
+          description: "Upstream Graph API error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BffErrorResponse"
+components:
+  schemas:
+    OAuthShortTokenResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - access_token
+        - user_id
+      properties:
+        access_token:
+          type: string
+          minLength: 1
+        user_id:
+          type: string
+          minLength: 1
+        token_type:
+          type: string
+        expires_in:
+          type: integer
+          minimum: 1
+    OAuthLongTokenResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - access_token
+      properties:
+        access_token:
+          type: string
+          minLength: 1
+        token_type:
+          type: string
+        expires_in:
+          type: integer
+          minimum: 1
+    GraphUserProfile:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - username
+      properties:
+        id:
+          type: string
+          minLength: 1
+        username:
+          type: string
+          minLength: 1
+    InstagramMediaItem:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - media_url
+        - permalink
+        - timestamp
+      properties:
+        id:
+          type: string
+          minLength: 1
+        caption:
+          type: string
+        media_url:
+          type: string
+          format: uri
+        permalink:
+          type: string
+          format: uri
+        timestamp:
+          type: string
+          format: date-time
+    GraphCursors:
+      type: object
+      additionalProperties: false
+      properties:
+        before:
+          type: string
+        after:
+          type: string
+    GraphPaging:
+      type: object
+      additionalProperties: false
+      properties:
+        cursors:
+          $ref: "#/components/schemas/GraphCursors"
+        next:
+          type: string
+          format: uri
+    GraphMediaListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/InstagramMediaItem"
+        paging:
+          $ref: "#/components/schemas/GraphPaging"
+    MetaGraphErrorDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        type:
+          type: string
+        code:
+          type: integer
+        error_subcode:
+          type: integer
+        is_transient:
+          type: boolean
+        fbtrace_id:
+          type: string
+    GraphErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/MetaGraphErrorDetail"
+    HashtagSuggestion:
+      type: object
+      additionalProperties: false
+      required:
+        - tag
+        - count
+        - lastUsedAt
+      properties:
+        tag:
+          type: string
+          minLength: 1
+        count:
+          type: integer
+          minimum: 1
+        lastUsedAt:
+          type: string
+          format: date-time
+    HashtagSuggestionsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - hashtags
+        - scannedPosts
+      properties:
+        hashtags:
+          type: array
+          items:
+            $ref: "#/components/schemas/HashtagSuggestion"
+        scannedPosts:
+          type: integer
+          minimum: 0
+    BffErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          minLength: 1

@@ -8,8 +8,8 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe("registerGracefulShutdown", () => {
-  it("closes the server and app before exiting successfully", async () => {
+describe("HTTPS 開発サーバーのグレースフルシャットダウン (registerGracefulShutdown)", () => {
+  it("正常終了時にサーバーとアプリを順番にクローズしてから終了コード 0 で終了する", async () => {
     const processRef = new EventEmitter();
     const events: string[] = [];
     const server = {
@@ -55,7 +55,7 @@ describe("registerGracefulShutdown", () => {
     expect(consoleRef.error).not.toHaveBeenCalled();
   });
 
-  it("forces exit with code 1 when shutdown exceeds the timeout", async () => {
+  it("シャットダウンがタイムアウトを超過した場合に接続を強制切断し終了コード 1 で終了する", async () => {
     vi.useFakeTimers();
 
     const processRef = new EventEmitter();
@@ -92,7 +92,7 @@ describe("registerGracefulShutdown", () => {
     expect(app.close).not.toHaveBeenCalled();
   });
 
-  it("ignores additional signals after shutdown has started", async () => {
+  it("シャットダウン開始後に追加のシグナルを受け取っても二重実行せず無視する", async () => {
     const processRef = new EventEmitter();
     let resolveShutdown: (() => void) | undefined;
     const closeServerRef = vi.fn(
@@ -127,7 +127,7 @@ describe("registerGracefulShutdown", () => {
     });
   });
 
-  it("closes all connections and exits with code 1 when shutdown cleanup fails", async () => {
+  it("シャットダウン処理中にエラーが発生した場合に全接続を閉じて終了コード 1 で終了する", async () => {
     const processRef = new EventEmitter();
     const server = {
       closeAllConnections: vi.fn(),

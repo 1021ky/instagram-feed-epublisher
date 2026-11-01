@@ -7,6 +7,8 @@ import {
   detectPreset,
   FeedFilterStep,
   formatDateToISO,
+  MAX_QUICK_SELECT_CHIPS,
+  resolveNextHashtagOnChipClick,
 } from "./FeedFilterStep";
 import { formatPostDate, PostCard } from "./PostCard";
 import { PostListStep } from "./PostListStep";
@@ -19,31 +21,64 @@ describe("FeedFilterStep ロジックおよび日付プリセット", () => {
     expect(formatDateToISO(baseDate)).toBe("2026-09-21");
   });
 
-  it("直近100日プリセットが今日から100日前と今日を算出すること", () => {
-    const dates = calculatePresetDates("100days", baseDate);
-    expect(dates.endDate).toBe("2026-09-21");
-    // 2026-09-21 の100日前は 2026-06-13
-    expect(dates.startDate).toBe("2026-06-13");
+  it.each([
+    { preset: "100days" as const, expectedStart: "2026-06-13", expectedEnd: "2026-09-21" },
+    { preset: "30days" as const, expectedStart: "2026-08-22", expectedEnd: "2026-09-21" },
+    { preset: "all" as const, expectedStart: undefined, expectedEnd: undefined },
+  ])(
+    "calculatePresetDates: プリセット '$preset' で正しい期間を算出すること",
+    ({ preset, expectedStart, expectedEnd }) => {
+      const dates = calculatePresetDates(preset, baseDate);
+      expect(dates.startDate).toBe(expectedStart);
+      expect(dates.endDate).toBe(expectedEnd);
+    },
+  );
+
+  it.each([
+    { label: "全期間 (未指定)", start: undefined, end: undefined, expected: "all" },
+    { label: "直近100日", start: "2026-06-13", end: "2026-09-21", expected: "100days" },
+    { label: "直近30日", start: "2026-08-22", end: "2026-09-21", expected: "30days" },
+    { label: "カスタム期間", start: "2026-01-01", end: "2026-05-01", expected: "custom" },
+  ])("detectPreset: $label の設定値から '$expected' を判定すること", ({ start, end, expected }) => {
+    expect(detectPreset(start, end, baseDate)).toBe(expected);
   });
 
-  it("直近30日プリセットが今日から30日前と今日を算出すること", () => {
-    const dates = calculatePresetDates("30days", baseDate);
-    expect(dates.endDate).toBe("2026-09-21");
-    // 2026-09-21 の30日前は 2026-08-22
-    expect(dates.startDate).toBe("2026-08-22");
-  });
-
-  it("全期間プリセットが開始日・終了日を未指定（undefined）にすること", () => {
-    const dates = calculatePresetDates("all", baseDate);
-    expect(dates.startDate).toBeUndefined();
-    expect(dates.endDate).toBeUndefined();
-  });
-
-  it("detectPreset が設定値からプリセット種別を正確に判定すること", () => {
-    expect(detectPreset(undefined, undefined, baseDate)).toBe("all");
-    expect(detectPreset("2026-06-13", "2026-09-21", baseDate)).toBe("100days");
-    expect(detectPreset("2026-08-22", "2026-09-21", baseDate)).toBe("30days");
-    expect(detectPreset("2026-01-01", "2026-05-01", baseDate)).toBe("custom");
+  it.each([
+    {
+      label: "未選択から新規タグを選択",
+      current: undefined,
+      clicked: "京都カフェ",
+      expected: "京都カフェ",
+    },
+    {
+      label: "別タグから切り替え",
+      current: "朝活",
+      clicked: "#京都カフェ",
+      expected: "京都カフェ",
+    },
+    {
+      label: "同一タグ再クリックで解除",
+      current: "京都カフェ",
+      clicked: "京都カフェ",
+      expected: undefined,
+    },
+    {
+      label: "大文字小文字の違いを無視して同一タグ解除",
+      current: "Travel",
+      clicked: "travel",
+      expected: undefined,
+    },
+    {
+      label: "全角・NFD/NFCゆれを正規化して同一タグ解除",
+      current: "＃ふ\u309Aりん",
+      clicked: "ぷりん",
+      expected: undefined,
+    },
+    { label: "空文字クリックで解除", current: "朝活", clicked: "", expected: undefined },
+    { label: "空白のみクリックで解除", current: "朝活", clicked: "#   ", expected: undefined },
+    { label: "全角＃のみクリックで解除", current: "朝活", clicked: "＃", expected: undefined },
+  ])("resolveNextHashtagOnChipClick: $label", ({ current, clicked, expected }) => {
+    expect(resolveNextHashtagOnChipClick(current, clicked)).toBe(expected);
   });
 });
 
@@ -140,6 +175,86 @@ describe("FeedFilterStep コンポーネント描画", () => {
     expect(html).toMatch(/readonly/i);
     expect(html).toContain("cursor-not-allowed");
     expect(html).toContain("この条件で投稿を取得");
+  });
+
+  it("ハッシュタグ候補があるとき、<datalist> オプションとクイック選択チップ（最大10件・選択状態 aria-pressed）が描画されること", () => {
+    const manySuggestions = Array.from({ length: 15 }, (_, idx) => ({
+      tag: idx === 0 ? "100日チャレンジ" : `タグ${idx + 1}`,
+      count: 20 - idx,
+      lastUsedAt: "2026-09-20T09:00:00.000Z",
+    }));
+
+    const html = renderToStaticMarkup(
+      <FeedFilterStep
+        filter={defaultFilter}
+        onFilterChange={vi.fn()}
+        onSubmit={vi.fn()}
+        isCollapsed={false}
+        hashtagSuggestions={manySuggestions}
+      />,
+    );
+
+    expect(html).toContain('list="hashtag-suggestions"');
+    expect(html).toContain('<datalist id="hashtag-suggestions">');
+    // datalist には全 15 件が含まれる
+    expect(html).toContain('value="タグ15"');
+    // クイック選択チップは上位 MAX_QUICK_SELECT_CHIPS (10件) のみ描画される
+    expect(html).toContain('aria-label="よく使うハッシュタグ"');
+    expect(html).toContain("#100日チャレンジ");
+    expect(html).toContain("(20)");
+    expect(html).toContain('aria-pressed="true"');
+    expect(html).toContain("#タグ10");
+    expect(html).not.toContain("><span>#タグ11</span>");
+    expect(MAX_QUICK_SELECT_CHIPS).toBe(10);
+  });
+
+  it("ハッシュタグ集計中（isLoadingHashtags=true かつ候補未取得）のときローディングステータスメッセージが表示されること", () => {
+    const html = renderToStaticMarkup(
+      <FeedFilterStep
+        filter={defaultFilter}
+        onFilterChange={vi.fn()}
+        onSubmit={vi.fn()}
+        isCollapsed={false}
+        hashtagSuggestions={[]}
+        isLoadingHashtags={true}
+      />,
+    );
+
+    expect(html).toContain("よく使うハッシュタグを集計中...");
+  });
+
+  it("ハッシュタグ候補が 0 件かつ非ローディングのとき、クイック選択チップ領域が表示されないこと", () => {
+    const html = renderToStaticMarkup(
+      <FeedFilterStep
+        filter={defaultFilter}
+        onFilterChange={vi.fn()}
+        onSubmit={vi.fn()}
+        isCollapsed={false}
+        hashtagSuggestions={[]}
+        isLoadingHashtags={false}
+      />,
+    );
+
+    expect(html).not.toContain("よく使うタグから選択:");
+    expect(html).not.toContain("よく使うハッシュタグを集計中...");
+  });
+
+  it("すでにハッシュタグ候補が存在する状態で isLoadingHashtags=true になった場合、既存チップを表示し続け重複ローディング文言を出さないこと", () => {
+    const html = renderToStaticMarkup(
+      <FeedFilterStep
+        filter={defaultFilter}
+        onFilterChange={vi.fn()}
+        onSubmit={vi.fn()}
+        isCollapsed={false}
+        hashtagSuggestions={[
+          { tag: "100日チャレンジ", count: 8, lastUsedAt: "2026-09-20T09:00:00.000Z" },
+        ]}
+        isLoadingHashtags={true}
+      />,
+    );
+
+    expect(html).toContain("#100日チャレンジ");
+    expect(html).not.toContain("よく使うハッシュタグを集計中...");
   });
 });
 

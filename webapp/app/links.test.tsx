@@ -57,43 +57,42 @@ function verifyLinks(links: string[]) {
 }
 
 describe("サイト内リンク切れ検証テスト", () => {
-  it("SiteFooter のすべてのリンク先が実在すること", () => {
-    const links = extractLinks(<SiteFooter />);
-    expect(links).toContain("/privacy");
-    expect(links).toContain("/terms");
-    expect(links).toContain("/data-deletion");
-    verifyLinks(links);
-  });
-
-  it("/privacy（日本語版）のすべての内部リンクおよび外部リンクが有効であること", () => {
-    const links = extractLinks(<PrivacyPage />);
-    expect(links).toContain("/");
-    expect(links).toContain("/data-deletion");
-    verifyLinks(links);
-  });
-
-  it("/privacy/en（英語版）のすべての内部リンクおよび外部リンクが有効であること", () => {
-    const links = extractLinks(<EnglishPrivacyPage />);
-    expect(links).toContain("/");
-    expect(links).toContain("/data-deletion");
-    verifyLinks(links);
-  });
-
-  it("/terms（利用規約）のすべての内部リンクおよび外部リンクが有効であること", () => {
-    const links = extractLinks(<TermsPage />);
-    expect(links).toContain("/");
-    expect(links).toContain("/privacy");
-    expect(links).toContain("/data-deletion");
-    verifyLinks(links);
-  });
-
-  it("/data-deletion（データ削除手順）のすべての内部リンクおよび外部リンクが有効であること", () => {
-    const links = extractLinks(<DataDeletionPage />);
-    expect(links).toContain("/");
-    expect(links).toContain("/privacy");
-    expect(links).toContain("https://www.instagram.com/accounts/manage_access/");
-    verifyLinks(links);
-  });
+  it.each([
+    {
+      label: "SiteFooter",
+      element: <SiteFooter />,
+      requiredLinks: ["/privacy", "/terms", "/data-deletion"],
+    },
+    {
+      label: "/privacy（日本語版）",
+      element: <PrivacyPage />,
+      requiredLinks: ["/", "/data-deletion"],
+    },
+    {
+      label: "/privacy/en（英語版）",
+      element: <EnglishPrivacyPage />,
+      requiredLinks: ["/", "/data-deletion"],
+    },
+    {
+      label: "/terms（利用規約）",
+      element: <TermsPage />,
+      requiredLinks: ["/", "/privacy", "/data-deletion"],
+    },
+    {
+      label: "/data-deletion（データ削除手順）",
+      element: <DataDeletionPage />,
+      requiredLinks: ["/", "/privacy", "https://www.instagram.com/accounts/manage_access/"],
+    },
+  ])(
+    "$label のすべての内部・外部リンクが有効で必須リンクを含むこと",
+    ({ element, requiredLinks }) => {
+      const links = extractLinks(element);
+      for (const required of requiredLinks) {
+        expect(links).toContain(required);
+      }
+      verifyLinks(links);
+    },
+  );
 
   describe("リンク切れ検知自体の妥当性検証", () => {
     it("存在しない内部リンクを渡すとエラーをスローすること", () => {

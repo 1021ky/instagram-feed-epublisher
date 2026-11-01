@@ -156,3 +156,19 @@
   - タイムアウト（`AbortSignal.timeout`）、Exponential Backoff リトライ（`p-retry`）、エラー分類、トークン秘匿（`[REDACTED]`）、構造化ロギングは `meta-api-client.ts` に集約し、`/me/media` 固有のフィールドやページング制御のみを `graph-client.ts` に持たせることで、将来 `/me` や `/{media-id}/children` 等の他エンドポイントを追加する際も安全に共通基盤を再利用できる。
 - **Vitest における `vi.restoreAllMocks()` とトップレベル `vi.mock()` の相互作用**:
   - `vi.mock("...", () => ({ fn: vi.fn().mockResolvedValue(...) }))` のようにファクトリ内で初期実装を与えている場合、テスト後に `vi.restoreAllMocks()` を呼ぶとモック実装がリセットされ、2つ目以降のテストで返り値が `undefined` になる。`beforeEach` 内で `vi.mocked(fn).mockResolvedValue(...)` を毎回明示的に設定することでテスト間の順序依存を排除できる。
+
+## 2026-10-25: Issue #35 ハッシュタグ候補機能 & Playwright E2E（OpenAPI モック + Agent-SOP）実装で得た知見
+
+- **Next.js App Router の `#__next-route-announcer__` と Playwright `getByRole('alert')` の衝突**:
+  - Next.js App Router はクライアント遷移時にスクリーンリーダー通知用の空要素 `<div role="alert" aria-live="assertive" id="__next-route-announcer__"></div>` を DOM 上に常駐させる。
+  - そのため、エラーバナー非表示を検証しようとして無条件の `expect(page.getByRole("alert")).toBeHidden()` を実行すると、`#__next-route-announcer__` にマッチして失敗する。アプリケーション固有のエラーバナーを検証する際は `page.getByRole("alert").filter({ hasText: "✕" })` のように表示コンテンツや親ランドマークで絞り込むこと。
+- **ローディング状態 E2E テストでの非同期ゲート（Promise Latch）活用**:
+  - ローディングスピナーの表示確認に `setTimeout` や `waitForTimeout` を使うと CI の負荷次第で Flaky になる。Playwright の `page.route()` 内で `arrived` Promise と `release()` 関数を持つゲート（Latch）を返す Custom Fixture を用意すれば、(1) リクエスト到達確定 → (2) ローディング表示アサート → (3) `release()` で実 BFF / モックサーバーへ通過 → (4) 完了表示アサート、を待機時間ゼロ・競合ゼロで決定論的に検証できる。
+- **外部 OAuth / Graph API を伴う Next.js アプリのフルスタック E2E 構成**:
+  - `META_GRAPH_API_BASE_URL` や OAuth エンドポイント URL を環境変数で差し替え可能にし、OpenAPI 3.1 スキーマを実行時検証するローカルモックサーバーを `playwright.config.ts` の `webServer` 配列で同時起動（開発用 `:3000` と分離した `:3100` を使用）することで、本番 Instagram に一切アクセスせず Better Auth の暗号化 JWE セッション発行から Route Handler 集計まで一気通貫で安全に E2E 検証できる。
+- **環境変数によるベース URL オーバーライドの境界値正規化**:
+  - `envValue.trim()` が非空かを先に判定してから `.replace(/\/+$/, "")` で末尾スラッシュを除去すると、`META_GRAPH_API_BASE_URL="/"` や `"  ///  "` が設定された際に `""`（空文字）を返してしまい、後続の `new URL(...)` で実行時例外となる。
+  - 必ず `trim()` と末尾 `/` 除去の**両方を行った後の文字列**が空でないかを判定し、空になる場合は本番デフォルト URL へ安全にフォールバックさせること。
+- **V8 の非標準 `Date.parse()` 推測挙動とタイムスタンプソートの全順序性担保**:
+  - V8（Node.js / Chromium）の `Date.parse()` は、`"not-a-timestamp-2"` のように末尾に `-1`〜`-12` を含む任意の非日時文字列を「2001年1月〜12月」の有効な日時として推測パースしてしまう。
+  - ISO 8601 日時文字列を比較する処理では `^\d{4}-\d{2}-\d{2}` の先頭一致を必須としたうえで、不正値を `-Infinity` に正規化して有限タイムスタンプより常に後ろへ配置することで、有効日時と不正文字列が混在しても例外を投げず厳密な弱順序（Strict Weak Ordering）を維持できる。

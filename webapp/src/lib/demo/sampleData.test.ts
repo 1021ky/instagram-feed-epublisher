@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { sampleDemoFeedData } from "./sampleData";
 
-describe("sampleDemoFeedData", () => {
+describe("デモ体験用サンプル投稿データ (sampleDemoFeedData)", () => {
   it("100日チャレンジ用の100件データを提供すること", () => {
     expect(sampleDemoFeedData.username).toBe("demo_100days");
     expect(sampleDemoFeedData.hashtag).toBe("#100日チャレンジ");

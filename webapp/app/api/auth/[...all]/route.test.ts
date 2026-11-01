@@ -17,12 +17,12 @@ vi.mock("@/lib/auth", () => ({
 
 import { GET, POST } from "./route";
 
-describe("/api/auth/[...all] route handlers", () => {
+describe("認証ルートハンドラ (/api/auth/[...all])", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe("GET handler", () => {
+  describe("GET ハンドラ", () => {
     it("handlers.GET を呼び出してそのレスポンスを返すこと", async () => {
       const expectedResponse = new Response("ok", { status: 200 });
       mockHandlers.GET.mockResolvedValue(expectedResponse);
@@ -70,7 +70,7 @@ describe("/api/auth/[...all] route handlers", () => {
     });
   });
 
-  describe("POST handler", () => {
+  describe("POST ハンドラ", () => {
     it("handlers.POST を呼び出してそのレスポンスを返すこと", async () => {
       const expectedResponse = new Response("created", { status: 201 });
       mockHandlers.POST.mockResolvedValue(expectedResponse);

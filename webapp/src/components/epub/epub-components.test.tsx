@@ -8,8 +8,8 @@ import { CoverThemeSelector } from "@/components/epub/CoverThemeSelector";
 import { EpubCustomizeStep } from "@/components/epub/EpubCustomizeStep";
 import { ExportModal } from "@/components/epub/ExportModal";
 
-describe("EPUB UI components", () => {
-  test("CoverThemeSelector renders all 5 themes", () => {
+describe("EPUB 生成 UI コンポーネント", () => {
+  test("CoverThemeSelector が全 5 種類の表紙テーマを描画すること", () => {
     const html = renderToStaticMarkup(
       <CoverThemeSelector selectedTheme="navy" onChange={() => undefined} />,
     );
@@ -21,7 +21,7 @@ describe("EPUB UI components", () => {
     expect(html).toContain("紫: ダーク");
   });
 
-  test("EpubCustomizeStep renders title, metadata, and theme controls", () => {
+  test("EpubCustomizeStep がタイトル・メタデータ・表紙テーマの設定欄を描画すること", () => {
     const html = renderToStaticMarkup(
       <EpubCustomizeStep
         defaultTitle="@demo_userの投稿記録"
@@ -43,7 +43,7 @@ describe("EPUB UI components", () => {
     expect(html).toContain("表紙テーマ");
   });
 
-  test("ExportModal renders completion guide and download action", () => {
+  test("ExportModal が完了ガイドとダウンロードボタンを描画すること", () => {
     const onDownload = vi.fn();
     const html = renderToStaticMarkup(
       <ExportModal

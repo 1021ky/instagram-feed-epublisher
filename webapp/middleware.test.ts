@@ -6,7 +6,7 @@ const originalNodeEnv = process.env.NODE_ENV;
 
 const createRequest = (url: string, headers?: HeadersInit) => new NextRequest(url, { headers });
 
-describe("middleware", () => {
+describe("正規ホストリダイレクトミドルウェア (middleware)", () => {
   afterEach(() => {
     process.env.NODE_ENV = originalNodeEnv;
   });

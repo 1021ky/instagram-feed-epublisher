@@ -12,7 +12,7 @@ import type { InstagramMedia } from "@/lib/instagram/types";
 
 const realModulePath = "./template-renderer";
 
-describe("renderChapterHtml", () => {
+describe("EPUB 章 HTML レンダリング (renderChapterHtml)", () => {
   test("プレースホルダーを置換する", async () => {
     const { renderChapterHtml } = await import(realModulePath);
     const html = renderChapterHtml(

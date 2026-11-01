@@ -46,7 +46,7 @@ import { POST } from "./route";
 import { buildEpub } from "@/lib/epub/epub-builder";
 import { fetchGraphMedia } from "@/lib/instagram/graph-client";
 
-describe("POST /api/epub", () => {
+describe("EPUB 生成 API (POST /api/epub)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

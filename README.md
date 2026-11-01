@@ -19,6 +19,7 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 
 ```text
 .
+├── .agent/skills/        # AIエージェント向けスキル定義・標準作業手順書 (Agent-SOP)
 ├── .github/              # GitHub Actions CI ワークフロー、エージェント向け指示定義
 ├── book_layout/          # EPUB 生成時の HTML / CSS レイアウトテンプレート
 ├── docs/                 # 設計資産・ドキュメント更新ポリシー
@@ -29,6 +30,8 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 │   │   ├── erDiagram.mmd     # データモデル・ER図
 │   │   ├── flowchart LR.mmd  # ユーザーフロー図
 │   │   └── sequenceDiagram.mmd # 認証・API連携シーケンス図
+│   ├── openapi/          # 外部・内部 API 契約定義 (OpenAPI 3.1)
+│   │   └── instagram-graph-api.openapi.yaml # Instagram Graph API / BFF スキーマ
 │   └── documentation-policy.md # ドキュメント更新ポリシー
 ├── scripts/              # リポジトリ共通チェックスクリプト
 └── webapp/               # Next.js Web アプリケーション本体（※詳細は webapp/README.md 参照）
@@ -215,10 +218,10 @@ pnpm terraform:fmt
 pnpm terraform:fmt:check
 pnpm terraform:validate
 
-# 単体テスト (Vitest)
+# 単体・結合・OpenAPI 契約テスト (Vitest)
 pnpm test
 
-# E2E テスト (Playwright ※現在整備中)
+# E2E テスト (Playwright + OpenAPI ローカルモックサーバー)
 pnpm e2etest
 ```
 
@@ -226,9 +229,8 @@ pnpm e2etest
 
 ## 7. 今後やりたいこと (Roadmap / TODO)
 
-- [ ] **Playwright による E2E テストの本格整備**
-  - 現在は SSO ボタンの表示確認（`webapp/e2e/sso-button.spec.ts`）のみ存在しています。
-  - 今後、認証フローのモック検証、および「ログイン ➔ 投稿取得・条件フィルタ ➔ EPUB 生成・ダウンロード」までの一連のユーザー体験を自動テストする E2E スイートを構築予定です。
+- [x] **Playwright による E2E テスト基盤の整備**
+  - Page Object Model (POM) + Custom Fixture 構造、Oxlint カスタムプラグインによる静的コード解析（10ルール）、および OpenAPI 3.1 モックサーバー連携による安全なフルスタック E2E スイートを構築済み。
 - [ ] **EPUB 生成プレビュー・プログレス表示の向上**
   - 多数の画像を含む投稿の取得・変換時の進捗状況（プログレスバー）やエラーハンドリングの強化。
 - [x] **本番デプロイ環境の整備（Google Cloud Run）**

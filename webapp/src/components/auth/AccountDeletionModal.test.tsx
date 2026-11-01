@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { AccountDeletionModal } from "./AccountDeletionModal";
 
-describe("AccountDeletionModal", () => {
+describe("退会確認・完了モーダル (AccountDeletionModal)", () => {
   it("isOpen が false の場合は何も描画しないこと", () => {
     const html = renderToStaticMarkup(
       <AccountDeletionModal

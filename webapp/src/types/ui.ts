@@ -2,6 +2,9 @@
  * @file UI共通型定義
  * ステップ管理、フィード絞り込み条件、投稿選択、EPUB装丁設定、表紙テーマ、デモデータ等の型を提供します。
  */
+import type { HashtagSuggestion } from "@/lib/instagram/types";
+
+export type { HashtagSuggestion };
 
 /**
  * ウィザードのステップ番号（1: 絞り込み, 2: 投稿選択, 3: 装丁設定）。
