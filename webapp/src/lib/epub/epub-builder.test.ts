@@ -35,6 +35,9 @@ vi.mock("@/lib/epub/media-downloader", () => ({
 vi.mock("@/lib/epub/template-renderer", () => ({
   loadLayoutTemplate: vi.fn().mockResolvedValue({ layoutHtml: "x", cssContent: "y" }),
   renderChapterHtml: vi.fn().mockReturnValue("<html></html>"),
+  renderTextPageHtml: vi.fn(
+    (title: string, body: string) => `<html><body>${title}:${body}</body></html>`,
+  ),
 }));
 
 vi.mock("@/lib/epub/cover-renderer", () => ({
@@ -283,5 +286,36 @@ describe("EPUB ビルド処理 (buildEpub)", () => {
     expect(downloadMedia).toHaveBeenNthCalledWith(2, mixedTimestampItems[2], "/tmp");
     expect(downloadMedia).toHaveBeenNthCalledWith(3, mixedTimestampItems[0], "/tmp");
     expect(downloadMedia).toHaveBeenNthCalledWith(4, mixedTimestampItems[3], "/tmp");
+  });
+
+  test("前書き・著者紹介・あとがき・裏表紙は指定順で章として挿入される", async () => {
+    await buildEpub(
+      {
+        items,
+        metadata: {
+          title: "title",
+          author: "author",
+          contact: "contact",
+          instagramUrl: "url",
+          authorIntroduction: "著者紹介テキスト",
+          preface: "まえがきテキスト",
+          afterword: "あとがきテキスト",
+          backCover: "裏表紙テキスト",
+        },
+      },
+      "/tmp",
+    );
+
+    expect(capturedEpubOptions[0]?.content).toEqual([
+      {
+        title: "著者紹介",
+        data: expect.stringContaining("著者紹介"),
+        filename: "author-introduction.xhtml",
+      },
+      { title: "まえがき", data: expect.stringContaining("まえがき"), filename: "preface.xhtml" },
+      { title: "Instagram Post", data: "<html></html>", filename: "1.xhtml" },
+      { title: "あとがき", data: expect.stringContaining("あとがき"), filename: "afterword.xhtml" },
+      { title: "裏表紙", data: expect.stringContaining("裏表紙"), filename: "back-cover.xhtml" },
+    ]);
   });
 });

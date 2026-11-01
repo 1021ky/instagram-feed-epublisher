@@ -124,6 +124,30 @@ export interface EpubCustomSettings {
   contact?: string;
   /** 著者の Instagram プロフィール URL */
   instagramUrl?: string;
+  /** カスタム表紙画像のURL（data URL / http URL） */
+  coverImageUrl?: string;
+  /** 表紙画像の代替プロパティ */
+  frontCoverImageUrl?: string;
+  /** 表紙画像の簡易プロパティ */
+  coverImage?: string;
+  /** 著者紹介 */
+  authorIntroduction?: string;
+  /** 旧名: 著者紹介 */
+  authorIntro?: string;
+  /** 旧名: 著者紹介（bio） */
+  authorBio?: string;
+  /** まえがき */
+  preface?: string;
+  /** 旧名: まえがき */
+  foreword?: string;
+  /** あとがき */
+  afterword?: string;
+  /** あとがきの代替プロパティ */
+  afterwordText?: string;
+  /** 裏表紙テキスト */
+  backCover?: string;
+  /** 裏表紙テキストの代替プロパティ */
+  backCoverText?: string;
 }
 
 /**

@@ -38,6 +38,11 @@ export type EpubMetadata = {
   instagramUrl: string;
   subtitle?: string;
   coverTheme?: CoverThemeId;
+  coverImageUrl?: string;
+  preface?: string;
+  afterword?: string;
+  authorIntroduction?: string;
+  backCover?: string;
 };
 
 /**
