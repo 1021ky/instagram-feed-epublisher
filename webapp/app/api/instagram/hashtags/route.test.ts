@@ -69,7 +69,18 @@ describe("ハッシュタグ候補取得 API の結合・OpenAPI 契約テスト
     ]);
   });
 
-  it("limit クエリパラメータの指定・最大 50 件クランプ・不正値フォールバックが機能する", async () => {
+  it.each([
+    { label: "指定件数 (3件)", query: "?limit=3", expectedCount: 3 },
+    { label: "上限クランプ (999 -> 50件)", query: "?limit=999", expectedCount: 50 },
+    {
+      label: "不正文字列フォールバック (invalid -> 20件)",
+      query: "?limit=invalid",
+      expectedCount: 20,
+    },
+    { label: "小数切り捨て (4.9 -> 4件)", query: "?limit=4.9", expectedCount: 4 },
+    { label: "負数フォールバック (-5 -> 20件)", query: "?limit=-5", expectedCount: 20 },
+    { label: "ゼロ件フォールバック (0 -> 20件)", query: "?limit=0", expectedCount: 20 },
+  ])("limit クエリパラメータの境界値検証: $label", async ({ query, expectedCount }) => {
     const manyCaptions = Array.from({ length: 60 }, (_, idx) => ({
       id: `post-${idx + 1}`,
       caption: `#tag_${String(idx + 1).padStart(2, "0")}`,
@@ -84,31 +95,15 @@ describe("ハッシュタグ候補取得 API の結合・OpenAPI 契約テスト
       json: async () => ({ data: manyCaptions }),
     } as Response);
 
-    // limit=3
-    const res3 = await GET(new Request("http://localhost:3100/api/instagram/hashtags?limit=3"));
-    const body3 = (await res3.json()) as { hashtags: HashtagSuggestion[]; scannedPosts: number };
-    assertValidOpenApiSchema(spec, "HashtagSuggestionsResponse", body3);
-    expect(body3.hashtags).toHaveLength(3);
+    const res = await GET(new Request(`http://localhost:3100/api/instagram/hashtags${query}`));
+    expect(res.status).toBe(200);
 
-    // limit=999 -> 最大 50 件にクランプ
-    const resMax = await GET(new Request("http://localhost:3100/api/instagram/hashtags?limit=999"));
-    const bodyMax = (await resMax.json()) as {
+    const body = (await res.json()) as {
       hashtags: HashtagSuggestion[];
       scannedPosts: number;
     };
-    assertValidOpenApiSchema(spec, "HashtagSuggestionsResponse", bodyMax);
-    expect(bodyMax.hashtags).toHaveLength(50);
-
-    // limit=invalid -> デフォルト 20 件にフォールバック
-    const resDefault = await GET(
-      new Request("http://localhost:3100/api/instagram/hashtags?limit=invalid"),
-    );
-    const bodyDefault = (await resDefault.json()) as {
-      hashtags: HashtagSuggestion[];
-      scannedPosts: number;
-    };
-    assertValidOpenApiSchema(spec, "HashtagSuggestionsResponse", bodyDefault);
-    expect(bodyDefault.hashtags).toHaveLength(20);
+    assertValidOpenApiSchema(spec, "HashtagSuggestionsResponse", body);
+    expect(body.hashtags).toHaveLength(expectedCount);
   });
 
   it("未ログイン時は HTTP 401 と OpenAPI BffErrorResponse 準拠のエラーを返す", async () => {

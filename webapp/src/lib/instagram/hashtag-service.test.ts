@@ -105,19 +105,23 @@ describe("ハッシュタグ抽出・集計サービス (extractHashtagsFromCapt
     ).toEqual([]);
   });
 
-  it("limit の指定・デフォルト値(20)・上限クランプ(50)・小数切り捨て・不正値フォールバックが正しく機能する", () => {
-    expect(normalizeHashtagLimit(undefined)).toBe(DEFAULT_HASHTAG_LIMIT);
-    expect(normalizeHashtagLimit(null)).toBe(DEFAULT_HASHTAG_LIMIT);
-    expect(normalizeHashtagLimit("")).toBe(DEFAULT_HASHTAG_LIMIT);
-    expect(normalizeHashtagLimit("abc")).toBe(DEFAULT_HASHTAG_LIMIT);
-    expect(normalizeHashtagLimit(Number.NaN)).toBe(DEFAULT_HASHTAG_LIMIT);
-    expect(normalizeHashtagLimit(Number.POSITIVE_INFINITY)).toBe(DEFAULT_HASHTAG_LIMIT);
-    expect(normalizeHashtagLimit(-5)).toBe(DEFAULT_HASHTAG_LIMIT);
-    expect(normalizeHashtagLimit(0)).toBe(DEFAULT_HASHTAG_LIMIT);
-    expect(normalizeHashtagLimit(3.9)).toBe(3);
-    expect(normalizeHashtagLimit("5")).toBe(5);
-    expect(normalizeHashtagLimit(100)).toBe(MAX_HASHTAG_LIMIT);
+  it.each([
+    { label: "未定義 (undefined)", raw: undefined, expected: DEFAULT_HASHTAG_LIMIT },
+    { label: "null", raw: null, expected: DEFAULT_HASHTAG_LIMIT },
+    { label: "空文字", raw: "", expected: DEFAULT_HASHTAG_LIMIT },
+    { label: "非数文字列 ('abc')", raw: "abc", expected: DEFAULT_HASHTAG_LIMIT },
+    { label: "NaN", raw: Number.NaN, expected: DEFAULT_HASHTAG_LIMIT },
+    { label: "Infinity", raw: Number.POSITIVE_INFINITY, expected: DEFAULT_HASHTAG_LIMIT },
+    { label: "負数 (-5)", raw: -5, expected: DEFAULT_HASHTAG_LIMIT },
+    { label: "ゼロ (0)", raw: 0, expected: DEFAULT_HASHTAG_LIMIT },
+    { label: "小数切り捨て (3.9 -> 3)", raw: 3.9, expected: 3 },
+    { label: "数字文字列 ('5' -> 5)", raw: "5", expected: 5 },
+    { label: "上限超過クランプ (100 -> 50)", raw: 100, expected: MAX_HASHTAG_LIMIT },
+  ])("normalizeHashtagLimit: $label の場合に $expected を返すこと", ({ raw, expected }) => {
+    expect(normalizeHashtagLimit(raw)).toBe(expected);
+  });
 
+  it("extractHashtagsFromPosts の limit オプション指定とデフォルト件数が機能すること", () => {
     const manyTagsCaption = Array.from(
       { length: 30 },
       (_, i) => `#tag_${String(i).padStart(2, "0")}`,

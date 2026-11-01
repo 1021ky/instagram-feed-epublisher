@@ -26,14 +26,19 @@ description: >-
 - 英語のみの `describe` や `it` / `test`（例: `describe("resolveInstagramAccessToken")`、`it("returns items on success")`、`describe("GET handler")`）を記述してはならない（MUST NOT）。
 - PR や計画時の一時的な管理番号（`UT-1:`、`IT-01:`、`TC-01:`、`E2E-1:` 等）をコード上の `describe` / `it` / `test` やコメントに含めてはならない（MUST NOT）。
 
-### 2. 因子分析に基づくテストケース設計
+### 2. 因子分析に基づくテストケース設計とパラメータ化（`it.each` 必須）
 
 実装対象の入力因子・状態遷移・外部依存レスポンスの水準を洗い出し、漏れなくテストケースを構成します。
 
 **Constraints:**
 
 - 正常系だけでなく、境界値（未定義 `undefined`、空文字、空白・記号のみ、0件、上限クランプ、小数・`NaN`・`Infinity`）および異常系（HTTP エラーステータス伝播、非 JSON エラー本文、タイムアウト・リトライ境界）を因子分析で洗い出すこと（MUST）。
-- 同構造の入力水準が複数ある場合は `it.each([...])("... ($label) ...", ...)` を用いて重複コードを抑えつつ日本語ラベルで可読性を保つこと（SHOULD）。
+- **パラメータ化テストの義務付け（MUST）**:
+  - 入力パラメータ（引数、クエリ、ヘッダー、User-Agent 等）だけが異なり、実行処理やアサート文の構造が同一のテストが 2 ケース以上存在する場合は、個別の `it` ブロックをコピペしたり、1 つの `it` 内に複数のアサートを直列に並べたりせず、**必ず `it.each` または `test.each` を用いてパラメータ化テストとして実装すること**。
+  - 1 つの `it` 内に直列アサートを並べると、最初の 1 件で失敗した場合に後続の境界値がすべてスキップされ全体の健全性が分からなくなるため、必ずケースごとに独立実行できるようにすること。
+- **パラメータ化テストの表記規約**:
+  - テーブル内の要素には必ず日本語の識別・意図ラベル（`label` プロパティ等）を含めること（MUST）。
+  - タイトルには `$label` や期待値埋め込みを用い、テストランナーのレポートで仕様書としてそのまま読める日本語にすること（MUST）。
 
 ### 3. テスト分離とプロジェクト固有の実装規約
 
@@ -57,7 +62,7 @@ description: >-
 
 ## Examples
 
-### Good Example（日本語の `describe` + `it`、一時番号なし）
+### Good Example 1: 通常の単体テスト（日本語の `describe` + `it`、一時番号なし）
 
 ```typescript
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -86,7 +91,26 @@ describe("Instagram クライアント API ヘルパー", () => {
 });
 ```
 
-### Bad Example（英語タイトル・一時番号プレフィックスは禁止）
+### Good Example 2: パラメータ化テスト（`it.each`、日本語ラベル、独立実行）
+
+```typescript
+describe("ハッシュタグ件数制限の正規化 (normalizeHashtagLimit)", () => {
+  it.each([
+    { label: "未定義 (undefined)", raw: undefined, expected: 20 },
+    { label: "空文字", raw: "", expected: 20 },
+    { label: "非数文字列 ('abc')", raw: "abc", expected: 20 },
+    { label: "負数 (-5)", raw: -5, expected: 20 },
+    { label: "ゼロ (0)", raw: 0, expected: 20 },
+    { label: "小数切り捨て (3.9 -> 3)", raw: 3.9, expected: 3 },
+    { label: "通常数値 (5)", raw: 5, expected: 5 },
+    { label: "上限超過クランプ (100 -> 50)", raw: 100, expected: 50 },
+  ])("入力が $label の場合に $expected を返すこと", ({ raw, expected }) => {
+    expect(normalizeHashtagLimit(raw)).toBe(expected);
+  });
+});
+```
+
+### Bad Example 1: 英語タイトル・一時番号プレフィックス（禁止）
 
 ```typescript
 // ❌ NG: describe が識別子のみ（英語のみ）、it も英語、かつ一時的なテスト番号 (UT-1) が含まれている
@@ -94,5 +118,24 @@ describe("fetchHashtagSuggestions", () => {
   it("UT-1: returns hashtags on success", async () => {
     // ...
   });
+});
+```
+
+### Bad Example 2: 入力違いの直列コピペアサート（パラメータ化テスト化すべきアンチパターン）
+
+```typescript
+// ❌ NG: 1 つのテスト内で異なる入力に対するアサートを直列に繰り返している。
+// 最初の expect で失敗すると後続の境界値が実行されず、レポートでもどの境界値がテストされているか見えない。
+it("limit クエリの各種境界値を検証する", async () => {
+  const res3 = await GET(new Request("http://localhost:3100/api/instagram/hashtags?limit=3"));
+  expect((await res3.json()).hashtags).toHaveLength(3);
+
+  const resMax = await GET(new Request("http://localhost:3100/api/instagram/hashtags?limit=999"));
+  expect((await resMax.json()).hashtags).toHaveLength(50);
+
+  const resInvalid = await GET(
+    new Request("http://localhost:3100/api/instagram/hashtags?limit=invalid"),
+  );
+  expect((await resInvalid.json()).hashtags).toHaveLength(20);
 });
 ```
