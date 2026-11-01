@@ -6,10 +6,28 @@ import { genericOAuth } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { resolveMetaGraphApiBaseUrl } from "@/lib/instagram/meta-api-client";
 
-const instagramAuthorizeUrl =
-  process.env.INSTAGRAM_OAUTH_AUTHORIZE_URL?.trim() || "https://www.instagram.com/oauth/authorize";
-const instagramTokenUrl =
-  process.env.INSTAGRAM_OAUTH_TOKEN_URL?.trim() || "https://api.instagram.com/oauth/access_token";
+export const DEFAULT_INSTAGRAM_OAUTH_AUTHORIZE_URL = "https://www.instagram.com/oauth/authorize";
+export const DEFAULT_INSTAGRAM_OAUTH_TOKEN_URL = "https://api.instagram.com/oauth/access_token";
+
+/**
+ * 実行時の Instagram OAuth エンドポイント URL（認可・トークン交換）を解決します。
+ * E2E テストや契約テスト時に `INSTAGRAM_OAUTH_AUTHORIZE_URL` / `INSTAGRAM_OAUTH_TOKEN_URL` で切り替え可能です。
+ */
+export function resolveInstagramOAuthUrls(): {
+  authorizeUrl: string;
+  tokenUrl: string;
+} {
+  const authorizeUrl =
+    process.env.INSTAGRAM_OAUTH_AUTHORIZE_URL?.trim().replace(/\/+$/, "") ||
+    DEFAULT_INSTAGRAM_OAUTH_AUTHORIZE_URL;
+  const tokenUrl =
+    process.env.INSTAGRAM_OAUTH_TOKEN_URL?.trim().replace(/\/+$/, "") ||
+    DEFAULT_INSTAGRAM_OAUTH_TOKEN_URL;
+  return { authorizeUrl, tokenUrl };
+}
+
+const { authorizeUrl: instagramAuthorizeUrl, tokenUrl: instagramTokenUrl } =
+  resolveInstagramOAuthUrls();
 
 /**
  * Better Auth instance configured for Instagram SSO with stateless session.
@@ -65,7 +83,8 @@ export const auth = betterAuth({
               code,
             });
 
-            const shortResponse = await fetch(instagramTokenUrl, {
+            const { tokenUrl } = resolveInstagramOAuthUrls();
+            const shortResponse = await fetch(tokenUrl, {
               method: "POST",
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded",

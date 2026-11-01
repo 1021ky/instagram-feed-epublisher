@@ -46,7 +46,7 @@ describe("fetchGraphMedia (`/me/media` pagination and filtering logic)", () => {
     await expect(fetchGraphMedia("")).rejects.toThrow("アクセストークンがありません");
   });
 
-  it("UT-G1: リクエスト URL に limit=100 および期間指定時の since / until が付与される", async () => {
+  it("リクエスト URL に limit=100 および期間指定時の since / until が付与される", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -73,7 +73,7 @@ describe("fetchGraphMedia (`/me/media` pagination and filtering logic)", () => {
     );
   });
 
-  it("UT-G2: 【複数ページ取得】24件で止まらず、paging.next / cursors.after を辿って 100件×2ページ = 200件すべて取得できる", async () => {
+  it("【複数ページ取得】24件で止まらず、paging.next / cursors.after を辿って 100件×2ページ = 200件すべて取得できる", async () => {
     const page1 = createMediaItems(100, {
       prefix: "p1",
       baseTimestampMs: Date.parse("2026-10-15T00:00:00Z"),
@@ -119,7 +119,7 @@ describe("fetchGraphMedia (`/me/media` pagination and filtering logic)", () => {
     expect(secondCallUrl.searchParams.get("after")).toBe("cursor-page-2");
   });
 
-  it("UT-G3: 【maxCount到達停止】フィルタ合致件数が maxCount に達した時点で次ページ取得を停止する", async () => {
+  it("【maxCount到達停止】フィルタ合致件数が maxCount に達した時点で次ページ取得を停止する", async () => {
     const page1 = createMediaItems(100, { prefix: "p1" });
     const page2 = createMediaItems(100, { prefix: "p2" });
 
@@ -162,7 +162,7 @@ describe("fetchGraphMedia (`/me/media` pagination and filtering logic)", () => {
     expect(items).toHaveLength(200);
   });
 
-  it("UT-G4: 【最大スキャン500件上限】合致件数が maxCount 未満でも累積スキャン500件（5ページ）で打ち切る", async () => {
+  it("【最大スキャン500件上限】合致件数が maxCount 未満でも累積スキャン500件（5ページ）で打ち切る", async () => {
     const fetchMock = vi.fn().mockImplementation((urlStr: string) => {
       const url = new URL(urlStr);
       const after = url.searchParams.get("after") ?? "0";
@@ -198,7 +198,7 @@ describe("fetchGraphMedia (`/me/media` pagination and filtering logic)", () => {
     expect(items).toHaveLength(DEFAULT_MAX_SCAN_ITEMS);
   });
 
-  it("UT-G5: 【期間指定あり・Early Exit】startDate より古い投稿に到達した時点でそれ以前を除外し次ページ取得を打ち切る", async () => {
+  it("【期間指定あり・Early Exit】startDate より古い投稿に到達した時点でそれ以前を除外し次ページ取得を打ち切る", async () => {
     const inRangeItems = createMediaItems(30, {
       prefix: "in-range",
       baseTimestampMs: Date.parse("2026-10-10T00:00:00Z"),
@@ -233,7 +233,7 @@ describe("fetchGraphMedia (`/me/media` pagination and filtering logic)", () => {
     expect(items).toHaveLength(30);
   });
 
-  it("UT-G6: 【期間指定なし・最大2年制限】期間未指定時は現在から2年前が since に設定され、2年より古い投稿に到達した時点で打ち切る", async () => {
+  it("【期間指定なし・最大2年制限】期間未指定時は現在から2年前が since に設定され、2年より古い投稿に到達した時点で打ち切る", async () => {
     const baseNow = new Date("2026-10-20T00:00:00Z");
     const twoYearsAgoMs = calculateMaxLookbackMs(baseNow, MAX_LOOKBACK_YEARS);
 
@@ -274,7 +274,7 @@ describe("fetchGraphMedia (`/me/media` pagination and filtering logic)", () => {
     expect(items).toHaveLength(40);
   });
 
-  it("UT-G7: 【異常系・冪等性】同一カーソルによる無限ループ防止と重複 id の排除が機能する", async () => {
+  it("【異常系・冪等性】同一カーソルによる無限ループ防止と重複 id の排除が機能する", async () => {
     const duplicateItems = [
       {
         id: "dup-1",
@@ -318,7 +318,7 @@ describe("fetchGraphMedia (`/me/media` pagination and filtering logic)", () => {
     expect(items[0]?.id).toBe("dup-1");
   });
 
-  it("UT-G8: 【途中ページリトライ】2ページ目取得時に一時エラーが発生しても、2ページ目のみリトライして完走する", async () => {
+  it("【途中ページリトライ】2ページ目取得時に一時エラーが発生しても、2ページ目のみリトライして完走する", async () => {
     const page1 = createMediaItems(100, { prefix: "p1" });
     const page2 = createMediaItems(50, { prefix: "p2" });
 

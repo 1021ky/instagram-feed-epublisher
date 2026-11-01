@@ -534,3 +534,18 @@
 - [x] フロントエンド UI（`FeedFilterStep.tsx` / `page.tsx`）＆ コンポーネント単体テスト（`feed-components.test.tsx`）
 - [x] Agent-SOP に従った POM + E2E テスト実装（`FeedFilterPage.ts` / `TopLoginPage.ts` / `e2e/fixtures/test.ts` / `hashtag-suggestions.spec.ts`）とセルフレビュー SOP 実践検証
 - [x] CI への Playwright E2E ジョブ追加（`.github/workflows/webapp-ci.yml`）およびドキュメント更新・全品質ゲート通過確認
+
+---
+
+## PR #92 レビュー指摘対応・テスト漏れ横展開監査・テスト番号整理
+
+- [x] Copilot レビュー指摘対応（`resolveMetaGraphApiBaseUrl` / `buildMetaApiUrls` の境界値防御と単体テスト追加）
+  - [x] `webapp/src/lib/instagram/meta-api-client.ts`: スラッシュのみ（`"/"`, `"  ///  "`）の環境変数値でも空文字にならず本番デフォルト URL へ安全にフォールバックするよう改善
+  - [x] `webapp/src/lib/instagram/meta-api-client.test.ts`: 因子分析に基づき未設定・空白のみ・スラッシュのみ・前後空白＋複数末尾スラッシュ・サブパス・`buildMetaApiUrls` 結合の単体テストを追加
+- [x] PR #92 全体の因子分析・横展開によるテスト漏れ補強と潜在不具合修正
+  - [x] `webapp/src/lib/auth.ts` & `webapp/src/lib/auth.test.ts`: `resolveInstagramOAuthUrls()` を純粋関数として切り出し、OAuth エンドポイント URL 解決の全水準テストを新設
+  - [x] `webapp/app/api/instagram/hashtags/route.test.ts`: `InstagramGraphApiError.recommendedHttpStatus` の非 `401` ステータス（`429` / `502` / `504` / `400`）伝播および非 `Error` 例外フォールバックのテストを追加
+  - [x] `webapp/src/lib/instagram/hashtag-service.ts` & `hashtag-service.test.ts`: 降順（最新→過去）投稿入力時の `lastUsedAt` 保持、小数・不正 `limit` 正規化、および V8 非標準 `Date.parse()` 推測を排した ISO タイムスタンプ比較・ソート順序のテストと修正を反映
+  - [x] `webapp/src/lib/client/instagram.test.ts` & `webapp/src/components/feed/feed-components.test.tsx`: デフォルト `limit=20`・`hashtags` 省略・非 JSON エラー応答、空/`#`/`＃` 入力や全角・NFD/NFC 選択解除、既存候補あり時のローディング表示抑止のテストを追加
+- [x] コード上の一時的なテスト番号プレフィックスの完全削除（振る舞いベースのテスト名へ統一）
+- [x] 全品質ゲート検証（lint, format, markdown, mermaid, typecheck, unit test, Playwright E2E）および PR #92 への反映

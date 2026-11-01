@@ -13,8 +13,17 @@ vi.mock("@/lib/auth/session-service", () => ({
   resolveInstagramAccessToken: vi.fn(),
 }));
 
+vi.mock("@/lib/instagram/graph-client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/instagram/graph-client")>();
+  return {
+    ...actual,
+    fetchGraphMedia: vi.fn(actual.fetchGraphMedia),
+  };
+});
+
 import { GET } from "./route";
 import { resolveInstagramAccessToken } from "@/lib/auth/session-service";
+import { fetchGraphMedia, InstagramGraphApiError } from "@/lib/instagram/graph-client";
 
 const originalFetch = globalThis.fetch;
 const spec = loadInstagramOpenApiSpec();
@@ -113,7 +122,7 @@ describe("GET /api/instagram/hashtags (Integration + OpenAPI Contract Tests)", (
     expect(body).toEqual({ error: "未ログインです" });
   });
 
-  it("Meta Graph API がトークン失効 (190) や非リトライ対象エラーを返した場合、推奨 HTTP ステータスを伝播する", async () => {
+  it("Meta Graph API がトークン失効 (190) を返した場合、HTTP 401 を伝播する", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 400,
@@ -133,5 +142,61 @@ describe("GET /api/instagram/hashtags (Integration + OpenAPI Contract Tests)", (
 
     const body = await response.json();
     assertValidOpenApiSchema(spec, "BffErrorResponse", body);
+  });
+
+  it.each([
+    {
+      label: "レート制限 (rate_limit)",
+      kind: "rate_limit" as const,
+      upstreamStatus: 429,
+      expectedHttpStatus: 429,
+    },
+    {
+      label: "上流一時障害 (upstream)",
+      kind: "upstream" as const,
+      upstreamStatus: 502,
+      expectedHttpStatus: 502,
+    },
+    {
+      label: "タイムアウト (timeout)",
+      kind: "timeout" as const,
+      upstreamStatus: 504,
+      expectedHttpStatus: 504,
+    },
+    {
+      label: "不正リクエスト (bad_request)",
+      kind: "bad_request" as const,
+      upstreamStatus: 400,
+      expectedHttpStatus: 400,
+    },
+  ])(
+    "InstagramGraphApiError ($label) 発生時に recommendedHttpStatus ($expectedHttpStatus) を伝播する",
+    async ({ kind, upstreamStatus, expectedHttpStatus }) => {
+      vi.mocked(fetchGraphMedia).mockRejectedValueOnce(
+        new InstagramGraphApiError({
+          message: `Graph failure: ${kind}`,
+          status: upstreamStatus,
+          kind,
+        }),
+      );
+
+      const response = await GET(new Request("http://localhost:3100/api/instagram/hashtags"));
+      expect(response.status).toBe(expectedHttpStatus);
+
+      const body = await response.json();
+      assertValidOpenApiSchema(spec, "BffErrorResponse", body);
+      expect(body).toEqual({ error: `Graph failure: ${kind}` });
+    },
+  );
+
+  it("Error インスタンス以外の例外がスローされた場合、HTTP 401 と既定メッセージを返す", async () => {
+    vi.mocked(resolveInstagramAccessToken).mockRejectedValueOnce("non-error-value");
+
+    const response = await GET(new Request("http://localhost:3100/api/instagram/hashtags"));
+    expect(response.status).toBe(401);
+
+    const body = await response.json();
+    assertValidOpenApiSchema(spec, "BffErrorResponse", body);
+    expect(body).toEqual({ error: "不明なエラー" });
   });
 });

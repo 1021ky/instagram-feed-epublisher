@@ -166,3 +166,9 @@
   - ローディングスピナーの表示確認に `setTimeout` や `waitForTimeout` を使うと CI の負荷次第で Flaky になる。Playwright の `page.route()` 内で `arrived` Promise と `release()` 関数を持つゲート（Latch）を返す Custom Fixture を用意すれば、(1) リクエスト到達確定 → (2) ローディング表示アサート → (3) `release()` で実 BFF / モックサーバーへ通過 → (4) 完了表示アサート、を待機時間ゼロ・競合ゼロで決定論的に検証できる。
 - **外部 OAuth / Graph API を伴う Next.js アプリのフルスタック E2E 構成**:
   - `META_GRAPH_API_BASE_URL` や OAuth エンドポイント URL を環境変数で差し替え可能にし、OpenAPI 3.1 スキーマを実行時検証するローカルモックサーバーを `playwright.config.ts` の `webServer` 配列で同時起動（開発用 `:3000` と分離した `:3100` を使用）することで、本番 Instagram に一切アクセスせず Better Auth の暗号化 JWE セッション発行から Route Handler 集計まで一気通貫で安全に E2E 検証できる。
+- **環境変数によるベース URL オーバーライドの境界値正規化**:
+  - `envValue.trim()` が非空かを先に判定してから `.replace(/\/+$/, "")` で末尾スラッシュを除去すると、`META_GRAPH_API_BASE_URL="/"` や `"  ///  "` が設定された際に `""`（空文字）を返してしまい、後続の `new URL(...)` で実行時例外となる。
+  - 必ず `trim()` と末尾 `/` 除去の**両方を行った後の文字列**が空でないかを判定し、空になる場合は本番デフォルト URL へ安全にフォールバックさせること。
+- **V8 の非標準 `Date.parse()` 推測挙動とタイムスタンプソートの全順序性担保**:
+  - V8（Node.js / Chromium）の `Date.parse()` は、`"not-a-timestamp-2"` のように末尾に `-1`〜`-12` を含む任意の非日時文字列を「2001年1月〜12月」の有効な日時として推測パースしてしまう。
+  - ISO 8601 日時文字列を比較する処理では `^\d{4}-\d{2}-\d{2}` の先頭一致を必須としたうえで、不正値を `-Infinity` に正規化して有限タイムスタンプより常に後ろへ配置することで、有効日時と不正文字列が混在しても例外を投げず厳密な弱順序（Strict Weak Ordering）を維持できる。

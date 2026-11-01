@@ -72,6 +72,43 @@ test("fetchHashtagSuggestions throws descriptive error on failure", async () => 
   );
 });
 
+test("fetchHashtagSuggestions uses default limit=20 and falls back to empty array when hashtags key is omitted", async () => {
+  const fetchMock = vi.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({ scannedPosts: 0 }),
+  } as Response);
+  globalThis.fetch = fetchMock;
+
+  const suggestions = await fetchHashtagSuggestions();
+  expect(suggestions).toEqual([]);
+  expect(fetchMock).toHaveBeenCalledWith(
+    "/api/instagram/hashtags?limit=20",
+    expect.objectContaining({ credentials: "include" }),
+  );
+});
+
+test("fetchHashtagSuggestions preserves raw response text when error body is non-JSON or lacks error field", async () => {
+  globalThis.fetch = vi
+    .fn()
+    .mockResolvedValueOnce({
+      ok: false,
+      status: 502,
+      text: async () => "Bad Gateway",
+    } as Response)
+    .mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      text: async () => JSON.stringify({ detail: "unexpected" }),
+    } as Response);
+
+  await expect(fetchHashtagSuggestions()).rejects.toThrow(
+    "ハッシュタグ候補の取得に失敗しました: 502 - Bad Gateway",
+  );
+  await expect(fetchHashtagSuggestions()).rejects.toThrow(
+    'ハッシュタグ候補の取得に失敗しました: 500 - {"detail":"unexpected"}',
+  );
+});
+
 test("requestEpub returns blob on success", async () => {
   const blob = new Blob(["epub"]);
   const response = {

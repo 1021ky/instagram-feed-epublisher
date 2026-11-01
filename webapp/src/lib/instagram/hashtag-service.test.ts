@@ -105,12 +105,16 @@ describe("hashtag-service: extractHashtagsFromCaption & extractHashtagsFromPosts
     ).toEqual([]);
   });
 
-  it("limit の指定・デフォルト値(20)・上限クランプ(50)・不正値フォールバックが正しく機能する", () => {
+  it("limit の指定・デフォルト値(20)・上限クランプ(50)・小数切り捨て・不正値フォールバックが正しく機能する", () => {
     expect(normalizeHashtagLimit(undefined)).toBe(DEFAULT_HASHTAG_LIMIT);
+    expect(normalizeHashtagLimit(null)).toBe(DEFAULT_HASHTAG_LIMIT);
     expect(normalizeHashtagLimit("")).toBe(DEFAULT_HASHTAG_LIMIT);
     expect(normalizeHashtagLimit("abc")).toBe(DEFAULT_HASHTAG_LIMIT);
+    expect(normalizeHashtagLimit(Number.NaN)).toBe(DEFAULT_HASHTAG_LIMIT);
+    expect(normalizeHashtagLimit(Number.POSITIVE_INFINITY)).toBe(DEFAULT_HASHTAG_LIMIT);
     expect(normalizeHashtagLimit(-5)).toBe(DEFAULT_HASHTAG_LIMIT);
     expect(normalizeHashtagLimit(0)).toBe(DEFAULT_HASHTAG_LIMIT);
+    expect(normalizeHashtagLimit(3.9)).toBe(3);
     expect(normalizeHashtagLimit("5")).toBe(5);
     expect(normalizeHashtagLimit(100)).toBe(MAX_HASHTAG_LIMIT);
 
@@ -122,5 +126,34 @@ describe("hashtag-service: extractHashtagsFromCaption & extractHashtagsFromPosts
 
     expect(extractHashtagsFromPosts(posts)).toHaveLength(20);
     expect(extractHashtagsFromPosts(posts, { limit: 5 })).toHaveLength(5);
+  });
+
+  it("実 API と同様に新しい順（降順）で投稿が並んでいる場合でも、lastUsedAt が古い投稿の日時で上書きされない", () => {
+    const suggestions = extractHashtagsFromPosts([
+      { caption: "最新の投稿 #京都カフェ", timestamp: "2026-10-25T12:00:00.000Z" },
+      { caption: "過去の投稿 #京都カフェ", timestamp: "2026-10-10T08:00:00.000Z" },
+    ]);
+
+    expect(suggestions).toEqual([
+      {
+        tag: "京都カフェ",
+        count: 2,
+        lastUsedAt: "2026-10-25T12:00:00.000Z",
+      },
+    ]);
+  });
+
+  it("timestamp が空文字や不正日時文字列を含む場合でも例外を投げず決定論的にソートする", () => {
+    const suggestions = extractHashtagsFromPosts([
+      { caption: "#empty_ts", timestamp: "" },
+      { caption: "#invalid_b", timestamp: "not-a-timestamp-1" },
+      { caption: "#invalid_a", timestamp: "not-a-timestamp-2" },
+    ]);
+
+    expect(suggestions).toEqual([
+      { tag: "empty_ts", count: 1, lastUsedAt: "1970-01-01T00:00:00.000Z" },
+      { tag: "invalid_a", count: 1, lastUsedAt: "not-a-timestamp-2" },
+      { tag: "invalid_b", count: 1, lastUsedAt: "not-a-timestamp-1" },
+    ]);
   });
 });

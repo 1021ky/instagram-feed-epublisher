@@ -42,7 +42,7 @@ function buildMockPosts(
 }
 
 describe("GET /api/instagram/media (Integration Tests with Meta API Mock)", () => {
-  it("IT-1: 【複数ページ一気通貫】100件×2ページ（計200件）を辿り、24件で止まらず200件返却する", async () => {
+  it("【複数ページ一気通貫】100件×2ページ（計200件）を辿り、24件で止まらず200件返却する", async () => {
     const page1 = buildMockPosts(100, {
       prefix: "p1",
       baseTimestampMs: Date.parse("2026-10-15T12:00:00Z"),
@@ -86,7 +86,7 @@ describe("GET /api/instagram/media (Integration Tests with Meta API Mock)", () =
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("IT-2: 【ハッシュタグ絞り込み＋複数ページスキャン】複数ページから対象ハッシュタグのみを抽出し、指定件数に達した時点で停止する", async () => {
+  it("【ハッシュタグ絞り込み＋複数ページスキャン】複数ページから対象ハッシュタグのみを抽出し、指定件数に達した時点で停止する", async () => {
     // 各ページ100件のうち、偶数インデックス（50件）のみが #100days を持つケース
     // maxCount=120 を満たすには 3ページ（50 + 50 + 50 = 150 >= 120）取得した時点で停止し、フィルタ後に120件が返る
     const fetchMock = vi.fn().mockImplementation((urlStr: string) => {
@@ -127,7 +127,7 @@ describe("GET /api/instagram/media (Integration Tests with Meta API Mock)", () =
     expect(body.items.every((item) => item.caption?.includes("#100days"))).toBe(true);
   });
 
-  it("IT-3: 【期間指定なし・最大2年下限】期間未指定時は2年以内の投稿をページング取得し、2年より古い投稿が出現した時点で停止して返却する", async () => {
+  it("【期間指定なし・最大2年下限】期間未指定時は2年以内の投稿をページング取得し、2年より古い投稿が出現した時点で停止して返却する", async () => {
     const page1 = buildMockPosts(100, {
       prefix: "p1",
       baseTimestampMs: Date.now() - 30 * 86_400_000, // 約1ヶ月前
@@ -176,7 +176,7 @@ describe("GET /api/instagram/media (Integration Tests with Meta API Mock)", () =
     expect(body.items).toHaveLength(130);
   });
 
-  it("IT-4: 【リトライ回復結合】ページネーション途中で Meta API が一時的レート制限を返しても、自動リトライで回復し全件返却する", async () => {
+  it("【リトライ回復結合】ページネーション途中で Meta API が一時的レート制限を返しても、自動リトライで回復し全件返却する", async () => {
     const page1 = buildMockPosts(50, {
       prefix: "p1",
       baseTimestampMs: Date.parse("2026-10-15T00:00:00Z"),
@@ -209,7 +209,7 @@ describe("GET /api/instagram/media (Integration Tests with Meta API Mock)", () =
               message: "(#4) Application request limit reached",
               code: 4,
               is_transient: true,
-              fbtrace_id: "trace-it4",
+              fbtrace_id: "trace-rate-limit",
             },
           }),
       } as Response)
@@ -234,7 +234,7 @@ describe("GET /api/instagram/media (Integration Tests with Meta API Mock)", () =
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
-  it("IT-5: 【エラー応答ステータス結合】トークン失効(code: 190)はリトライせず即座に HTTP 401 を返す", async () => {
+  it("【エラー応答ステータス結合】トークン失効(code: 190)はリトライせず即座に HTTP 401 を返す", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
       status: 400,
@@ -244,7 +244,7 @@ describe("GET /api/instagram/media (Integration Tests with Meta API Mock)", () =
             message: "Invalid OAuth access token.",
             code: 190,
             is_transient: false,
-            fbtrace_id: "trace-it5-auth",
+            fbtrace_id: "trace-auth-error",
           },
         }),
     } as Response);

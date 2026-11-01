@@ -48,11 +48,15 @@ describe("FeedFilterStep ロジックおよび日付プリセット", () => {
     expect(detectPreset("2026-01-01", "2026-05-01", baseDate)).toBe("custom");
   });
 
-  it("resolveNextHashtagOnChipClick が未選択タグの選択と選択中タグの再クリック解除（大文字小文字無視）を正しく判定すること", () => {
+  it("resolveNextHashtagOnChipClick が未選択タグの選択と選択中タグの再クリック解除（大文字小文字・全角＃・NFD/NFC ゆれ無視）および空入力フォールバックを正しく判定すること", () => {
     expect(resolveNextHashtagOnChipClick(undefined, "京都カフェ")).toBe("京都カフェ");
     expect(resolveNextHashtagOnChipClick("朝活", "#京都カフェ")).toBe("京都カフェ");
     expect(resolveNextHashtagOnChipClick("京都カフェ", "京都カフェ")).toBeUndefined();
     expect(resolveNextHashtagOnChipClick("Travel", "travel")).toBeUndefined();
+    expect(resolveNextHashtagOnChipClick("＃ふ\u309Aりん", "ぷりん")).toBeUndefined();
+    expect(resolveNextHashtagOnChipClick("朝活", "")).toBeUndefined();
+    expect(resolveNextHashtagOnChipClick("朝活", "#   ")).toBeUndefined();
+    expect(resolveNextHashtagOnChipClick("朝活", "＃")).toBeUndefined();
   });
 });
 
@@ -210,6 +214,24 @@ describe("FeedFilterStep コンポーネント描画", () => {
     );
 
     expect(html).not.toContain("よく使うタグから選択:");
+    expect(html).not.toContain("よく使うハッシュタグを集計中...");
+  });
+
+  it("すでにハッシュタグ候補が存在する状態で isLoadingHashtags=true になった場合、既存チップを表示し続け重複ローディング文言を出さないこと", () => {
+    const html = renderToStaticMarkup(
+      <FeedFilterStep
+        filter={defaultFilter}
+        onFilterChange={vi.fn()}
+        onSubmit={vi.fn()}
+        isCollapsed={false}
+        hashtagSuggestions={[
+          { tag: "100日チャレンジ", count: 8, lastUsedAt: "2026-09-20T09:00:00.000Z" },
+        ]}
+        isLoadingHashtags={true}
+      />,
+    );
+
+    expect(html).toContain("#100日チャレンジ");
     expect(html).not.toContain("よく使うハッシュタグを集計中...");
   });
 });

@@ -17,9 +17,9 @@ export const META_GRAPH_API_BASE_URL = "https://graph.instagram.com";
  * E2E テストや契約テスト時に `META_GRAPH_API_BASE_URL` 環境変数でモックサーバーへ切り替え可能です。
  */
 export function resolveMetaGraphApiBaseUrl(): string {
-  const configured = process.env.META_GRAPH_API_BASE_URL?.trim();
+  const configured = process.env.META_GRAPH_API_BASE_URL?.trim().replace(/\/+$/, "");
   if (configured) {
-    return configured.replace(/\/+$/, "");
+    return configured;
   }
   return META_GRAPH_API_BASE_URL;
 }

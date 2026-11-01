@@ -76,6 +76,19 @@ export function normalizeHashtagLimit(rawLimit?: number | string | null): number
   return Math.min(Math.floor(parsed), MAX_HASHTAG_LIMIT);
 }
 
+const ISO_TIMESTAMP_PREFIX_REGEX = /^\d{4}-\d{2}-\d{2}/;
+
+/**
+ * ISO 8601 形式の日時文字列をミリ秒タイムスタンプへ変換します。
+ * V8 の `Date.parse("foo-1")` のような非標準推測を避けるため、`YYYY-MM-DD` 先頭一致を必須とします。
+ */
+function parseIsoTimestampMs(value: string): number {
+  if (!ISO_TIMESTAMP_PREFIX_REGEX.test(value)) {
+    return Number.NaN;
+  }
+  return Date.parse(value);
+}
+
 /**
  * 投稿一覧からハッシュタグ別の出現投稿数と最終使用日時を集計し、優先度順に返します。
  *
@@ -102,7 +115,7 @@ export function extractHashtagsFromPosts(
     }
 
     const timestamp = item.timestamp || new Date(0).toISOString();
-    const parsedMs = Date.parse(timestamp);
+    const parsedMs = parseIsoTimestampMs(timestamp);
     const itemMs = Number.isFinite(parsedMs) ? parsedMs : -Infinity;
 
     for (const tag of tags) {
@@ -124,24 +137,22 @@ export function extractHashtagsFromPosts(
   }
 
   return Array.from(statsMap.entries())
+    .sort(([aTag, aStat], [bTag, bStat]) => {
+      if (bStat.count !== aStat.count) {
+        return bStat.count - aStat.count;
+      }
+      if (bStat.lastUsedMs !== aStat.lastUsedMs) {
+        return bStat.lastUsedMs > aStat.lastUsedMs ? 1 : -1;
+      }
+      if (bStat.lastUsedAt !== aStat.lastUsedAt) {
+        return bStat.lastUsedAt.localeCompare(aStat.lastUsedAt);
+      }
+      return aTag < bTag ? -1 : aTag > bTag ? 1 : 0;
+    })
+    .slice(0, limit)
     .map(([tag, stat]) => ({
       tag,
       count: stat.count,
       lastUsedAt: stat.lastUsedAt,
-    }))
-    .sort((a, b) => {
-      if (b.count !== a.count) {
-        return b.count - a.count;
-      }
-      const bMs = Date.parse(b.lastUsedAt);
-      const aMs = Date.parse(a.lastUsedAt);
-      if (Number.isFinite(aMs) && Number.isFinite(bMs) && bMs !== aMs) {
-        return bMs - aMs;
-      }
-      if (b.lastUsedAt !== a.lastUsedAt) {
-        return b.lastUsedAt.localeCompare(a.lastUsedAt);
-      }
-      return a.tag < b.tag ? -1 : a.tag > b.tag ? 1 : 0;
-    })
-    .slice(0, limit);
+    }));
 }
