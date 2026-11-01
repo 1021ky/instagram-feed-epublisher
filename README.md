@@ -19,6 +19,7 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 
 ```text
 .
+├── .agent/skills/        # AIエージェント向けスキル定義・標準作業手順書 (Agent-SOP)
 ├── .github/              # GitHub Actions CI ワークフロー、エージェント向け指示定義
 ├── book_layout/          # EPUB 生成時の HTML / CSS レイアウトテンプレート
 ├── docs/                 # 設計資産・ドキュメント更新ポリシー

@@ -291,7 +291,7 @@ describe("共通通信クライアントのリトライ・Exponential Backoff・
 
   it.each([
     {
-      label: "non-retryable auth error",
+      label: "リトライ不可の認証エラー",
       payload: {
         error: {
           message: "Error validating access token: Session has expired",
@@ -306,7 +306,7 @@ describe("共通通信クライアントのリトライ・Exponential Backoff・
       expectedCalls: 1,
     },
     {
-      label: "retryable transient error",
+      label: "リトライ可能な一時エラー",
       payload: {
         error: {
           message: "(#2) Service temporarily unavailable",
@@ -321,7 +321,7 @@ describe("共通通信クライアントのリトライ・Exponential Backoff・
       expectedCalls: 2,
     },
   ])(
-    "HTTP 200 JSON に error が含まれる場合 ($label) は 200 branch が分類される",
+    "HTTP 200 JSON に error が含まれる場合（$label）もエラー種別どおりに分類される",
     async ({ payload, expectedKind, expectedStatus, expectedCalls }) => {
       const successResponse = {
         ok: true,

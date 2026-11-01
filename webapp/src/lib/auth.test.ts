@@ -25,7 +25,7 @@ afterEach(() => {
   }
 });
 
-describe("resolveInstagramOAuthUrls", () => {
+describe("Instagram OAuth エンドポイント URL 解決 (resolveInstagramOAuthUrls)", () => {
   it.each([
     { label: "未定義 (undefined)", value: undefined },
     { label: "空文字", value: "" },

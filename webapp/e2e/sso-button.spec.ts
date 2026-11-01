@@ -4,7 +4,7 @@
 import { expect, test } from "./fixtures/test";
 
 test.describe("TOPページ（未ログイン時）", () => {
-  test("Instagram SSO button is visible", async ({ topLoginPage }) => {
+  test("Instagram SSO ログインボタンが表示される", async ({ topLoginPage }) => {
     await topLoginPage.goto();
     await expect(topLoginPage.ssoLoginButton).toBeVisible();
   });

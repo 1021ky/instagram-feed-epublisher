@@ -41,7 +41,7 @@ function createMediaItems(
   }));
 }
 
-describe("fetchGraphMedia (`/me/media` pagination and filtering logic)", () => {
+describe("投稿一覧ページネーション・絞り込み取得クライアント (fetchGraphMedia)", () => {
   it("トークン未指定時にエラーを送出する", async () => {
     await expect(fetchGraphMedia("")).rejects.toThrow("アクセストークンがありません");
   });

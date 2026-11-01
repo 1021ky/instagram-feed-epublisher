@@ -11,7 +11,7 @@ const mockedResolveInstagramAccessToken = resolveInstagramAccessToken as unknown
   typeof vi.fn
 >;
 
-describe("POST /api/user/delete", () => {
+describe("退会・セッション破棄 API (POST /api/user/delete)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

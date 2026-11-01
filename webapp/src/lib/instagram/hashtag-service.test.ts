@@ -10,7 +10,7 @@ import {
   normalizeHashtagLimit,
 } from "./hashtag-service";
 
-describe("hashtag-service: extractHashtagsFromCaption & extractHashtagsFromPosts", () => {
+describe("ハッシュタグ抽出・集計サービス (extractHashtagsFromCaption / extractHashtagsFromPosts)", () => {
   it("日本語（漢字・ひらがな・カタカナ・長音）・英数字・アンダースコアを含む複数タグを抽出する", () => {
     const tags = extractHashtagsFromCaption(
       "今日の記録 #100日チャレンジ #京都カフェ_2026 #コーヒーのある暮らし # morning_routine",

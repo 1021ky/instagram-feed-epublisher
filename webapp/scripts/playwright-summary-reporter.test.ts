@@ -15,7 +15,7 @@ afterEach(() => {
   }
 });
 
-describe("PlaywrightSummaryReporter", () => {
+describe("Playwright 静的 Markdown サマリーレポーター (PlaywrightSummaryReporter)", () => {
   it("ANSI エスケープコードを除去した上で静的 Markdown レポートを出力しプロセスをブロックしない", () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "pw-summary-test-"));
     tempDirs.push(tmpDir);

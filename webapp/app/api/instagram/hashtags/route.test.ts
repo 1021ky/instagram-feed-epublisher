@@ -37,7 +37,7 @@ afterEach(() => {
   globalThis.fetch = originalFetch;
 });
 
-describe("GET /api/instagram/hashtags (Integration + OpenAPI Contract Tests)", () => {
+describe("ハッシュタグ候補取得 API の結合・OpenAPI 契約テスト (GET /api/instagram/hashtags)", () => {
   it("直近投稿を Meta Graph API（OpenAPI モックハンドラ）から取得・集計し、OpenAPI スキーマ準拠のレスポンスを返す", async () => {
     const mockUpstream = createMockInstagramHandler({
       baseDate: new Date(),

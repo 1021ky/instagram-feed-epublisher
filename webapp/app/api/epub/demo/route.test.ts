@@ -21,7 +21,7 @@ vi.mock("@/lib/epub/epub-builder", () => ({
 import { POST } from "./route";
 import { buildEpub } from "@/lib/epub/epub-builder";
 
-describe("POST /api/epub/demo", () => {
+describe("デモ用 EPUB 生成 API (POST /api/epub/demo)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

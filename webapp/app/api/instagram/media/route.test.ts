@@ -41,7 +41,7 @@ function buildMockPosts(
   }));
 }
 
-describe("GET /api/instagram/media (Integration Tests with Meta API Mock)", () => {
+describe("投稿一覧取得 API の結合テスト (GET /api/instagram/media)", () => {
   it("【複数ページ一気通貫】100件×2ページ（計200件）を辿り、24件で止まらず200件返却する", async () => {
     const page1 = buildMockPosts(100, {
       prefix: "p1",

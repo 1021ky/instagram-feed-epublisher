@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { sortItemsByTimestamp } from "./sort";
 import type { EpubSortOrder } from "@/types/ui";
 
-describe("sortItemsByTimestamp", () => {
+describe("投稿アイテムの日時ソート (sortItemsByTimestamp)", () => {
   const items = [
     { id: "2", timestamp: "2026-02-01T00:00:00Z" },
     { id: "1", timestamp: "2026-01-01T00:00:00Z" },

@@ -9,17 +9,17 @@ import {
 } from "./openapi-contract.mjs";
 import { createMockInstagramHandler } from "./mock-instagram-server.mjs";
 
-describe("OpenAPI 3.1 Contract Specification & Validator", () => {
+describe("OpenAPI 3.1 契約仕様およびスキーマ検証器", () => {
   const spec = loadInstagramOpenApiSpec();
 
-  it("loads docs/openapi/instagram-graph-api.openapi.yaml with OpenAPI 3.1.0 metadata and schemas", () => {
+  it("docs/openapi/instagram-graph-api.openapi.yaml から OpenAPI 3.1.0 のメタデータとスキーマを読み込める", () => {
     expect(spec.openapi).toBe("3.1.0");
     const paths = spec.paths as Record<string, unknown>;
     expect(paths["/me/media"]).toBeDefined();
     expect(paths["/api/instagram/hashtags"]).toBeDefined();
   });
 
-  it("accepts valid HashtagSuggestionsResponse payloads", () => {
+  it("有効な HashtagSuggestionsResponse ペイロードを許容する", () => {
     const result = validateOpenApiSchema(spec, "HashtagSuggestionsResponse", {
       hashtags: [
         {
@@ -34,7 +34,7 @@ describe("OpenAPI 3.1 Contract Specification & Validator", () => {
     expect(result.errors).toEqual([]);
   });
 
-  it("rejects HashtagSuggestionsResponse payloads missing required fields or having extra properties", () => {
+  it("必須フィールド欠落や未定義プロパティを含む不正なペイロードを拒否する", () => {
     const missingField = validateOpenApiSchema(spec, "HashtagSuggestionsResponse", {
       hashtags: [{ tag: "京都カフェ", count: 0, lastUsedAt: "not-a-date" }],
     });
@@ -49,7 +49,7 @@ describe("OpenAPI 3.1 Contract Specification & Validator", () => {
     ).toThrow(/OpenAPI contract violation/);
   });
 
-  it("serves OpenAPI-validated OAuth, /me, and /me/media responses from createMockInstagramHandler", async () => {
+  it("createMockInstagramHandler が OAuth・/me・/me/media の OpenAPI 準拠レスポンスを返す", async () => {
     const handler = createMockInstagramHandler({
       baseDate: new Date("2026-10-20T09:00:00.000Z"),
     });

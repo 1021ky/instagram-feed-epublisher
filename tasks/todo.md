@@ -548,4 +548,6 @@
   - [x] `webapp/src/lib/instagram/hashtag-service.ts` & `hashtag-service.test.ts`: 降順（最新→過去）投稿入力時の `lastUsedAt` 保持、小数・不正 `limit` 正規化、および V8 非標準 `Date.parse()` 推測を排した ISO タイムスタンプ比較・ソート順序のテストと修正を反映
   - [x] `webapp/src/lib/client/instagram.test.ts` & `webapp/src/components/feed/feed-components.test.tsx`: デフォルト `limit=20`・`hashtags` 省略・非 JSON エラー応答、空/`#`/`＃` 入力や全角・NFD/NFC 選択解除、既存候補あり時のローディング表示抑止のテストを追加
 - [x] コード上の一時的なテスト番号プレフィックスの完全削除（振る舞いベースのテスト名へ統一）
+- [x] 全単体テスト・結合テスト・E2E テストの `describe` / `it` / `test` 表記の日本語統一
+- [x] 次回以降もテストケース表記を日本語で記述するスキル・指示定義の整備（`.agent/skills/vitest-test-authoring/SKILL.md`, `playwright-e2e-authoring`, `playwright-e2e-self-review`, `.github/instructions/testing.instructions.md`）
 - [x] 全品質ゲート検証（lint, format, markdown, mermaid, typecheck, unit test, Playwright E2E）および PR #92 への反映

@@ -39,6 +39,7 @@ Inspect every modified file in `webapp/e2e/pages/` and `webapp/e2e/*.spec.ts` to
 **Constraints:**
 
 - You MUST verify that `.spec.ts` files express _what_ user scenario is being tested in domain language (e.g., `await feedFilterPage.selectHashtagChip("京都")`), not _how_ the DOM is queried.
+- You MUST verify that all `test.describe(...)` and `test(...)` titles in `.spec.ts` are written in **Japanese** without English-only titles or temporary test ID prefixes (`TC-*`, `E2E-*`, etc.).
 - You MUST verify that Page Object classes in `webapp/e2e/pages/` contain NO business assertions (`expect(...)`) and remain reusable across both positive and negative test cases.
 - You MUST verify that every Page Object class is registered in `webapp/e2e/fixtures/test.ts` and injected via Playwright fixtures rather than instantiated with `new` inside `.spec.ts`.
 

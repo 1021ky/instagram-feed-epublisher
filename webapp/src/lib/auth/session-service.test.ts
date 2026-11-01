@@ -24,8 +24,8 @@ const mockedAuth = auth as unknown as {
   };
 };
 
-describe("resolveInstagramAccessToken", () => {
-  it("resolves access token from getAccessToken API", async () => {
+describe("Instagram アクセストークン解決 (resolveInstagramAccessToken)", () => {
+  it("getAccessToken API からアクセストークンを取得できること", async () => {
     mockedAuth.api.getSession.mockResolvedValue({ user: { id: "1" } });
     mockedAuth.api.getAccessToken.mockResolvedValue({ accessToken: "token_from_get_access_token" });
 
@@ -37,7 +37,7 @@ describe("resolveInstagramAccessToken", () => {
     });
   });
 
-  it("resolves access token from listUserAccounts API when getAccessToken returns null", async () => {
+  it("getAccessToken が null を返した場合に listUserAccounts API からフォールバック取得できること", async () => {
     mockedAuth.api.getSession.mockResolvedValue({ user: { id: "1" } });
     mockedAuth.api.getAccessToken.mockResolvedValue(null);
     mockedAuth.api.listUserAccounts.mockResolvedValue([
@@ -49,7 +49,7 @@ describe("resolveInstagramAccessToken", () => {
     expect(token).toBe("instagram_token");
   });
 
-  it("resolves access token from listUserAccounts API when getAccessToken throws an error", async () => {
+  it("getAccessToken が例外を投げた場合に listUserAccounts API からフォールバック取得できること", async () => {
     mockedAuth.api.getSession.mockResolvedValue({ user: { id: "1" } });
     mockedAuth.api.getAccessToken.mockRejectedValue(new Error("API Error"));
     mockedAuth.api.listUserAccounts.mockResolvedValue([
@@ -60,7 +60,7 @@ describe("resolveInstagramAccessToken", () => {
     expect(token).toBe("instagram_token_fallback");
   });
 
-  it("throws error when session is missing", async () => {
+  it("セッションが存在しない場合に未ログインエラーを送出すること", async () => {
     mockedAuth.api.getSession.mockResolvedValue(null);
 
     await expect(resolveInstagramAccessToken(new Request("http://localhost"))).rejects.toThrow(
@@ -68,7 +68,7 @@ describe("resolveInstagramAccessToken", () => {
     );
   });
 
-  it("throws error when access token is not found", async () => {
+  it("Instagram のアクセストークンが見つからない場合にエラーを送出すること", async () => {
     mockedAuth.api.getSession.mockResolvedValue({ user: { id: "1" } });
     mockedAuth.api.getAccessToken.mockResolvedValue(null);
     mockedAuth.api.listUserAccounts.mockResolvedValue([

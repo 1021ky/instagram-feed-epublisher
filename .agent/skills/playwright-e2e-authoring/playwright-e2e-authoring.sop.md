@@ -9,7 +9,7 @@ Every E2E test in this repository is guarded by both this SOP and static code an
 ## Parameters
 
 - **target_feature** (required): The user-facing feature or user journey to be tested.
-- **test_cases** (required): List of test case IDs and user-visible acceptance criteria to verify.
+- **test_cases** (required): List of user-visible acceptance criteria to verify (written in Japanese).
 - **page_objects** (optional, default: `webapp/e2e/pages/`): Target Page Object classes to create or extend.
 - **spec_file** (required): Path to the `.spec.ts` file under `webapp/e2e/`.
 
@@ -62,6 +62,7 @@ Author the test scenarios in `webapp/e2e/<feature>.spec.ts` using the injected P
 - You MUST use Playwright's auto-retrying Web-First Assertions (`await expect(locator).toBeVisible()`, `await expect(locator).toHaveValue()`, `await expect(locator).toHaveCount()`, `await expect(page).toHaveURL()`, etc.).
 - You MUST NOT manually `await` state extractors inside `expect(...)` (e.g., `expect(await locator.isVisible()).toBe(true)` or `expect(await locator.inputValue()).toBe(...)` is strictly forbidden by `playwright-best-practices/prefer-web-first-assertions`).
 - You MUST `await` (or `return`) every asynchronous Playwright `expect(...)` call (enforced by `playwright-best-practices/missing-playwright-await`).
+- You MUST write both `test.describe(...)` and `test(...)` titles in **Japanese** describing user-visible behavior. English-only test titles and temporary test case ID prefixes (`TC-*`, `E2E-*`, etc.) are strictly forbidden.
 - You MUST NOT commit `test.only`, `test.skip`, or `page.pause()`.
 - You MUST isolate external network dependencies (such as authentication session or Instagram API calls) per test using `page.route(...)` or dedicated fixtures so tests never depend on shared mutable state or live third-party rate limits.
 
@@ -100,7 +101,7 @@ export class TopLoginPage {
 import { expect, test } from "./fixtures/test";
 
 test.describe("TOPページ（未ログイン時）", () => {
-  test("Instagram SSO button is visible", async ({ topLoginPage }) => {
+  test("Instagram SSO ログインボタンが表示される", async ({ topLoginPage }) => {
     await topLoginPage.goto();
     await expect(topLoginPage.ssoLoginButton).toBeVisible();
   });

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isInstagramOrFacebookInAppBrowser } from "./InAppBrowserAlert";
 
-describe("isInstagramOrFacebookInAppBrowser", () => {
+describe("アプリ内ブラウザ判定 (isInstagramOrFacebookInAppBrowser)", () => {
   it("Instagram アプリ内ブラウザを検知できること", () => {
     expect(
       isInstagramOrFacebookInAppBrowser(
