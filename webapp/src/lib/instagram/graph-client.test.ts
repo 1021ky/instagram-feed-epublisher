@@ -362,4 +362,22 @@ describe("投稿一覧ページネーション・絞り込み取得クライア�
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(items).toHaveLength(150);
   });
+
+  it("【fields オプション指定】指定された fields パラメータが Meta Graph API リクエストに反映されること", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ data: createMediaItems(1) }),
+    } as Response);
+    globalThis.fetch = fetchMock;
+
+    await fetchGraphMedia("token", {
+      fields: "id,caption,timestamp",
+      maxScanItems: 10,
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const calledUrl = new URL(fetchMock.mock.calls[0]?.[0] as string);
+    expect(calledUrl.searchParams.get("fields")).toBe("id,caption,timestamp");
+  });
 });

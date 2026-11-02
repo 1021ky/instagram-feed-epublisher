@@ -601,3 +601,17 @@
   - [x] `webapp/README.md`
 - [x] 品質ゲート検証（TypeScript 型チェック、Vitest 単体テスト全324件、Playwright E2E、Oxlint、Oxfmt、マークダウン検証）
 - [x] コミット作成および PR 作成（`refactor(ui): アトミックデザイン（Atoms/Molecules/Organisms）への全面移行とコロケーションテスト整備`）
+
+---
+
+## ログインおよびハッシュタグ取得パフォーマンス改善（OAuth並列化・フィールド軽量化・1往復化）
+
+- [x] 改善 1: OAuth コールバックの高速化（`webapp/src/lib/auth.ts`）
+  - [x] 短期トークン取得後、長期トークン交換とユーザー情報（`/me`）取得を `Promise.all` で並列実行
+  - [x] `webapp/src/lib/auth.test.ts` での並列実行およびエラー時の挙動検証
+- [x] 改善 2 & 3: ハッシュタグ取得 API の高速化（`webapp/app/api/instagram/hashtags/route.ts`, `webapp/src/lib/instagram/graph-client.ts`）
+  - [x] `fetchGraphMedia` に `fields` オプションを追加し、ハッシュタグ取得時は `id,caption,timestamp` のみに限定（不要な `media_url`, `permalink` を除外）
+  - [x] `HASHTAG_SCAN_MAX_POSTS` を 200 から 100（1 ページ分）に最適化し、ページネーションの 2 往復通信を 1 往復に削減
+  - [x] 関連テスト（`graph-client.test.ts`, `hashtags/route.test.ts`）の更新
+- [x] 品質ゲート検証（TypeScript 型チェック、Vitest 単体テスト全329件、Oxlint、Oxfmt、ビルド検証）
+- [x] コミット作成および PR #94 へのプッシュ反映

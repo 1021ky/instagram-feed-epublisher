@@ -18,7 +18,15 @@ export { InstagramGraphApiError };
 const logger = getLogger("instagram.graph-client");
 
 const MEDIA_ENDPOINT_PATH = "/me/media";
-const MEDIA_FIELDS = ["id", "caption", "media_url", "permalink", "timestamp"].join(",");
+/** 通常のフィード取得で要求するデフォルトフィールド一覧 */
+export const DEFAULT_MEDIA_FIELDS = ["id", "caption", "media_url", "permalink", "timestamp"].join(
+  ",",
+);
+
+/** ハッシュタグ集計専用の軽量フィールド一覧（media_url や permalink の署名URL生成を省き Meta 側処理・転送を高速化） */
+export const HASHTAG_SCAN_FIELDS = ["id", "caption", "timestamp"].join(",");
+
+const MEDIA_FIELDS = DEFAULT_MEDIA_FIELDS;
 
 /** Meta Graph API 1リクエストあたりの最大取得件数 */
 export const DEFAULT_PAGE_LIMIT = 100;
@@ -56,6 +64,8 @@ export type FetchGraphMediaOptions = MetaApiRetryOptions & {
   pageLimit?: number;
   /** 期間計算の基準日時（テスト用、デフォルト: 現在時刻） */
   now?: Date;
+  /** 要求フィールド一覧（カンマ区切り、デフォルト: DEFAULT_MEDIA_FIELDS） */
+  fields?: string;
 };
 
 /**
@@ -162,7 +172,7 @@ export async function fetchGraphMedia(
       path: MEDIA_ENDPOINT_PATH,
       accessToken,
       queryParams: {
-        fields: MEDIA_FIELDS,
+        fields: options?.fields ?? MEDIA_FIELDS,
         limit,
         since: sinceSec,
         until: untilSec,
