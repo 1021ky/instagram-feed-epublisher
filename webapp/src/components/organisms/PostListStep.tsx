@@ -8,7 +8,7 @@
 import { useId, useMemo, useState } from "react";
 import { CheckSquare, FileQuestion, Image as ImageIcon, Search, Square, X } from "lucide-react";
 import type { FeedPostItem } from "@/types/ui";
-import { PostCard } from "./PostCard";
+import { PostCard } from "@/components/molecules";
 
 export interface PostListStepProps {
   /** 投稿アイテム一覧 */

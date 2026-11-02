@@ -9,32 +9,22 @@ vi.mock("@/lib/auth-client", () => ({
   },
 }));
 
-vi.mock("@/components/auth/InAppBrowserAlert", () => ({
+vi.mock("@/components/molecules", () => ({
+  AlertBanner: ({ message }: { message: string }) => <div>ALERT_BANNER:{message}</div>,
   InAppBrowserAlert: () => <div>IN_APP_BROWSER_ALERT</div>,
 }));
 
-vi.mock("@/components/auth/LoginCard", () => ({
+vi.mock("@/components/organisms", () => ({
+  AccountDeletionModal: () => <div>ACCOUNT_DELETION_MODAL</div>,
+  EpubCustomizeStep: () => <div>EPUB_CUSTOMIZE_STEP</div>,
+  ExportModal: () => <div>EXPORT_MODAL</div>,
+  FeedFilterStep: () => <div>FEED_FILTER_STEP</div>,
   LoginCard: () => <div>LOGIN_CARD</div>,
-}));
-
-vi.mock("@/components/auth/Navbar", () => ({
   Navbar: ({ user }: { user?: { username?: string; displayName?: string } | null }) => (
     <div>{user ? `NAVBAR:${user.username ?? user.displayName ?? "unknown"}` : "NAVBAR:guest"}</div>
   ),
-}));
-
-vi.mock("@/components/feed", () => ({
-  FeedFilterStep: () => <div>FEED_FILTER_STEP</div>,
   PostListStep: () => <div>POST_LIST_STEP</div>,
   StickyActionBar: () => <div>STICKY_ACTION_BAR</div>,
-}));
-
-vi.mock("@/components/epub/EpubCustomizeStep", () => ({
-  EpubCustomizeStep: () => <div>EPUB_CUSTOMIZE_STEP</div>,
-}));
-
-vi.mock("@/components/epub/ExportModal", () => ({
-  ExportModal: () => <div>EXPORT_MODAL</div>,
 }));
 
 import Page from "./page";

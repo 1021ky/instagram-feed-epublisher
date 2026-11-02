@@ -1,20 +1,9 @@
+import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { LegalContactBox, LegalPage, LegalSection } from "./LegalPage";
-import { SiteFooter } from "./SiteFooter";
 
-describe("共通法的ページ UI", () => {
-  it("SiteFooter に法的ページへのリンクが表示されること", () => {
-    const html = renderToStaticMarkup(<SiteFooter />);
-
-    expect(html).toContain('href="/privacy"');
-    expect(html).toContain('href="/terms"');
-    expect(html).toContain('href="/data-deletion"');
-    expect(html).toContain("プライバシーポリシー");
-    expect(html).toContain("利用規約");
-    expect(html).toContain("データ削除手順");
-  });
-
+describe("法的ページ (LegalPage)", () => {
   it("LegalPage と LegalSection が見出しと導線を描画すること", () => {
     const html = renderToStaticMarkup(
       <LegalPage title="サンプル規約" description="説明です。" updatedAt="2026年9月23日">

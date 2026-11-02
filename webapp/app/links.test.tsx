@@ -9,7 +9,7 @@ import DataDeletionPage from "./data-deletion/page";
 import EnglishPrivacyPage from "./privacy/en/page";
 import PrivacyPage from "./privacy/page";
 import TermsPage from "./terms/page";
-import { SiteFooter } from "@/components/common/SiteFooter";
+import { SiteFooter } from "@/components/organisms";
 
 /**
  * JSX からレンダリングされた HTML 内のすべての <a> タグの href を抽出する。
