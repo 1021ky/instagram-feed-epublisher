@@ -615,3 +615,15 @@
   - [x] 関連テスト（`graph-client.test.ts`, `hashtags/route.test.ts`）の更新
 - [x] 品質ゲート検証（TypeScript 型チェック、Vitest 単体テスト全329件、Oxlint、Oxfmt、ビルド検証）
 - [x] コミット作成および PR #94 へのプッシュ反映
+
+---
+
+## 仕様ベースの命名・コメントへのリファクタリング（内部実装詳細の排除）
+
+- [x] `webapp/app/api/instagram/hashtags/route.ts`: 定数 `HASHTAG_SCAN_MAX_POSTS` のコメントから「1往復で完結」等の内部事情を削除
+- [x] `webapp/app/api/instagram/hashtags/route.test.ts`: テスト名から「高速に取得する」「1ページ上限」等の実装詳細表現を排し仕様ベースの命名へ変更
+- [x] `webapp/src/lib/instagram/graph-client.ts`: `HASHTAG_SCAN_FIELDS` のコメントを仕様ベースに変更
+- [x] `webapp/src/lib/auth.ts`: docstring およびインラインコメントから並列化等の実装言及を整理
+- [x] `webapp/src/lib/auth.test.ts`: describe / it / コメントを関数の振る舞い（仕様）ベースに変更
+- [x] 品質ゲート検証（型チェック、Vitest、Oxlint、Oxfmt、ビルド）
+- [x] コミット作成および PR #94 へのプッシュ反映

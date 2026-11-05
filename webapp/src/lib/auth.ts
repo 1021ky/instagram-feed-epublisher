@@ -30,7 +30,7 @@ const { authorizeUrl: instagramAuthorizeUrl, tokenUrl: instagramTokenUrl } =
   resolveInstagramOAuthUrls();
 
 /**
- * Instagram 認可コードからアクセストークン（長期トークン）およびプロファイルを並列取得します。
+ * Instagram 認可コードから長期アクセストークンおよびプロファイル情報を取得します。
  */
 export async function exchangeInstagramToken({
   code,
@@ -73,7 +73,7 @@ export async function exchangeInstagramToken({
     throw new Error("Instagram access token missing from response");
   }
 
-  // 高速化: 長期トークン交換とユーザー情報 (/me) 取得を短期トークンで並列実行 (Promise.all)
+  // 長期トークン交換とユーザー情報 (/me) の取得
   const longUrl = new URL(`${resolveMetaGraphApiBaseUrl()}/access_token`);
   longUrl.searchParams.set("grant_type", "ig_exchange_token");
   longUrl.searchParams.set("client_secret", process.env.INSTAGRAM_CLIENT_SECRET ?? "");
@@ -141,7 +141,7 @@ export async function exchangeInstagramToken({
 
 /**
  * トークン情報からユーザープロファイル情報を返却します。
- * 事前取得（並列取得）されたプロファイルがある場合は追加通信なしで即時返却します。
+ * キャッシュされたプロファイルが存在する場合は外部 API を呼ばずに即時返却します。
  */
 export async function getInstagramUserInfo(tokens: { accessToken?: string; raw?: unknown }) {
   const preloaded = (tokens.raw as { profile?: { id: string; username?: string } } | undefined)

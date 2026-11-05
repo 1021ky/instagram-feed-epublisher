@@ -69,7 +69,7 @@ describe("ハッシュタグ候補取得 API の結合・OpenAPI 契約テスト
     ]);
   });
 
-  it("fetchGraphMedia に軽量フィールド (HASHTAG_SCAN_FIELDS) と 1ページ上限 (HASHTAG_SCAN_MAX_POSTS=100) を指定して高速に取得する", async () => {
+  it("ハッシュタグ集計用フィールド (HASHTAG_SCAN_FIELDS) とスキャン上限 (HASHTAG_SCAN_MAX_POSTS) を指定して fetchGraphMedia を呼び出す", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,

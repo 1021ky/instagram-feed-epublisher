@@ -13,7 +13,7 @@ import { extractHashtagsFromPosts, normalizeHashtagLimit } from "@/lib/instagram
 
 const logger = getLogger("api.instagram.hashtags");
 
-/** ハッシュタグ候補集計のために直近からスキャンする最大投稿数（1ページ上限100件に集約して通信を1往復で完結） */
+/** ハッシュタグ候補集計のために直近からスキャンする最大投稿数 */
 export const HASHTAG_SCAN_MAX_POSTS = 100;
 
 /**

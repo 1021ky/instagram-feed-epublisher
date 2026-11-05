@@ -23,7 +23,7 @@ export const DEFAULT_MEDIA_FIELDS = ["id", "caption", "media_url", "permalink", 
   ",",
 );
 
-/** ハッシュタグ集計専用の軽量フィールド一覧（media_url や permalink の署名URL生成を省き Meta 側処理・転送を高速化） */
+/** ハッシュタグ候補集計に必要な投稿フィールド一覧 */
 export const HASHTAG_SCAN_FIELDS = ["id", "caption", "timestamp"].join(",");
 
 const MEDIA_FIELDS = DEFAULT_MEDIA_FIELDS;

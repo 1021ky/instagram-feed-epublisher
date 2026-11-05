@@ -72,7 +72,7 @@ describe("Instagram OAuth エンドポイント URL 解決 (resolveInstagramOAut
   });
 });
 
-describe("Instagram OAuth トークン交換・プロファイル取得の並列化 (exchangeInstagramToken & getInstagramUserInfo)", () => {
+describe("Instagram OAuth トークン交換・プロファイル取得 (exchangeInstagramToken & getInstagramUserInfo)", () => {
   const originalFetch = globalThis.fetch;
 
   afterEach(() => {
@@ -80,7 +80,7 @@ describe("Instagram OAuth トークン交換・プロファイル取得の並列
     vi.restoreAllMocks();
   });
 
-  it("exchangeInstagramToken が短期トークン取得後、長期トークン交換とユーザー情報取得を並列実行すること", async () => {
+  it("認可コードから長期アクセストークンとプロファイル情報を取得してトークン結果を返すこと", async () => {
     const fetchMock = vi.fn().mockImplementation((urlInput: string) => {
       const url = String(urlInput);
       if (url.includes("/oauth/access_token")) {
@@ -133,7 +133,7 @@ describe("Instagram OAuth トークン交換・プロファイル取得の並列
         },
       }),
     );
-    // 合計3回（短期トークンPOST 1回 + 並列GET 2回）呼ばれていること
+    // 短期トークンPOSTおよび長期トークン・ユーザー情報GETが行われること
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
