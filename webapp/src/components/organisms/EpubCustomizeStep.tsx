@@ -2,7 +2,7 @@
  * @file EPUB 装丁設定ステップ UI
  */
 import * as React from "react";
-import { CoverThemeSelector } from "@/components/epub/CoverThemeSelector";
+import { CoverThemeSelector } from "@/components/molecules";
 import type { EpubCustomSettings } from "@/types/ui";
 
 type EpubCustomizeStepProps = {

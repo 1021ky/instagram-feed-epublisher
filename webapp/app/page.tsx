@@ -5,16 +5,18 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { InAppBrowserAlert } from "@/components/auth/InAppBrowserAlert";
-import { LoginCard } from "@/components/auth/LoginCard";
-import { Navbar } from "@/components/auth/Navbar";
-import { FeedFilterStep, PostListStep, StickyActionBar } from "@/components/feed";
-import { EpubCustomizeStep } from "@/components/epub/EpubCustomizeStep";
-import { ExportModal } from "@/components/epub/ExportModal";
+import { AlertBanner, InAppBrowserAlert } from "@/components/molecules";
 import {
   AccountDeletionModal,
   type AccountDeletionStep,
-} from "@/components/auth/AccountDeletionModal";
+  EpubCustomizeStep,
+  ExportModal,
+  FeedFilterStep,
+  LoginCard,
+  Navbar,
+  PostListStep,
+  StickyActionBar,
+} from "@/components/organisms";
 import { fetchHashtagSuggestions, fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";
@@ -549,15 +551,7 @@ export default function Page() {
           onDeleteAccount={!isDemoMode && isLoggedIn ? handleOpenDeleteModal : undefined}
           disabled={loadingLogin || loadingFeed || isGeneratingEpub || deletingAccount}
         />
-        {error && (
-          <div
-            role="alert"
-            className="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-start gap-2"
-          >
-            <span className="font-bold">✕</span>
-            <p className="flex-1">{error}</p>
-          </div>
-        )}
+        {error && <AlertBanner message={error} className="mb-4" />}
 
         <main className="max-w-3xl mx-auto w-full space-y-6">
           {!canUseApp && !isSessionPending && (

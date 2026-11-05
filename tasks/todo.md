@@ -551,3 +551,90 @@
 - [x] 全単体テスト・結合テスト・E2E テストの `describe` / `it` / `test` 表記の日本語統一
 - [x] 次回以降もテストケース表記を日本語で記述するスキル・指示定義の整備（`.agent/skills/vitest-test-authoring/SKILL.md`, `playwright-e2e-authoring`, `playwright-e2e-self-review`, `.github/instructions/testing.instructions.md`）
 - [x] 全品質ゲート検証（lint, format, markdown, mermaid, typecheck, unit test, Playwright E2E）および PR #92 への反映
+
+---
+
+## アトミックデザイン（3層＋App Router計4層）への全面移行とテストコロケーション整備
+
+- [x] 全コンポーネントの層分類・配置方針の設計および合意（/grill-me インタビュー完了）
+  - [x] 旧4ディレクトリ（`auth/`, `feed/`, `epub/`, `common/`）の完全廃止と 3 層（`atoms/`, `molecules/`, `organisms/`）への一本化
+  - [x] テストファイルの完全コロケーション（1コンポーネント = 1テストファイル `[ComponentName].test.tsx`）の採用
+- [x] `refactor/atomic-design-migration` ブランチの切り出し
+- [x] Layer 1: Atoms (`webapp/src/components/atoms/`)
+  - [x] `FilterChip.tsx` / `FilterChip.test.tsx`
+  - [x] `InlineLoadingStatus.tsx` / `InlineLoadingStatus.test.tsx`
+  - [x] `index.ts`（バレルエクスポート定義）
+- [x] Layer 2: Molecules (`webapp/src/components/molecules/`)
+  - [x] `AlertBanner.tsx` / `AlertBanner.test.tsx`
+  - [x] `HashtagQuickSelect.tsx` / `HashtagQuickSelect.test.tsx`
+  - [x] `InAppBrowserAlert.tsx` / `InAppBrowserAlert.test.tsx`（旧 `auth/` より移行）
+  - [x] `CoverThemeSelector.tsx` / `CoverThemeSelector.test.tsx`（旧 `epub/` より移行）
+  - [x] `PostCard.tsx` / `PostCard.test.tsx`（旧 `feed/` より移行）
+  - [x] `index.ts`（バレルエクスポート定義）
+- [x] Layer 3: Organisms (`webapp/src/components/organisms/`)
+  - [x] `Navbar.tsx` / `Navbar.test.tsx`（旧 `auth/` より移行）
+  - [x] `LoginCard.tsx` / `LoginCard.test.tsx`（旧 `auth/` より移行）
+  - [x] `AccountDeletionModal.tsx` / `AccountDeletionModal.test.tsx`（旧 `auth/` より移行）
+  - [x] `FeedFilterStep.tsx` / `FeedFilterStep.test.tsx`（旧 `feed/` より移行）
+  - [x] `PostListStep.tsx` / `PostListStep.test.tsx`（旧 `feed/` より移行）
+  - [x] `StickyActionBar.tsx` / `StickyActionBar.test.tsx`（旧 `feed/` より移行）
+  - [x] `EpubCustomizeStep.tsx` / `EpubCustomizeStep.test.tsx`（旧 `epub/` より移行）
+  - [x] `ExportModal.tsx` / `ExportModal.test.tsx`（旧 `epub/` より移行）
+  - [x] `SiteFooter.tsx` / `SiteFooter.test.tsx`（旧 `common/` より移行）
+  - [x] `LegalPage.tsx` / `LegalPage.test.tsx`（旧 `common/` より移行）
+  - [x] `index.ts`（バレルエクスポート定義）
+- [x] 旧ディレクトリ（`auth/`, `feed/`, `epub/`, `common/`）の完全削除
+- [x] 呼び出し側の import パス一括更新
+  - [x] `webapp/app/page.tsx`
+  - [x] `webapp/app/page.test.tsx`
+  - [x] `webapp/app/layout.tsx`
+  - [x] `webapp/app/links.test.tsx`
+  - [x] `webapp/app/data-deletion/page.tsx`
+  - [x] `webapp/app/privacy/page.tsx`
+  - [x] `webapp/app/privacy/en/page.tsx`
+  - [x] `webapp/app/terms/page.tsx`
+- [x] Agent-SOP スキル・ルール・エージェント指示の更新
+  - [x] `.agent/skills/atomic-design-components/SKILL.md`
+  - [x] `.agent/skills/atomic-design-components/atomic-design-components.sop.md`
+  - [x] `.github/instructions/atomic-design.instructions.md`
+  - [x] `webapp/src/components/AGENTS.md`
+  - [x] `webapp/README.md`
+- [x] 品質ゲート検証（TypeScript 型チェック、Vitest 単体テスト全324件、Playwright E2E、Oxlint、Oxfmt、マークダウン検証）
+- [x] コミット作成および PR 作成（`refactor(ui): アトミックデザイン（Atoms/Molecules/Organisms）への全面移行とコロケーションテスト整備`）
+
+---
+
+## ログインおよびハッシュタグ取得パフォーマンス改善（OAuth並列化・フィールド軽量化・1往復化）
+
+- [x] 改善 1: OAuth コールバックの高速化（`webapp/src/lib/auth.ts`）
+  - [x] 短期トークン取得後、長期トークン交換とユーザー情報（`/me`）取得を `Promise.all` で並列実行
+  - [x] `webapp/src/lib/auth.test.ts` での並列実行およびエラー時の挙動検証
+- [x] 改善 2 & 3: ハッシュタグ取得 API の高速化（`webapp/app/api/instagram/hashtags/route.ts`, `webapp/src/lib/instagram/graph-client.ts`）
+  - [x] `fetchGraphMedia` に `fields` オプションを追加し、ハッシュタグ取得時は `id,caption,timestamp` のみに限定（不要な `media_url`, `permalink` を除外）
+  - [x] `HASHTAG_SCAN_MAX_POSTS` を 200 から 100（1 ページ分）に最適化し、ページネーションの 2 往復通信を 1 往復に削減
+  - [x] 関連テスト（`graph-client.test.ts`, `hashtags/route.test.ts`）の更新
+- [x] 品質ゲート検証（TypeScript 型チェック、Vitest 単体テスト全329件、Oxlint、Oxfmt、ビルド検証）
+- [x] コミット作成および PR #94 へのプッシュ反映
+
+---
+
+## 仕様ベースの命名・コメントへのリファクタリング（内部実装詳細の排除）
+
+- [x] `webapp/app/api/instagram/hashtags/route.ts`: 定数 `HASHTAG_SCAN_MAX_POSTS` のコメントから「1往復で完結」等の内部事情を削除
+- [x] `webapp/app/api/instagram/hashtags/route.test.ts`: テスト名から「高速に取得する」「1ページ上限」等の実装詳細表現を排し仕様ベースの命名へ変更
+- [x] `webapp/src/lib/instagram/graph-client.ts`: `HASHTAG_SCAN_FIELDS` のコメントを仕様ベースに変更
+- [x] `webapp/src/lib/auth.ts`: docstring およびインラインコメントから並列化等の実装言及を整理
+- [x] `webapp/src/lib/auth.test.ts`: describe / it / コメントを関数の振る舞い（仕様）ベースに変更
+- [x] 品質ゲート検証（型チェック、Vitest、Oxlint、Oxfmt、ビルド）
+- [x] コミット作成および PR #94 へのプッシュ反映
+
+---
+
+## TOPページ起動・健全性検証のCI組み込み（Next.js ビルド＆E2Eスモークテスト）
+
+- [x] CI ワークフロー更新: `webapp-ci.yml` の `Webapp check` ジョブに `pnpm build` を追加
+- [x] Page Object 拡張: `webapp/e2e/pages/TopLoginPage.ts` に見出し・フッター・エラー画面の User-Facing ロケータを追加
+- [x] E2E 設定更新: `webapp/playwright.config.ts` に `ignoreHTTPSErrors: true` を追加
+- [x] E2E スモークテスト新設: `webapp/e2e/top-page-smoke.spec.ts` を作成（HTTP 200, コンソールエラー0件, 主要コンポーネント描画検証）
+- [x] ローカル検証（Oxlint, Oxfmt, tsc, Vitest 329件, Next.js build, Playwright smoke test パス）
+- [x] コミット作成および PR #94 へのプッシュ反映

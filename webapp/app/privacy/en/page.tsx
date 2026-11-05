@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { LegalContactBox, LegalPage, LegalSection } from "@/components/common/LegalPage";
+import { LegalContactBox, LegalPage, LegalSection } from "@/components/organisms";
 import { LEGAL_UPDATED_AT } from "@/lib/legal";
 
 export const metadata: Metadata = {

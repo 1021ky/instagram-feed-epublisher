@@ -49,11 +49,10 @@ webapp/
 │   └── pages/            # Page Object Model クラス群
 ├── scripts/              # 開発サーバー・OpenAPI モックサーバー・Oxlint プラグイン
 └── src/
-    ├── components/       # UI コンポーネント (auth, feed, epub, common)
-    │   ├── auth/         # ナビゲーション、ログインカード、WebView注意バナー
-    │   ├── common/       # 共通フッター、法的ページレイアウト
-    │   ├── epub/         # EPUB 装丁設定・表紙テーマ・エクスポートモーダル
-    │   └── feed/         # 絞り込みフォーム、投稿カード、選択リスト、下部アクションバー
+    ├── components/       # UI コンポーネント (atoms, molecules, organisms)
+    │   ├── atoms/        # 最小単位 UI 要素 (FilterChip, InlineLoadingStatus)
+    │   ├── molecules/    # 単一責務の複合パーツ (AlertBanner, HashtagQuickSelect, InAppBrowserAlert, CoverThemeSelector, PostCard)
+    │   └── organisms/    # 独立セクション・ステップ・モーダル (Navbar, LoginCard, AccountDeletionModal, 各Step, StickyActionBar, SiteFooter, LegalPage)
     ├── lib/              # 共通ライブラリ・ロジック
     │   ├── auth/         # Better Auth 設定・セッションサービス
     │   ├── epub/         # EPUB ビルダー・レンダラー

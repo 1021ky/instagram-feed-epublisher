@@ -69,6 +69,26 @@ describe("ハッシュタグ候補取得 API の結合・OpenAPI 契約テスト
     ]);
   });
 
+  it("ハッシュタグ集計用フィールド (HASHTAG_SCAN_FIELDS) とスキャン上限 (HASHTAG_SCAN_MAX_POSTS) を指定して fetchGraphMedia を呼び出す", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ data: [] }),
+    } as Response);
+
+    await GET(new Request("http://localhost:3100/api/instagram/hashtags"));
+
+    expect(fetchGraphMedia).toHaveBeenCalledWith(
+      "mock-instagram-access-token",
+      expect.objectContaining({
+        maxScanItems: 100,
+        pageLimit: 100,
+        fields: "id,caption,timestamp",
+        filter: { maxCount: 100 },
+      }),
+    );
+  });
+
   it.each([
     { label: "指定件数 (3件)", query: "?limit=3", expectedCount: 3 },
     { label: "上限クランプ (999 -> 50件)", query: "?limit=999", expectedCount: 50 },

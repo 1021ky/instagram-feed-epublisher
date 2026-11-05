@@ -30,6 +30,166 @@ const { authorizeUrl: instagramAuthorizeUrl, tokenUrl: instagramTokenUrl } =
   resolveInstagramOAuthUrls();
 
 /**
+ * Instagram 認可コードから長期アクセストークンおよびプロファイル情報を取得します。
+ */
+export async function exchangeInstagramToken({
+  code,
+  redirectURI,
+}: {
+  code: string;
+  redirectURI: string;
+}) {
+  const form = new URLSearchParams({
+    client_id: process.env.INSTAGRAM_CLIENT_ID ?? "",
+    client_secret: process.env.INSTAGRAM_CLIENT_SECRET ?? "",
+    grant_type: "authorization_code",
+    redirect_uri: redirectURI,
+    code,
+  });
+
+  const { tokenUrl } = resolveInstagramOAuthUrls();
+  const shortResponse = await fetch(tokenUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: form.toString(),
+  });
+
+  if (!shortResponse.ok) {
+    const errorText = await shortResponse.text();
+    throw new Error(`Instagram token exchange failed: ${shortResponse.status} ${errorText}`);
+  }
+
+  const shortPayload = (await shortResponse.json()) as {
+    access_token?: string;
+    user_id?: string;
+    token_type?: string;
+    expires_in?: number;
+  };
+
+  const shortAccessToken = shortPayload.access_token;
+  if (!shortAccessToken) {
+    throw new Error("Instagram access token missing from response");
+  }
+
+  // 長期トークン交換とユーザー情報 (/me) の取得
+  const longUrl = new URL(`${resolveMetaGraphApiBaseUrl()}/access_token`);
+  longUrl.searchParams.set("grant_type", "ig_exchange_token");
+  longUrl.searchParams.set("client_secret", process.env.INSTAGRAM_CLIENT_SECRET ?? "");
+  longUrl.searchParams.set("access_token", shortAccessToken);
+
+  const userUrl = new URL(`${resolveMetaGraphApiBaseUrl()}/me`);
+  userUrl.searchParams.set("fields", "id,username");
+  userUrl.searchParams.set("access_token", shortAccessToken);
+
+  const [longResponse, userResponse] = await Promise.all([
+    fetch(longUrl.toString()),
+    fetch(userUrl.toString()),
+  ]);
+
+  if (!longResponse.ok) {
+    const errorText = await longResponse.text();
+    throw new Error(
+      `Instagram long-lived token exchange failed: ${longResponse.status} ${errorText}`,
+    );
+  }
+
+  const longPayload = (await longResponse.json()) as {
+    access_token?: string;
+    token_type?: string;
+    expires_in?: number;
+  };
+
+  let preloadedProfile: { id: string; username?: string } | undefined;
+  if (userResponse.ok) {
+    try {
+      const userPayload = (await userResponse.json()) as {
+        id?: string | number;
+        username?: string;
+      };
+      if (userPayload.id) {
+        preloadedProfile = {
+          id: String(userPayload.id),
+          username: userPayload.username,
+        };
+      }
+    } catch {
+      // パース失敗時は getUserInfo 側のフォールバックに委ねる
+    }
+  }
+
+  const longAccessToken = longPayload.access_token ?? shortAccessToken;
+  const expiresIn = longPayload.expires_in ?? shortPayload.expires_in ?? 0;
+
+  return {
+    accessToken: longAccessToken,
+    accessTokenExpiresAt: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
+    scopes: [
+      "instagram_business_basic",
+      "instagram_business_content_publish",
+      "instagram_business_manage_comments",
+      "instagram_business_manage_messages",
+    ],
+    raw: {
+      short: shortPayload,
+      long: longPayload,
+      profile: preloadedProfile,
+    },
+  };
+}
+
+/**
+ * トークン情報からユーザープロファイル情報を返却します。
+ * キャッシュされたプロファイルが存在する場合は外部 API を呼ばずに即時返却します。
+ */
+export async function getInstagramUserInfo(tokens: { accessToken?: string; raw?: unknown }) {
+  const preloaded = (tokens.raw as { profile?: { id: string; username?: string } } | undefined)
+    ?.profile;
+  if (preloaded?.id) {
+    return {
+      id: preloaded.id,
+      name: preloaded.username ?? "instagram-user",
+      email: `${preloaded.username ?? preloaded.id}@instagram.local`,
+      emailVerified: false,
+      image: undefined,
+    };
+  }
+
+  if (!tokens.accessToken) {
+    throw new Error("Instagram access token missing for user info");
+  }
+
+  const url = new URL(`${resolveMetaGraphApiBaseUrl()}/me`);
+  url.searchParams.set("fields", "id,username");
+  url.searchParams.set("access_token", tokens.accessToken);
+
+  const response = await fetch(url.toString());
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Instagram user info failed: ${response.status} ${errorText}`);
+  }
+
+  const payload = (await response.json()) as {
+    id?: string | number;
+    username?: string;
+  };
+
+  const id = payload.id ? String(payload.id) : undefined;
+  if (!id) {
+    throw new Error("Instagram user id missing from user info");
+  }
+
+  return {
+    id,
+    name: payload.username ?? "instagram-user",
+    email: `${payload.username ?? id}@instagram.local`,
+    emailVerified: false,
+    image: undefined,
+  };
+}
+
+/**
  * Better Auth instance configured for Instagram SSO with stateless session.
  */
 export const auth = betterAuth({
@@ -56,131 +216,12 @@ export const auth = betterAuth({
           tokenUrl: instagramTokenUrl,
           scopes: ["instagram_business_basic"],
           authorizationUrlParams: {
-            /**
-             * Facebook ログインへの自動リダイレクト・誘導を無効化し、
-             * Instagram 単体のログイン・認可画面を確実に表示させるための設定。
-             */
             enable_fb_login: "0",
-            /**
-             * ブラウザにキャッシュされたセッションでの自動ログインを防ぎ、
-             * 常に Instagram の再認証・確認画面を明示的に表示させるための設定。
-             * （別アカウントへの切り替えや確実な同意取得のため）
-             */
             force_authentication: "1",
-            /**
-             * Better Auth のデフォルトではスコープがスペース区切り（OAuth2標準）で渡されるが、
-             * Instagram の認可エンドポイントはカンマ区切り（または単一指定）を期待するため、
-             * スコープ文字列を明示的に指定して「このページはご利用いただけません」エラーを防ぐ。
-             */
             scope: "instagram_business_basic",
           },
-          getToken: async ({ code, redirectURI }) => {
-            const form = new URLSearchParams({
-              client_id: process.env.INSTAGRAM_CLIENT_ID ?? "",
-              client_secret: process.env.INSTAGRAM_CLIENT_SECRET ?? "",
-              grant_type: "authorization_code",
-              redirect_uri: redirectURI,
-              code,
-            });
-
-            const { tokenUrl } = resolveInstagramOAuthUrls();
-            const shortResponse = await fetch(tokenUrl, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-              },
-              body: form.toString(),
-            });
-
-            if (!shortResponse.ok) {
-              const errorText = await shortResponse.text();
-              throw new Error(
-                `Instagram token exchange failed: ${shortResponse.status} ${errorText}`,
-              );
-            }
-
-            const shortPayload = (await shortResponse.json()) as {
-              access_token?: string;
-              user_id?: string;
-              token_type?: string;
-              expires_in?: number;
-            };
-
-            const shortAccessToken = shortPayload.access_token;
-            if (!shortAccessToken) {
-              throw new Error("Instagram access token missing from response");
-            }
-
-            const longUrl = new URL(`${resolveMetaGraphApiBaseUrl()}/access_token`);
-            longUrl.searchParams.set("grant_type", "ig_exchange_token");
-            longUrl.searchParams.set("client_secret", process.env.INSTAGRAM_CLIENT_SECRET ?? "");
-            longUrl.searchParams.set("access_token", shortAccessToken);
-
-            const longResponse = await fetch(longUrl.toString());
-            if (!longResponse.ok) {
-              const errorText = await longResponse.text();
-              throw new Error(
-                `Instagram long-lived token exchange failed: ${longResponse.status} ${errorText}`,
-              );
-            }
-
-            const longPayload = (await longResponse.json()) as {
-              access_token?: string;
-              token_type?: string;
-              expires_in?: number;
-            };
-
-            const longAccessToken = longPayload.access_token ?? shortAccessToken;
-            const expiresIn = longPayload.expires_in ?? shortPayload.expires_in ?? 0;
-
-            return {
-              accessToken: longAccessToken,
-              accessTokenExpiresAt: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
-              scopes: [
-                "instagram_business_basic",
-                "instagram_business_content_publish",
-                "instagram_business_manage_comments",
-                "instagram_business_manage_messages",
-              ],
-              raw: {
-                short: shortPayload,
-                long: longPayload,
-              },
-            };
-          },
-          getUserInfo: async (tokens) => {
-            if (!tokens.accessToken) {
-              throw new Error("Instagram access token missing for user info");
-            }
-
-            const url = new URL(`${resolveMetaGraphApiBaseUrl()}/me`);
-            url.searchParams.set("fields", "id,username");
-            url.searchParams.set("access_token", tokens.accessToken);
-
-            const response = await fetch(url.toString());
-            if (!response.ok) {
-              const errorText = await response.text();
-              throw new Error(`Instagram user info failed: ${response.status} ${errorText}`);
-            }
-
-            const payload = (await response.json()) as {
-              id?: string | number;
-              username?: string;
-            };
-
-            const id = payload.id ? String(payload.id) : undefined;
-            if (!id) {
-              throw new Error("Instagram user id missing from user info");
-            }
-
-            return {
-              id,
-              name: payload.username ?? "instagram-user",
-              email: `${payload.username ?? id}@instagram.local`,
-              emailVerified: false,
-              image: undefined,
-            };
-          },
+          getToken: exchangeInstagramToken,
+          getUserInfo: getInstagramUserInfo,
         },
       ],
     }),

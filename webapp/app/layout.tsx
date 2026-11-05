@@ -1,7 +1,7 @@
 /**
  * @file Next.js App Router ルートレイアウト
  */
-import { SiteFooter } from "@/components/common/SiteFooter";
+import { SiteFooter } from "@/components/organisms";
 import type { ReactNode } from "react";
 import "./globals.css";
 

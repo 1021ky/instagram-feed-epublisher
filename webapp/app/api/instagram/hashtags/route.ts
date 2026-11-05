@@ -4,13 +4,17 @@
 import { NextResponse } from "next/server";
 import { getLogger } from "@/lib/logger";
 import { resolveInstagramAccessToken } from "@/lib/auth/session-service";
-import { fetchGraphMedia, InstagramGraphApiError } from "@/lib/instagram/graph-client";
+import {
+  fetchGraphMedia,
+  HASHTAG_SCAN_FIELDS,
+  InstagramGraphApiError,
+} from "@/lib/instagram/graph-client";
 import { extractHashtagsFromPosts, normalizeHashtagLimit } from "@/lib/instagram/hashtag-service";
 
 const logger = getLogger("api.instagram.hashtags");
 
 /** ハッシュタグ候補集計のために直近からスキャンする最大投稿数 */
-const HASHTAG_SCAN_MAX_POSTS = 200;
+export const HASHTAG_SCAN_MAX_POSTS = 100;
 
 /**
  * ログイン中ユーザーの直近投稿からよく使うハッシュタグ候補を集計して返却します。
@@ -25,6 +29,8 @@ export async function GET(request: Request) {
     const accessToken = await resolveInstagramAccessToken(request);
     const items = await fetchGraphMedia(accessToken, {
       maxScanItems: HASHTAG_SCAN_MAX_POSTS,
+      pageLimit: HASHTAG_SCAN_MAX_POSTS,
+      fields: HASHTAG_SCAN_FIELDS,
       filter: {
         maxCount: HASHTAG_SCAN_MAX_POSTS,
       },

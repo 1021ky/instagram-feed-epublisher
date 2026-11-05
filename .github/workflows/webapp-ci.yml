@@ -39,6 +39,9 @@ jobs:
           - name: Type check
             run: pnpm --filter instagram-feed-epublisher-webapp exec tsc --noEmit
 
+          - name: Build webapp
+            run: pnpm build
+
           - name: Unit tests
             run: pnpm test
 

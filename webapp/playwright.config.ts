@@ -41,6 +41,7 @@ export default defineConfig({
   use: {
     baseURL,
     browserName: "chromium",
+    ignoreHTTPSErrors: true,
     launchOptions: slowMo > 0 ? { slowMo } : undefined,
     screenshot: !isCI && isFullReportRun ? "on" : "only-on-failure",
     trace: !isCI && isFullReportRun ? "on" : "retain-on-failure",
