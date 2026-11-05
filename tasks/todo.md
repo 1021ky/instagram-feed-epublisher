@@ -627,3 +627,14 @@
 - [x] `webapp/src/lib/auth.test.ts`: describe / it / コメントを関数の振る舞い（仕様）ベースに変更
 - [x] 品質ゲート検証（型チェック、Vitest、Oxlint、Oxfmt、ビルド）
 - [x] コミット作成および PR #94 へのプッシュ反映
+
+---
+
+## TOPページ起動・健全性検証のCI組み込み（Next.js ビルド＆E2Eスモークテスト）
+
+- [x] CI ワークフロー更新: `webapp-ci.yml` の `Webapp check` ジョブに `pnpm build` を追加
+- [x] Page Object 拡張: `webapp/e2e/pages/TopLoginPage.ts` に見出し・フッター・エラー画面の User-Facing ロケータを追加
+- [x] E2E 設定更新: `webapp/playwright.config.ts` に `ignoreHTTPSErrors: true` を追加
+- [x] E2E スモークテスト新設: `webapp/e2e/top-page-smoke.spec.ts` を作成（HTTP 200, コンソールエラー0件, 主要コンポーネント描画検証）
+- [x] ローカル検証（Oxlint, Oxfmt, tsc, Vitest 329件, Next.js build, Playwright smoke test パス）
+- [x] コミット作成および PR #94 へのプッシュ反映
