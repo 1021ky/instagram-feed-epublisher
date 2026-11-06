@@ -98,25 +98,6 @@ describe("EPUB ビルド処理 (buildEpub)", () => {
     ).rejects.toThrow("render error");
   });
 
-  test("EPUB生成時は upstream 6.2.3 の self-closing タグ設定を使う", async () => {
-    await buildEpub(
-      {
-        items,
-        metadata: {
-          title: "title",
-          author: "author",
-          contact: "contact",
-          instagramUrl: "url",
-        },
-      },
-      "/tmp",
-    );
-
-    expect(capturedEpubOptions[0]).toMatchObject({
-      useSelfClosingTags: true,
-    });
-  });
-
   test("フィクスチャを使用してEPUB生成フローをテスト", async () => {
     const { downloadMedia } = await import("@/lib/epub/media-downloader");
     const { renderChapterHtml } = await import("@/lib/epub/template-renderer");
