@@ -89,6 +89,7 @@ export async function buildEpub(input: EpubInput, outputDir: string): Promise<st
       customNcxTocTemplatePath: path.join(templatesDir, "toc.ncx.ejs"),
       customHtmlTocTemplatePath: path.join(templatesDir, "epub3", "toc.xhtml.ejs"),
       customHtmlCoverTemplatePath: path.join(templatesDir, "epub3", "cover.xhtml.ejs"),
+      useSelfClosingTags: true,
     },
     outputPath,
   );
