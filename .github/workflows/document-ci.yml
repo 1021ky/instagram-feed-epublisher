@@ -32,14 +32,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - parallel:
-          - name: Lint markdown
-            run: pnpm lint:md
+      - name: Lint markdown
+        run: pnpm lint:md
 
-          - name: Format check
-            run: pnpm format:check
+      - name: Format check
+        run: pnpm format:check
 
-          - name: Check Mermaid diagrams
-            run: pnpm check:mermaid
-            env:
-              PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
+      - name: Check Mermaid diagrams
+        run: pnpm check:mermaid
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
