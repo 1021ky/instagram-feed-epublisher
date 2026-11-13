@@ -9,9 +9,8 @@ RUN npm install -g pnpm@10.26.0
 FROM base AS deps
 WORKDIR /app
 
-# pnpm-workspace と lockfile、patch、package.json をコピー
+# pnpm-workspace と lockfile、package.json をコピー
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY patches/ ./patches/
 COPY webapp/package.json ./webapp/
 
 # 依存パッケージのインストール（キャッシュ活用）
