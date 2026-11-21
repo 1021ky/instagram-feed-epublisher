@@ -32,12 +32,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Next.js types and Type check
+        run: |
+          pnpm --filter instagram-feed-epublisher-webapp exec next typegen
+          pnpm --filter instagram-feed-epublisher-webapp exec tsc --noEmit
+
       - parallel:
           - name: Lint code
             run: pnpm lint
-
-          - name: Type check
-            run: pnpm --filter instagram-feed-epublisher-webapp exec tsc --noEmit
 
           - name: Build webapp
             run: pnpm build
