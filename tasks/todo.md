@@ -365,11 +365,11 @@
 - [x] GitHub Issue #80 の起票
 - [x] 作業ブランチ `fix/issue-80-canonical-host-redirect-port` の作成
 - [x] 修正実装
-  - [x] `webapp/middleware.ts`: `x-forwarded-host` 優先でのホスト判定
-  - [x] `webapp/middleware.ts`: ポート 8080 を含まない安全なリダイレクト URL 構築
+  - [x] `webapp/proxy.ts`: `x-forwarded-host` 優先でのホスト判定
+  - [x] `webapp/proxy.ts`: ポート 8080 を含まない安全なリダイレクト URL 構築
 - [x] テストの追加・更新
-  - [x] `webapp/middleware.test.ts`: `x-forwarded-host` による正規ドメイン判定テスト
-  - [x] `webapp/middleware.test.ts`: ポート 8080 が混入しないことのテスト
+  - [x] `webapp/proxy.test.ts`: `x-forwarded-host` による正規ドメイン判定テスト
+  - [x] `webapp/proxy.test.ts`: ポート 8080 が混入しないことのテスト
 - [x] 全品質ゲート検証（test, lint, format, tsc, build）
 - [x] 学びと知見（`tasks/lessons.md`）の記録
 - [x] Issue #80 に対する Pull Request #81 の作成
