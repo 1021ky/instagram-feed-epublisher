@@ -268,3 +268,11 @@
    - `docs/openapi/instagram-graph-api.openapi.yaml` に Meta OAuth / Graph API（`/me/media` 等）および内部 BFF API（`/api/instagram/hashtags`）のスキーマを定義。
    - E2E 実行時は `playwright.config.ts` が OpenAPI スキーマ検証付きのローカルモックサーバー（`webapp/scripts/mock-instagram-server.mjs`）と E2E 専用 Next.js サーバーを自動起動し、OAuth ログインから Route Handler・`graph-client.ts`・`hashtag-service.ts` まで本番 Instagram に一切触れずに一気通貫で検証。
    - エラー応答（502）やローディング待機などの異常系・境界値シナリオは、Custom Fixture 内の `page.route()` ゲートを用いてテストケース単位で完全分離して検証。
+
+---
+
+## 13. Architecture Decision Records (ADR)
+
+設計上の主要な意思決定ログは `docs/adr/` 配下に記録しています。
+
+- [ADR-0001: Instagram OAuth ログイン時の再認証制御とアカウント切り替え導線の設計](../adr/0001-instagram-oauth-login-and-account-switching.md)

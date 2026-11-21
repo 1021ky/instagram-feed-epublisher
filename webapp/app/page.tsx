@@ -4,7 +4,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { authClient, signInWithInstagram } from "@/lib/auth-client";
 import { AlertBanner, InAppBrowserAlert } from "@/components/molecules";
 import {
   AccountDeletionModal,
@@ -92,6 +92,7 @@ export default function Page() {
   const downloadUrlRef = useRef<string | null>(null);
 
   const [appMode, setAppMode] = useState<AppMode>("real");
+  const [justLoggedOut, setJustLoggedOut] = useState(false);
 
   const session = authClient.useSession();
   const isLoggedIn = Boolean(session.data);
@@ -206,14 +207,12 @@ export default function Page() {
     setError(null);
   }, [defaultDates.end, defaultDates.start]);
 
-  const handleLogin = async () => {
+  const handleLogin = async (forceReauth = false) => {
     setLoadingLogin(true);
     setError(null);
+    setJustLoggedOut(false);
     try {
-      await authClient.signIn.oauth2({
-        providerId: "instagram",
-        callbackURL: "/?scroll=filters",
-      });
+      await signInWithInstagram({ forceReauth });
     } catch (e) {
       console.error(e);
       setError(e instanceof Error ? e.message : "ログインに失敗しました");
@@ -230,6 +229,7 @@ export default function Page() {
     setFeed([]);
     setIsFilterCollapsed(false);
     setHasFetched(false);
+    setJustLoggedOut(true);
   };
 
   /**
@@ -555,7 +555,13 @@ export default function Page() {
 
         <main className="max-w-3xl mx-auto w-full space-y-6">
           {!canUseApp && !isSessionPending && (
-            <LoginCard loadingLogin={loadingLogin} onLogin={handleLogin} onDemo={handleDemo} />
+            <LoginCard
+              loadingLogin={loadingLogin}
+              onLogin={() => handleLogin(false)}
+              onForceReauthLogin={() => handleLogin(true)}
+              justLoggedOut={justLoggedOut}
+              onDemo={handleDemo}
+            />
           )}
 
           {canUseApp && (

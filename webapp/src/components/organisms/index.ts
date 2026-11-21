@@ -17,7 +17,7 @@ export {
   formatDateToISO,
 } from "./FeedFilterStep";
 export { LegalContactBox, LegalPage, LegalSection } from "./LegalPage";
-export { LoginCard } from "./LoginCard";
+export { LoginCard, type LoginCardProps } from "./LoginCard";
 export { Navbar } from "./Navbar";
 export { PostListStep, type PostListStepProps } from "./PostListStep";
 export { SiteFooter } from "./SiteFooter";

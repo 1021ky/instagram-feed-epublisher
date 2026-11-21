@@ -1,9 +1,11 @@
 "use client";
 
-type LoginCardProps = {
+export type LoginCardProps = {
   loadingLogin: boolean;
   onDemo: () => void;
   onLogin: () => void;
+  onForceReauthLogin?: () => void;
+  justLoggedOut?: boolean;
 };
 
 const steps = [
@@ -24,7 +26,13 @@ const steps = [
   },
 ];
 
-export function LoginCard({ loadingLogin, onDemo, onLogin }: LoginCardProps) {
+export function LoginCard({
+  loadingLogin,
+  onDemo,
+  onLogin,
+  onForceReauthLogin,
+  justLoggedOut = false,
+}: LoginCardProps) {
   return (
     <section className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm border border-slate-200/80 max-w-xl mx-auto">
       {/* ヘッダー・メイン見出し */}
@@ -59,13 +67,24 @@ export function LoginCard({ loadingLogin, onDemo, onLogin }: LoginCardProps) {
         </p>
       </div>
 
+      {/* ログアウト後の補足案内 */}
+      {justLoggedOut && (
+        <div
+          role="status"
+          className="mb-5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-600 leading-relaxed"
+        >
+          本アプリからログアウトしました。ブラウザ上の Instagram
+          ログイン状態は維持されているため、別のアカウントに切り替える場合は下の「別のアカウントでログイン」をご利用ください。
+        </div>
+      )}
+
       {/* CTAボタン群（横幅いっぱいに収まる横並び等幅配置） */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3 w-full">
         <button
           type="button"
           onClick={onLogin}
           disabled={loadingLogin}
-          className="w-full px-5 py-2.5 rounded-lg text-white font-medium text-xs sm:text-sm bg-gradient-to-r from-[#405DE6] via-[#C13584] to-[#E1306C] hover:opacity-95 transition flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-50 min-h-[40px]"
+          className="w-full px-5 py-2.5 rounded-lg text-white font-medium text-xs sm:text-sm bg-gradient-to-r from-[#405DE6] via-[#C13584] to-[#E1306C] hover:opacity-95 transition flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-50 min-h-[44px]"
         >
           <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
             <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
@@ -75,12 +94,26 @@ export function LoginCard({ loadingLogin, onDemo, onLogin }: LoginCardProps) {
         <button
           type="button"
           onClick={onDemo}
-          className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-slate-600 hover:text-slate-900 font-medium text-xs sm:text-sm hover:bg-slate-50 transition flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px]"
+          className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-slate-600 hover:text-slate-900 font-medium text-xs sm:text-sm hover:bg-slate-50 transition flex items-center justify-center gap-1.5 cursor-pointer min-h-[44px]"
         >
           <span>デモを体験する</span>
           <span className="text-[11px] text-slate-400 font-normal">(登録不要)</span>
         </button>
       </div>
+
+      {/* 別アカウントでの再認証ログイン導線 */}
+      {onForceReauthLogin && (
+        <div className="mb-6 flex justify-center">
+          <button
+            type="button"
+            onClick={onForceReauthLogin}
+            disabled={loadingLogin}
+            className="px-3 py-2 text-xs text-slate-500 hover:text-slate-800 underline underline-offset-4 transition cursor-pointer disabled:opacity-50 min-h-[44px] flex items-center"
+          >
+            別のアカウントでログイン
+          </button>
+        </div>
+      )}
 
       {/* かんたん 3 ステップ（縦並び配置） */}
       <div className="pt-5 border-t border-slate-100">

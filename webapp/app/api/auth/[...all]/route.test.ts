@@ -81,5 +81,55 @@ describe("認証ルートハンドラ (/api/auth/[...all])", () => {
       expect(mockHandlers.POST).toHaveBeenCalledWith(request);
       expect(response).toBe(expectedResponse);
     });
+
+    it.each([
+      {
+        label: "通常ログイン（クエリなし）",
+        requestUrl: "https://localhost/api/auth/sign-in/oauth2",
+        expectedForceReauth: null,
+      },
+      {
+        label: "force_reauth=false 指定",
+        requestUrl: "https://localhost/api/auth/sign-in/oauth2?force_reauth=false",
+        expectedForceReauth: null,
+      },
+      {
+        label: "別アカウントでログイン（force_reauth=true）",
+        requestUrl: "https://localhost/api/auth/sign-in/oauth2?force_reauth=true",
+        expectedForceReauth: "true",
+      },
+    ])(
+      "$label のとき、認可 URL の force_reauth パラメータが期待通りになること",
+      async ({ requestUrl, expectedForceReauth }) => {
+        const baseAuthUrl =
+          "https://www.instagram.com/oauth/authorize?client_id=cid&redirect_uri=https%3A%2F%2Flocalhost%2Fapi%2Fauth%2Foauth2%2Fcallback%2Finstagram&state=state123&enable_fb_login=0&scope=instagram_business_basic";
+
+        mockHandlers.POST.mockResolvedValue(
+          new Response(JSON.stringify({ url: baseAuthUrl, redirect: true }), {
+            status: 200,
+            headers: {
+              "Content-Type": "application/json",
+              "Set-Cookie": "better-auth.state=abc; Path=/; HttpOnly",
+            },
+          }),
+        );
+
+        const request = new Request(requestUrl, { method: "POST" });
+        const response = await POST(request);
+
+        expect(response.status).toBe(200);
+        expect(response.headers.get("Set-Cookie")).toBe("better-auth.state=abc; Path=/; HttpOnly");
+
+        const payload = (await response.json()) as { url: string; redirect: boolean };
+        expect(payload.redirect).toBe(true);
+
+        const parsedUrl = new URL(payload.url);
+        expect(parsedUrl.searchParams.get("force_reauth")).toBe(expectedForceReauth);
+        expect(parsedUrl.searchParams.get("state")).toBe("state123");
+        expect(parsedUrl.searchParams.get("redirect_uri")).toBe(
+          "https://localhost/api/auth/oauth2/callback/instagram",
+        );
+      },
+    );
   });
 });

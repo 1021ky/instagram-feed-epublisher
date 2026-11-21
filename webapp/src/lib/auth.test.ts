@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_INSTAGRAM_OAUTH_AUTHORIZE_URL,
   DEFAULT_INSTAGRAM_OAUTH_TOKEN_URL,
+  auth,
   exchangeInstagramToken,
   getInstagramUserInfo,
   resolveInstagramOAuthUrls,
@@ -185,5 +186,39 @@ describe("Instagram OAuth トークン交換・プロファイル取得 (exchang
       image: undefined,
     });
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("通常ログイン時の Instagram OAuth 認可 URL 生成の振る舞い", () => {
+  it("通常ログインでは force_authentication や force_reauth を付与せず認可 URL を生成すること", async () => {
+    const response = await auth.handler(
+      new Request("https://localhost:3000/api/auth/sign-in/oauth2", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          providerId: "instagram",
+          callbackURL: "/?scroll=filters",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    const payload = (await response.json()) as { url?: string; redirect?: boolean };
+    expect(payload.redirect).toBe(true);
+    expect(payload.url).toBeDefined();
+
+    const authorizeUrl = new URL(payload.url as string);
+    expect(`${authorizeUrl.origin}${authorizeUrl.pathname}`).toBe(
+      DEFAULT_INSTAGRAM_OAUTH_AUTHORIZE_URL,
+    );
+    expect(authorizeUrl.searchParams.has("force_authentication")).toBe(false);
+    expect(authorizeUrl.searchParams.has("force_reauth")).toBe(false);
+    expect(authorizeUrl.searchParams.get("enable_fb_login")).toBe("0");
+    expect(authorizeUrl.searchParams.get("scope")).toContain("instagram_business_basic");
+    expect(authorizeUrl.searchParams.get("redirect_uri")).toMatch(
+      /\/api\/auth\/oauth2\/callback\/instagram$/,
+    );
   });
 });
