@@ -133,6 +133,30 @@ describe("EPUB 章 HTML レンダリング (renderChapterHtml)", () => {
 
     expect(parseErrors.length).toBe(0);
   });
+
+  test("複数ページカルーセルの1ページ目はキャプション付き、2ページ目以降は連番見出しのみで重複出力しない", async () => {
+    const { renderChapterHtml } = await import(realModulePath);
+    const template = {
+      layoutHtml:
+        '<html><body><h1>{chapter_title}</h1><img src="{image_filename}"/><p class="caption">{caption_html}</p><a href="{post_url}">Link</a></body></html>',
+      cssContent: "",
+    };
+
+    const page1 = renderChapterHtml(template, mockMediaBasic, "file:///tmp/1.jpg", {
+      pageIndex: 0,
+      totalPages: 2,
+    });
+    const page2 = renderChapterHtml(template, mockMediaBasic, "file:///tmp/2.jpg", {
+      pageIndex: 1,
+      totalPages: 2,
+    });
+
+    expect(page1).toContain("<h1>A simple post #test (1/2)</h1>");
+    expect(page1).toContain('<p class="caption">A simple post #test</p>');
+    expect(page2).toContain("<h1>A simple post #test (2/2)</h1>");
+    expect(page2).toContain('<p class="caption"></p>');
+    expect(page2).toContain(mockMediaBasic.permalink);
+  });
 });
 
 test("loadLayoutTemplateは読み込み失敗時に例外を投げる", async () => {

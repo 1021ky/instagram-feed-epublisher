@@ -78,6 +78,13 @@ function validateXhtml(html: string): boolean {
   }
 }
 
+export type ChapterRenderOptions = {
+  /** カルーセル展開時のページ番号（0始まり） */
+  pageIndex?: number;
+  /** カルーセル展開時の総ページ数 */
+  totalPages?: number;
+};
+
 /**
  * Renders a chapter HTML using the book_layout template.
  */
@@ -85,14 +92,21 @@ export function renderChapterHtml(
   template: { layoutHtml: string; cssContent: string },
   item: InstagramMedia,
   imagePath: string,
+  options?: ChapterRenderOptions,
 ): string {
+  const totalPages = options?.totalPages ?? 1;
+  const pageIndex = options?.pageIndex ?? 0;
+  const isSubsequentCarouselPage = totalPages > 1 && pageIndex > 0;
+
   // 重要: 改行を<br />に変換する前にXMLエスケープを行う
   // これにより<br />タグ自体がエスケープされることを防ぐ
-  const escapedCaption = escapeXml(item.caption ?? "");
+  const rawCaption = isSubsequentCarouselPage ? "" : (item.caption ?? "");
+  const escapedCaption = escapeXml(rawCaption);
   const captionHtml = escapedCaption.replace(/\n/g, "<br />");
 
-  // チャプタータイトルもエスケープ
-  const rawTitle = item.caption?.slice(0, 32) || "Instagram Post";
+  // チャプタータイトルもエスケープ（複数枚展開時は連番を付与）
+  const baseTitle = item.caption?.slice(0, 32) || "Instagram Post";
+  const rawTitle = totalPages > 1 ? `${baseTitle} (${pageIndex + 1}/${totalPages})` : baseTitle;
   const chapterTitle = escapeXml(rawTitle);
 
   // post_urlもエスケープ（URLのクエリパラメータに&が含まれる場合があるため）

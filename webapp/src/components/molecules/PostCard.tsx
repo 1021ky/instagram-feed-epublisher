@@ -7,7 +7,8 @@
 
 import { useId, useState } from "react";
 import Image from "next/image";
-import { Calendar, Check, ExternalLink, Heart, ImageIcon } from "lucide-react";
+import { Calendar, Check, ExternalLink, Heart, ImageIcon, Layers } from "lucide-react";
+import { listCarouselMediaEntries, resolveMediaDisplayUrl } from "@/lib/instagram/media-resolver";
 import type { FeedPostItem } from "@/types/ui";
 
 /**
@@ -35,6 +36,8 @@ export interface PostCardProps {
   post: FeedPostItem;
   /** 選択状態の変更コールバック */
   onToggleSelect: (postId: string) => void;
+  /** カルーセル子画像の選択状態変更コールバック */
+  onToggleChildSelect?: (postId: string, childId: string) => void;
   /** 連番（1から始まるインデックス、オプショナル） */
   index?: number;
 }
@@ -42,12 +45,21 @@ export interface PostCardProps {
 /**
  * 投稿カードコンポーネント。
  */
-export function PostCard({ post, onToggleSelect, index }: PostCardProps) {
+export function PostCard({ post, onToggleSelect, onToggleChildSelect, index }: PostCardProps) {
   const [imageError, setImageError] = useState(false);
   const checkboxId = useId();
 
   // 選択状態（デフォルトは true として扱う）
   const isSelected = post.selected !== false;
+  const carouselEntries = listCarouselMediaEntries(post);
+  const isCarousel = carouselEntries.length > 1;
+  const selectedChildSet =
+    post.selectedChildIds !== undefined ? new Set(post.selectedChildIds) : null;
+  const selectedCarouselEntries = isCarousel
+    ? carouselEntries.filter((entry) => (selectedChildSet ? selectedChildSet.has(entry.id) : true))
+    : [];
+  const thumbnailUrl =
+    (isCarousel ? selectedCarouselEntries[0]?.url : undefined) ?? resolveMediaDisplayUrl(post);
 
   const handleCardClick = () => {
     onToggleSelect(post.id);
@@ -105,10 +117,18 @@ export function PostCard({ post, onToggleSelect, index }: PostCardProps) {
             #{index}
           </span>
         )}
+        {isCarousel && (
+          <span className="absolute bottom-1 right-1 z-10 inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-slate-900/75 text-white text-[10px] font-bold rounded-md backdrop-blur-xs">
+            <Layers className="w-2.5 h-2.5" aria-hidden="true" />
+            <span>
+              {selectedCarouselEntries.length}/{carouselEntries.length}枚
+            </span>
+          </span>
+        )}
 
-        {!imageError && post.media_url ? (
+        {!imageError && thumbnailUrl ? (
           <Image
-            src={post.media_url}
+            src={thumbnailUrl}
             alt={captionText.slice(0, 50)}
             fill
             sizes="(max-width: 640px) 80px, 96px"
@@ -172,6 +192,65 @@ export function PostCard({ post, onToggleSelect, index }: PostCardProps) {
             {isSelected ? "収録対象" : "除外"}
           </span>
         </div>
+
+        {/* 4. カルーセル子画像の選択リスト（複数枚投稿時のみ・横スクロール） */}
+        {isCarousel && (
+          <div
+            className="pt-2 mt-2 border-t border-slate-100 space-y-1.5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-[11px] font-semibold text-slate-500 m-0">
+              収録する写真を選択（{selectedCarouselEntries.length}/{carouselEntries.length}枚）
+            </p>
+            <div
+              role="group"
+              aria-label="カルーセル画像の収録選択"
+              className="flex items-center gap-2 overflow-x-auto pb-1"
+            >
+              {carouselEntries.map((entry, idx) => {
+                const isChildSelected =
+                  isSelected && (selectedChildSet ? selectedChildSet.has(entry.id) : true);
+                return (
+                  <button
+                    key={entry.id}
+                    type="button"
+                    role="checkbox"
+                    aria-checked={isChildSelected}
+                    aria-label={`画像 ${idx + 1} を${isChildSelected ? "EPUBから除外" : "EPUBに収録"}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleChildSelect?.(post.id, entry.id);
+                    }}
+                    className={`relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 min-h-[44px] min-w-[44px] rounded-lg overflow-hidden border transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                      isChildSelected
+                        ? "border-slate-900 ring-1 ring-slate-900"
+                        : "border-slate-200 opacity-45 grayscale"
+                    }`}
+                  >
+                    <Image
+                      src={entry.url}
+                      alt={`カルーセル画像 ${idx + 1}`}
+                      fill
+                      sizes="(max-width: 640px) 80px, 96px"
+                      className="object-cover"
+                      unoptimized
+                    />
+                    <span
+                      aria-hidden="true"
+                      className={`absolute top-1 right-1 w-4 h-4 rounded flex items-center justify-center ${
+                        isChildSelected
+                          ? "bg-slate-900 text-white"
+                          : "bg-white/90 border border-slate-300 text-transparent"
+                      }`}
+                    >
+                      <Check className="w-3 h-3 stroke-[2.5]" />
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </article>
   );

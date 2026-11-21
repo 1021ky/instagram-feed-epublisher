@@ -300,4 +300,38 @@ describe("EPUB 生成 API (POST /api/epub)", () => {
       },
     });
   });
+
+  it("selectedCarouselChildrenを指定した場合にbuildEpubへ引き渡される", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: { maxCount: 10 },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+          },
+          selectedMediaIds: ["1"],
+          selectedCarouselChildren: {
+            "1": ["child-1", "child-3"],
+          },
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(buildEpub).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedCarouselChildren: {
+          "1": ["child-1", "child-3"],
+        },
+      }),
+      "/tmp/epub-workdir",
+    );
+  });
 });

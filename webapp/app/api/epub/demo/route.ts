@@ -53,6 +53,7 @@ export async function POST(request: Request) {
       metadata: EpubMetadata;
       coverTheme?: CoverThemeId;
       sortOrder?: EpubSortOrder;
+      selectedCarouselChildren?: Record<string, string[]>;
     };
 
     const rawCoverTheme = payload.coverTheme ?? payload.metadata?.coverTheme;
@@ -95,6 +96,9 @@ export async function POST(request: Request) {
         },
         coverTheme,
         sortOrder,
+        ...(payload.selectedCarouselChildren
+          ? { selectedCarouselChildren: payload.selectedCarouselChildren }
+          : {}),
       },
       workDir,
     );

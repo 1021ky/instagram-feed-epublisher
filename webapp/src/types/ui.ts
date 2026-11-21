@@ -2,9 +2,13 @@
  * @file UI共通型定義
  * ステップ管理、フィード絞り込み条件、投稿選択、EPUB装丁設定、表紙テーマ、デモデータ等の型を提供します。
  */
-import type { HashtagSuggestion } from "@/lib/instagram/types";
+import type {
+  HashtagSuggestion,
+  InstagramMediaChild,
+  InstagramMediaType,
+} from "@/lib/instagram/types";
 
-export type { HashtagSuggestion };
+export type { HashtagSuggestion, InstagramMediaChild, InstagramMediaType };
 
 /**
  * ウィザードのステップ番号（1: 絞り込み, 2: 投稿選択, 3: 装丁設定）。
@@ -50,8 +54,16 @@ export interface FeedFilterOptions {
 export interface FeedPostItem {
   /** Instagram メディア ID */
   id: string;
+  /** メディア種別（IMAGE / VIDEO / CAROUSEL_ALBUM） */
+  media_type?: InstagramMediaType;
   /** メディア（画像・動画サムネイル）の表示 URL */
-  media_url: string;
+  media_url?: string;
+  /** 動画投稿時のサムネイル URL */
+  thumbnail_url?: string;
+  /** カルーセル投稿の子メディア一覧 */
+  children?: {
+    data: InstagramMediaChild[];
+  };
   /** Instagram の投稿パーマリンク */
   permalink: string;
   /** キャプション本文 */
@@ -64,6 +76,8 @@ export interface FeedPostItem {
   comments_count?: number;
   /** EPUB への収録対象フラグ */
   selected?: boolean;
+  /** カルーセル投稿で収録対象に選択された子メディア ID 一覧（未指定時は全画像対象） */
+  selectedChildIds?: string[];
 }
 
 /**

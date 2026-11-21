@@ -284,4 +284,84 @@ describe("EPUB ビルド処理 (buildEpub)", () => {
     expect(downloadMedia).toHaveBeenNthCalledWith(3, mixedTimestampItems[0], "/tmp");
     expect(downloadMedia).toHaveBeenNthCalledWith(4, mixedTimestampItems[3], "/tmp");
   });
+
+  test("カルーセル投稿は選択された複数枚を1ページ1画像として連番ページに展開する", async () => {
+    const { downloadMedia } = await import("@/lib/epub/media-downloader");
+    const { renderChapterHtml } = await import("@/lib/epub/template-renderer");
+
+    vi.mocked(downloadMedia)
+      .mockResolvedValueOnce("/tmp/carousel-1_1.jpg")
+      .mockResolvedValueOnce("/tmp/carousel-1_2.jpg");
+
+    const carouselItem: InstagramMedia = {
+      id: "carousel-1",
+      caption: "旅の思い出アルバム",
+      media_type: "CAROUSEL_ALBUM",
+      media_url: "https://example.com/c1.jpg",
+      permalink: "https://instagram.com/p/carousel-1",
+      timestamp: "2026-09-01T00:00:00.000Z",
+      children: {
+        data: [
+          { id: "child-1", media_type: "IMAGE", media_url: "https://example.com/c1.jpg" },
+          { id: "child-2", media_type: "IMAGE", media_url: "https://example.com/c2.jpg" },
+          { id: "child-3", media_type: "IMAGE", media_url: "https://example.com/c3.jpg" },
+        ],
+      },
+    };
+
+    await buildEpub(
+      {
+        items: [carouselItem],
+        metadata: {
+          title: "title",
+          author: "author",
+          contact: "contact",
+          instagramUrl: "url",
+        },
+        selectedCarouselChildren: {
+          "carousel-1": ["child-1", "child-3"],
+        },
+      },
+      "/tmp",
+    );
+
+    expect(downloadMedia).toHaveBeenCalledTimes(2);
+    expect(downloadMedia).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        id: "carousel-1_1",
+        media_type: "IMAGE",
+        media_url: "https://example.com/c1.jpg",
+      }),
+      "/tmp",
+    );
+    expect(downloadMedia).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        id: "carousel-1_2",
+        media_type: "IMAGE",
+        media_url: "https://example.com/c3.jpg",
+      }),
+      "/tmp",
+    );
+    expect(renderChapterHtml).toHaveBeenCalledTimes(2);
+    expect(renderChapterHtml).toHaveBeenNthCalledWith(
+      1,
+      expect.anything(),
+      carouselItem,
+      "file:///tmp/carousel-1_1.jpg",
+      { pageIndex: 0, totalPages: 2 },
+    );
+    expect(renderChapterHtml).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      carouselItem,
+      "file:///tmp/carousel-1_2.jpg",
+      { pageIndex: 1, totalPages: 2 },
+    );
+    expect(capturedEpubOptions[0]?.content).toEqual([
+      { title: "旅の思い出アルバム (1/2)", data: "<html></html>", filename: "carousel-1_1.xhtml" },
+      { title: "旅の思い出アルバム (2/2)", data: "<html></html>", filename: "carousel-1_2.xhtml" },
+    ]);
+  });
 });

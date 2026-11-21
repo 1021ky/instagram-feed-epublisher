@@ -96,7 +96,8 @@ export function EpubCustomizeStep({ settings, onChange, defaultTitle }: EpubCust
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-700 block">表紙テーマ</span>
             <span className="text-[11px] text-slate-400">
-              ※ 投稿は時系列（古い順）で自動組版されます
+              ※ Step 2 の並び順（{settings.sortOrder === "desc" ? "新しい順" : "古い順"}
+              ）で組版されます
             </span>
           </div>
           <CoverThemeSelector

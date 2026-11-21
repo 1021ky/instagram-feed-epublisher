@@ -56,6 +56,9 @@ export async function POST(request: Request) {
         metadata: payload.metadata,
         coverTheme: payload.coverTheme,
         sortOrder: payload.sortOrder,
+        ...(payload.selectedCarouselChildren
+          ? { selectedCarouselChildren: payload.selectedCarouselChildren }
+          : {}),
       },
       workDir,
     );
@@ -88,6 +91,7 @@ type EpubRequestPayload = {
   sortOrder: EpubSortOrder;
   selectedMediaIds?: string[];
   excludedMediaIds?: string[];
+  selectedCarouselChildren?: Record<string, string[]>;
 };
 
 function validatePayload(value: unknown): EpubRequestPayload {
@@ -119,6 +123,10 @@ function validatePayload(value: unknown): EpubRequestPayload {
   if (selectedMediaIds?.length && excludedMediaIds?.length) {
     throw new Error("selectedMediaIds と excludedMediaIds を同時に指定することはできません");
   }
+  const selectedCarouselChildren = optionalStringArrayRecord(
+    value.selectedCarouselChildren,
+    "selectedCarouselChildren",
+  );
 
   return {
     filter: {
@@ -139,6 +147,7 @@ function validatePayload(value: unknown): EpubRequestPayload {
     sortOrder,
     selectedMediaIds,
     excludedMediaIds,
+    selectedCarouselChildren,
   };
 }
 
@@ -194,4 +203,26 @@ function optionalStringArray(value: unknown, fieldName: string): string[] | unde
 
   const normalized = [...new Set(value)];
   return normalized.length > 0 ? normalized : undefined;
+}
+
+function optionalStringArrayRecord(
+  value: unknown,
+  fieldName: string,
+): Record<string, string[]> | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  if (!isObject(value)) {
+    throw new Error(`${fieldName} はオブジェクト形式で指定してください`);
+  }
+
+  const record: Record<string, string[]> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (!Array.isArray(entry) || entry.some((id) => typeof id !== "string")) {
+      throw new Error(`${fieldName}.${key} は文字列配列で指定してください`);
+    }
+    record[key] = [...new Set(entry)];
+  }
+  return Object.keys(record).length > 0 ? record : undefined;
 }

@@ -37,4 +37,5 @@ export type EpubInput = {
   coverTheme?: CoverThemeId;
   sortOrder?: EpubSortOrder;
   selectedMediaIds?: string[];
+  selectedCarouselChildren?: Record<string, string[]>;
 };

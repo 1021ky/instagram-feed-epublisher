@@ -20,7 +20,7 @@ function createAvatarDataUrl() {
   `);
 }
 
-function createPostImageDataUrl(day: number) {
+function createPostImageDataUrl(day: number, slideLabel?: string) {
   const hue = (day * 17) % 360;
   return createSvgDataUrl(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
@@ -32,7 +32,7 @@ function createPostImageDataUrl(day: number) {
       </defs>
       <rect width="1080" height="1080" rx="96" fill="url(#bg)" />
       <circle cx="862" cy="218" r="96" fill="rgba(255,255,255,0.18)" />
-      <text x="96" y="468" font-family="Arial, sans-serif" font-size="104" font-weight="700" fill="#fff">Day ${day}</text>
+      <text x="96" y="468" font-family="Arial, sans-serif" font-size="104" font-weight="700" fill="#fff">Day ${day}${slideLabel ? ` ${slideLabel}` : ""}</text>
       <text x="96" y="602" font-family="Arial, sans-serif" font-size="50" fill="rgba(255,255,255,0.92)">#100日チャレンジ</text>
       <text x="96" y="684" font-family="Arial, sans-serif" font-size="38" fill="rgba(255,255,255,0.88)">Instagram Feed ePublisher Demo</text>
     </svg>
@@ -49,11 +49,25 @@ export const sampleDemoFeedData: DemoFeedData = {
     const day = index + 1;
     const timestamp = new Date(startDate);
     timestamp.setUTCDate(startDate.getUTCDate() + index);
+    const id = `demo-${String(day).padStart(3, "0")}`;
+    const isCarousel = day === 3;
 
     return {
-      id: `demo-${String(day).padStart(3, "0")}`,
+      id,
       caption: `Day ${day} の記録です。小さな積み重ねを EPUB にまとめるデモ投稿です。 #100日チャレンジ #demo`,
+      media_type: isCarousel ? "CAROUSEL_ALBUM" : "IMAGE",
       media_url: createPostImageDataUrl(day),
+      ...(isCarousel
+        ? {
+            children: {
+              data: [1, 2, 3].map((slide) => ({
+                id: `${id}-img-${slide}`,
+                media_type: "IMAGE" as const,
+                media_url: createPostImageDataUrl(day + slide * 5, `(${slide}/3)`),
+              })),
+            },
+          }
+        : {}),
       permalink: `https://www.instagram.com/p/demo${String(day).padStart(3, "0")}/`,
       timestamp: timestamp.toISOString(),
       selected: true,

@@ -2,30 +2,20 @@
  * @file InstagramおよびEPUB向けクライアントAPIラッパー。
  */
 import type { CoverThemeId, EpubSortOrder } from "@/types/ui";
-import type { HashtagSuggestion } from "@/lib/instagram/types";
+import type {
+  FeedFilter,
+  HashtagSuggestion,
+  InstagramMedia,
+  InstagramMediaChild,
+  InstagramMediaType,
+} from "@/lib/instagram/types";
 
-export type { HashtagSuggestion };
-
-/**
- * Instagramメディア項目。
- */
-export type InstagramMedia = {
-  id: string;
-  caption?: string;
-  media_url: string;
-  permalink: string;
-  timestamp: string;
-};
-
-/**
- * APIリクエスト用のフィード絞り込み条件。
- */
-export type FeedFilter = {
-  hashtag?: string;
-  startDate?: string;
-  endDate?: string;
-  maxCount: number;
-  sortOrder?: EpubSortOrder;
+export type {
+  FeedFilter,
+  HashtagSuggestion,
+  InstagramMedia,
+  InstagramMediaChild,
+  InstagramMediaType,
 };
 
 /**
@@ -51,6 +41,7 @@ export type EpubRequest = {
   sortOrder?: EpubSortOrder;
   selectedMediaIds?: string[];
   excludedMediaIds?: string[];
+  selectedCarouselChildren?: Record<string, string[]>;
   items?: InstagramMedia[];
 };
 
@@ -64,6 +55,7 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
   if (filter.hashtag) params.set("hashtag", filter.hashtag);
   if (filter.startDate) params.set("startDate", filter.startDate);
   if (filter.endDate) params.set("endDate", filter.endDate);
+  if (filter.sortOrder) params.set("sortOrder", filter.sortOrder);
 
   const url = `/api/instagram/media?${params.toString()}`;
 

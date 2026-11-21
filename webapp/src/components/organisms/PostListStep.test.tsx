@@ -87,4 +87,42 @@ describe("投稿リストステップ (PostListStep)", () => {
     expect(html).toContain("投稿はまだ取得されていません");
     expect(html).toContain("この条件で投稿を取得");
   });
+
+  it.each([
+    {
+      label: "未指定時（デフォルトで古い順がアクティブ）",
+      sortOrder: undefined,
+      ascPressed: 'aria-pressed="true"',
+      descPressed: 'aria-pressed="false"',
+    },
+    {
+      label: "古い順 (asc) 指定時",
+      sortOrder: "asc" as const,
+      ascPressed: 'aria-pressed="true"',
+      descPressed: 'aria-pressed="false"',
+    },
+    {
+      label: "新しい順 (desc) 指定時",
+      sortOrder: "desc" as const,
+      ascPressed: 'aria-pressed="false"',
+      descPressed: 'aria-pressed="true"',
+    },
+  ])("並び順選択 UI が $label に正しく描画されること", ({ sortOrder, ascPressed, descPressed }) => {
+    const html = renderToStaticMarkup(
+      <PostListStep
+        posts={samplePosts}
+        sortOrder={sortOrder}
+        onSortOrderChange={vi.fn()}
+        onToggleSelect={vi.fn()}
+        onSelectAll={vi.fn()}
+        onDeselectAll={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('aria-label="投稿の並び順"');
+    expect(html).toContain("古い順（おすすめ）");
+    expect(html).toContain("新しい順");
+    expect(html).toContain(ascPressed);
+    expect(html).toContain(descPressed);
+  });
 });

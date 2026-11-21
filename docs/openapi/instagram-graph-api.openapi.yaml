@@ -242,12 +242,42 @@ components:
         username:
           type: string
           minLength: 1
+    InstagramMediaChild:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - media_type
+      properties:
+        id:
+          type: string
+          minLength: 1
+        media_type:
+          type: string
+          enum:
+            - IMAGE
+            - VIDEO
+        media_url:
+          type: string
+          format: uri
+        thumbnail_url:
+          type: string
+          format: uri
+    InstagramMediaChildren:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/InstagramMediaChild"
     InstagramMediaItem:
       type: object
       additionalProperties: false
       required:
         - id
-        - media_url
         - permalink
         - timestamp
       properties:
@@ -256,7 +286,16 @@ components:
           minLength: 1
         caption:
           type: string
+        media_type:
+          type: string
+          enum:
+            - IMAGE
+            - VIDEO
+            - CAROUSEL_ALBUM
         media_url:
+          type: string
+          format: uri
+        thumbnail_url:
           type: string
           format: uri
         permalink:
@@ -265,6 +304,8 @@ components:
         timestamp:
           type: string
           format: date-time
+        children:
+          $ref: "#/components/schemas/InstagramMediaChildren"
     GraphCursors:
       type: object
       additionalProperties: false

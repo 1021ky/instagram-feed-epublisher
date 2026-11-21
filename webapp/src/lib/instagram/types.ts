@@ -15,14 +15,34 @@ export type FeedFilter = {
 };
 
 /**
+ * Instagram メディア種別。
+ */
+export type InstagramMediaType = "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
+
+/**
+ * カルーセル投稿内の子メディア項目。
+ */
+export type InstagramMediaChild = {
+  id: string;
+  media_type: "IMAGE" | "VIDEO";
+  media_url?: string;
+  thumbnail_url?: string;
+};
+
+/**
  * 正規化済みの Instagram メディア項目。
  */
 export type InstagramMedia = {
   id: string;
   caption?: string;
-  media_url: string;
+  media_type?: InstagramMediaType;
+  media_url?: string;
+  thumbnail_url?: string;
   permalink: string;
   timestamp: string;
+  children?: {
+    data: InstagramMediaChild[];
+  };
 };
 
 /**

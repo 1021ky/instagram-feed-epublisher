@@ -6,8 +6,16 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import { CheckSquare, FileQuestion, Image as ImageIcon, Search, Square, X } from "lucide-react";
-import type { FeedPostItem } from "@/types/ui";
+import {
+  ArrowUpDown,
+  CheckSquare,
+  FileQuestion,
+  Image as ImageIcon,
+  Search,
+  Square,
+  X,
+} from "lucide-react";
+import type { EpubSortOrder, FeedPostItem } from "@/types/ui";
 import { PostCard } from "@/components/molecules";
 
 export interface PostListStepProps {
@@ -15,10 +23,16 @@ export interface PostListStepProps {
   posts: FeedPostItem[];
   /** 単一投稿の選択トグルコールバック */
   onToggleSelect: (postId: string) => void;
+  /** カルーセル子画像の選択トグルコールバック */
+  onToggleChildSelect?: (postId: string, childId: string) => void;
   /** 全選択コールバック */
   onSelectAll: () => void;
   /** 全解除コールバック */
   onDeselectAll: () => void;
+  /** 投稿の並び順（デフォルト: asc = 古い順） */
+  sortOrder?: EpubSortOrder;
+  /** 並び順変更コールバック */
+  onSortOrderChange?: (sortOrder: EpubSortOrder) => void;
   /** タイトルまたは説明文（オプショナル） */
   title?: string;
   /** サブタイトル（オプショナル） */
@@ -33,8 +47,11 @@ export interface PostListStepProps {
 export function PostListStep({
   posts,
   onToggleSelect,
+  onToggleChildSelect,
   onSelectAll,
   onDeselectAll,
+  sortOrder = "asc",
+  onSortOrderChange,
   title = "Step 2: 投稿の確認・選択",
   subtitle = "書籍に収録したい投稿を選択してください（除外したい投稿はタップしてチェックを外せます）",
   isFetched = true,
@@ -160,8 +177,8 @@ export function PostListStep({
           )}
         </div>
 
-        {/* 3. 一括操作ボタン */}
-        <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 flex-wrap">
+        {/* 3. 一括操作 & 並び順コントロールバー */}
+        <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100 flex-wrap">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -184,11 +201,49 @@ export function PostListStep({
             </button>
           </div>
 
-          {searchQuery && (
-            <span className="text-xs text-slate-500 font-medium">
-              該当: {filteredPosts.length} 件
-            </span>
-          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {searchQuery && (
+              <span className="text-xs text-slate-500 font-medium">
+                該当: {filteredPosts.length} 件
+              </span>
+            )}
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500">
+                <ArrowUpDown className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>並び順:</span>
+              </span>
+              <div
+                role="group"
+                aria-label="投稿の並び順"
+                className="inline-flex items-center bg-slate-100 p-1 rounded-xl gap-1"
+              >
+                <button
+                  type="button"
+                  aria-pressed={sortOrder === "asc"}
+                  onClick={() => onSortOrderChange?.("asc")}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                    sortOrder === "asc"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  古い順（おすすめ）
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={sortOrder === "desc"}
+                  onClick={() => onSortOrderChange?.("desc")}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+                    sortOrder === "desc"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  新しい順
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -196,7 +251,13 @@ export function PostListStep({
       {filteredPosts.length > 0 ? (
         <div className="space-y-3 pb-28 sm:pb-32" role="list">
           {filteredPosts.map((post, idx) => (
-            <PostCard key={post.id} post={post} onToggleSelect={onToggleSelect} index={idx + 1} />
+            <PostCard
+              key={post.id}
+              post={post}
+              onToggleSelect={onToggleSelect}
+              onToggleChildSelect={onToggleChildSelect}
+              index={idx + 1}
+            />
           ))}
         </div>
       ) : (
