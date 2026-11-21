@@ -1,3 +1,6 @@
+/**
+ * @file 投稿リストステップ (PostListStep) の単体テスト
+ */
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
@@ -45,15 +48,12 @@ describe("投稿リストステップ (PostListStep)", () => {
       />,
     );
 
-    // 3件中2件選択中
     expect(html).toContain("選択中: 2 / 3 件");
     expect(html).toContain("すべて選択");
     expect(html).toContain("選択解除");
     expect(html).toContain("Day 98: 朝のランニング記録");
     expect(html).toContain("Day 99: カフェで読書");
     expect(html).toContain("Day 100: 祝・完走！");
-
-    // 固定バーと被らない余白が設定されていること
     expect(html).toContain("pb-28");
   });
 

@@ -14,9 +14,9 @@ import {
   FeedFilterStep,
   LoginCard,
   Navbar,
-  PostListStep,
   StickyActionBar,
 } from "@/components/organisms";
+import { PostListStep } from "@/features/feed";
 import { fetchHashtagSuggestions, fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";

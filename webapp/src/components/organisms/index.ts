@@ -19,6 +19,5 @@ export {
 export { LegalContactBox, LegalPage, LegalSection } from "./LegalPage";
 export { LoginCard, type LoginCardProps } from "./LoginCard";
 export { Navbar } from "./Navbar";
-export { PostListStep, type PostListStepProps } from "./PostListStep";
 export { SiteFooter } from "./SiteFooter";
 export { StickyActionBar, type StickyActionBarProps } from "./StickyActionBar";

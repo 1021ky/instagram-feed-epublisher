@@ -1,7 +1,7 @@
 /**
  * @file Step 2: 投稿確認・選択リストコンポーネント (PostListStep)
  * スマホに最適化された縦1列のカードリスト、キーワード検索によるキャプション絞り込み、
- * 「すべて選択」「選択解除」の一括トグル、および選択件数カウンターを提供します。
+ * 並び順切替、「すべて選択」「選択解除」の一括トグル、および選択件数カウンターを提供します。
  */
 "use client";
 
@@ -15,8 +15,9 @@ import {
   Square,
   X,
 } from "lucide-react";
+import { toPostCardViewModel } from "@/features/feed/model/post-presenter";
+import { PostCard } from "@/features/feed/ui/PostCard";
 import type { EpubSortOrder, FeedPostItem } from "@/types/ui";
-import { PostCard } from "@/components/molecules";
 
 export interface PostListStepProps {
   /** 投稿アイテム一覧 */
@@ -64,15 +65,13 @@ export function PostListStep({
     return posts.filter((p) => p.selected !== false).length;
   }, [posts]);
 
-  // キーワードによるリアルタイムフィルタリング
-  const filteredPosts = useMemo(() => {
+  // キーワードによるリアルタイムフィルタリング＋表示用 ViewModel 変換
+  const filteredPostViewModels = useMemo(() => {
     const trimmed = searchQuery.trim().toLowerCase();
-    if (!trimmed) return posts;
-
-    return posts.filter((post) => {
-      const caption = (post.caption || "").toLowerCase();
-      return caption.includes(trimmed);
-    });
+    const matched = trimmed
+      ? posts.filter((post) => (post.caption || "").toLowerCase().includes(trimmed))
+      : posts;
+    return matched.map(toPostCardViewModel);
   }, [posts, searchQuery]);
 
   // フィード未取得状態のプレースホルダー表示
@@ -204,7 +203,7 @@ export function PostListStep({
           <div className="flex items-center gap-2 flex-wrap">
             {searchQuery && (
               <span className="text-xs text-slate-500 font-medium">
-                該当: {filteredPosts.length} 件
+                該当: {filteredPostViewModels.length} 件
               </span>
             )}
             <div className="flex items-center gap-1.5">
@@ -248,12 +247,12 @@ export function PostListStep({
       </div>
 
       {/* 4. 投稿一覧リスト */}
-      {filteredPosts.length > 0 ? (
+      {filteredPostViewModels.length > 0 ? (
         <div className="space-y-3 pb-28 sm:pb-32" role="list">
-          {filteredPosts.map((post, idx) => (
+          {filteredPostViewModels.map((postVm, idx) => (
             <PostCard
-              key={post.id}
-              post={post}
+              key={postVm.id}
+              post={postVm}
               onToggleSelect={onToggleSelect}
               onToggleChildSelect={onToggleChildSelect}
               index={idx + 1}
