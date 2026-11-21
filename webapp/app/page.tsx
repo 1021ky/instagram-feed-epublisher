@@ -4,7 +4,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { authClient, signInWithInstagram } from "@/lib/auth-client";
+import { authClient, formatLogoutBannerTitle, signInWithInstagram } from "@/lib/auth-client";
 import { AlertBanner, InAppBrowserAlert, StatusBanner } from "@/components/molecules";
 import {
   AccountDeletionModal,
@@ -92,7 +92,7 @@ export default function Page() {
   const downloadUrlRef = useRef<string | null>(null);
 
   const [appMode, setAppMode] = useState<AppMode>("real");
-  const [justLoggedOut, setJustLoggedOut] = useState(false);
+  const [logoutNotice, setLogoutNotice] = useState<{ username?: string } | null>(null);
 
   const session = authClient.useSession();
   const isLoggedIn = Boolean(session.data);
@@ -210,7 +210,7 @@ export default function Page() {
   const handleLogin = async (forceReauth = false) => {
     setLoadingLogin(true);
     setError(null);
-    setJustLoggedOut(false);
+    setLogoutNotice(null);
     try {
       await signInWithInstagram({ forceReauth });
     } catch (e) {
@@ -225,11 +225,12 @@ export default function Page() {
       resetDemoState();
       return;
     }
+    const loggedOutUsername = activeProfile?.username;
     await authClient.signOut();
     setFeed([]);
     setIsFilterCollapsed(false);
     setHasFetched(false);
-    setJustLoggedOut(true);
+    setLogoutNotice({ username: loggedOutUsername });
   };
 
   /**
@@ -556,12 +557,12 @@ export default function Page() {
         <main className="max-w-3xl mx-auto w-full space-y-6">
           {!canUseApp && !isSessionPending && (
             <>
-              {justLoggedOut && (
+              {logoutNotice && (
                 <StatusBanner
                   className="max-w-xl mx-auto"
-                  title="本アプリからログアウトしました"
+                  title={formatLogoutBannerTitle(logoutNotice.username)}
                   description="Instagram のログイン状態はブラウザに維持されています。別アカウントに切り替える場合は下の「別のアカウントでログイン」をご利用ください。"
-                  onDismiss={() => setJustLoggedOut(false)}
+                  onDismiss={() => setLogoutNotice(null)}
                 />
               )}
               <LoginCard

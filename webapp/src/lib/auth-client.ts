@@ -22,3 +22,15 @@ export async function signInWithInstagram({ forceReauth = false }: { forceReauth
     ...(forceReauth ? { fetchOptions: { query: { force_reauth: "true" } } } : {}),
   });
 }
+
+/**
+ * ログアウト直後のステータスバナーに表示する見出しを生成します。
+ */
+export function formatLogoutBannerTitle(username?: string): string {
+  const trimmed = username?.trim();
+  if (!trimmed) {
+    return "本アプリからログアウトしました";
+  }
+  const normalized = trimmed.startsWith("@") ? trimmed : `@${trimmed}`;
+  return `${normalized} からログアウトしました`;
+}
