@@ -1,0 +1,303 @@
+/**
+ * @file EPUB APIルートの単体テスト。
+ */
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { InstagramMedia } from "@/lib/instagram/types";
+
+vi.mock("node:fs/promises", async () => {
+  const actual = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
+  return {
+    ...actual,
+    mkdtemp: vi.fn().mockResolvedValue("/tmp/epub-workdir"),
+    readFile: vi.fn().mockResolvedValue(Buffer.from("epub")),
+  };
+});
+
+vi.mock("@/lib/auth/session-service", () => ({
+  resolveInstagramAccessToken: vi.fn().mockResolvedValue("token"),
+}));
+
+vi.mock("@/lib/instagram/graph-client", () => ({
+  fetchGraphMedia: vi.fn().mockResolvedValue([
+    {
+      id: "1",
+      media_url: "https://example.com/1.jpg",
+      permalink: "https://instagram.com/p/1",
+      timestamp: "2026-09-01T00:00:00.000Z",
+    },
+    {
+      id: "2",
+      media_url: "https://example.com/2.jpg",
+      permalink: "https://instagram.com/p/2",
+      timestamp: "2026-09-02T00:00:00.000Z",
+    },
+  ]),
+}));
+
+vi.mock("@/lib/instagram/filter-service", () => ({
+  applyFeedFilter: vi.fn((items: InstagramMedia[]) => items),
+}));
+
+vi.mock("@/lib/epub/epub-builder", () => ({
+  buildEpub: vi.fn().mockResolvedValue("/tmp/epub-workdir/instagram-feed.epub"),
+}));
+
+import { POST } from "./route";
+import { buildEpub } from "@/lib/epub/epub-builder";
+import { fetchGraphMedia } from "@/lib/instagram/graph-client";
+
+describe("EPUB 生成 API (POST /api/epub)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("従来ペイロードではデフォルト値を補い、選択投稿のみを渡す", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: { maxCount: 10 },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+          },
+          selectedMediaIds: ["2"],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(buildEpub).toHaveBeenCalledWith(
+      {
+        items: [
+          {
+            id: "2",
+            media_url: "https://example.com/2.jpg",
+            permalink: "https://instagram.com/p/2",
+            timestamp: "2026-09-02T00:00:00.000Z",
+          },
+        ],
+        metadata: {
+          title: "My Book",
+          author: "Author",
+          contact: "contact@example.com",
+          instagramUrl: "https://instagram.com/example",
+          language: undefined,
+          coverTheme: "navy",
+        },
+        coverTheme: "navy",
+        sortOrder: "desc",
+      },
+      "/tmp/epub-workdir",
+    );
+  });
+
+  it("トップレベル未指定時にmetadata.coverThemeおよびfilter.sortOrderからフォールバック解決する", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: { maxCount: 10, sortOrder: "asc" },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+            coverTheme: "slate",
+          },
+          selectedMediaIds: ["1"],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(buildEpub).toHaveBeenCalledWith(
+      expect.objectContaining({
+        coverTheme: "slate",
+        sortOrder: "asc",
+        metadata: expect.objectContaining({
+          coverTheme: "slate",
+        }),
+      }),
+      "/tmp/epub-workdir",
+    );
+  });
+
+  it("selectedMediaIds未指定時はexcludedMediaIdsで除外できる", async () => {
+    await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: { maxCount: 10 },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+          },
+          coverTheme: "ivory",
+          sortOrder: "asc",
+          excludedMediaIds: ["1"],
+        }),
+      }),
+    );
+
+    expect(buildEpub).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: [
+          {
+            id: "2",
+            media_url: "https://example.com/2.jpg",
+            permalink: "https://instagram.com/p/2",
+            timestamp: "2026-09-02T00:00:00.000Z",
+          },
+        ],
+        coverTheme: "ivory",
+        sortOrder: "asc",
+      }),
+      "/tmp/epub-workdir",
+    );
+  });
+
+  it("不正なcoverTheme値では400を返す", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: { maxCount: 10 },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+          },
+          coverTheme: "orange",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: "coverTheme の値が不正です" });
+    expect(buildEpub).not.toHaveBeenCalled();
+  });
+
+  it("selectedMediaIdsとexcludedMediaIdsの同時指定では400を返す", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: { maxCount: 10 },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+          },
+          selectedMediaIds: ["1"],
+          excludedMediaIds: ["2"],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: "selectedMediaIds と excludedMediaIds を同時に指定することはできません",
+    });
+    expect(buildEpub).not.toHaveBeenCalled();
+  });
+
+  it("nullや空配列の選択リストは未指定として扱う", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: { maxCount: 10 },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+          },
+          selectedMediaIds: null,
+          excludedMediaIds: [],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(buildEpub).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: [
+          {
+            id: "1",
+            media_url: "https://example.com/1.jpg",
+            permalink: "https://instagram.com/p/1",
+            timestamp: "2026-09-01T00:00:00.000Z",
+          },
+          {
+            id: "2",
+            media_url: "https://example.com/2.jpg",
+            permalink: "https://instagram.com/p/2",
+            timestamp: "2026-09-02T00:00:00.000Z",
+          },
+        ],
+      }),
+      "/tmp/epub-workdir",
+    );
+  });
+
+  it("fetchGraphMediaにフィルタ条件（期間・ハッシュタグ・件数）を引き渡す", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/epub", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: {
+            hashtag: "100days",
+            startDate: "2026-09-01",
+            endDate: "2026-10-20",
+            maxCount: 200,
+          },
+          metadata: {
+            title: "My Book",
+            author: "Author",
+            contact: "contact@example.com",
+            instagramUrl: "https://instagram.com/example",
+          },
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(fetchGraphMedia).toHaveBeenCalledWith("token", {
+      filter: {
+        hashtag: "100days",
+        startDate: "2026-09-01",
+        endDate: "2026-10-20",
+        maxCount: 200,
+      },
+    });
+  });
+});

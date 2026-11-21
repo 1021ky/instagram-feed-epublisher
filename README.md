@@ -1,80 +1,255 @@
-# make_epub_from_instagram
+# instagram-feed-epublisher
 
-Instagramの投稿を収集してEPUBを生成する小さなツールです。ハッシュタグ指定または対象ユーザー（target_user）指定に対応します。Google FireベースのサブコマンドCLIです。
+Instagram の投稿を収集・フィルタリングし、EPUB（電子書籍）としてまとめてダウンロードできる Web アプリケーションです。
+Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジンでセキュアに UI と API（フィード取得・EPUB 生成）を提供します。
 
-## セットアップ
+---
 
-- 前提: Python 3.10+
-- uv推奨（pipでも可）。このリポジトリは `pyproject.toml` で依存と各種ツール設定を管理します。
+## 1. このリポジトリで管理しているもの
 
-uvを使う場合:
+- **Web アプリケーション本体 (`webapp/`)**: Next.js (App Router) によるフロントエンド、Better Auth を用いた Instagram SSO、フィード取得・EPUB 生成 API Route。
+- **EPUB レイアウトテンプレート (`book_layout/`)**: 電子書籍のスタイル（CSS）および HTML テンプレート。
+- **設計・運用ドキュメント (`docs/`)**: 要件定義、アーキテクチャ、データフロー、ER図・フローチャート等の設計資産（`docs/designdoc/`）およびドキュメント更新ポリシー。
+- **プロジェクト共通スクリプト (`scripts/`)**: Mermaid 図面検証等のリポジトリ共通スクリプト。
+- **CI/CD ワークフロー (`.github/workflows/`)**: GitHub Actions によるコード・Markdown・Mermaid・型・テストの総合自動検証。
 
-```sh
-uv venv
-uv pip install -e .[dev]
+---
+
+## 2. ディレクトリ構成
+
+```text
+.
+├── .agent/skills/        # AIエージェント向けスキル定義・標準作業手順書 (Agent-SOP)
+├── .github/              # GitHub Actions CI ワークフロー、エージェント向け指示定義
+├── book_layout/          # EPUB 生成時の HTML / CSS レイアウトテンプレート
+├── docs/                 # 設計資産・ドキュメント更新ポリシー
+│   ├── designdoc/        # 設計ドキュメント・Mermaid 図面
+│   │   ├── designDoc.md      # Webapp 詳細設計書
+│   │   ├── infra-designdoc.md # インフラ基本設計書・運用手順
+│   │   ├── ui-ux-guidelines.md # UI/UX 設計ガイドライン
+│   │   ├── erDiagram.mmd     # データモデル・ER図
+│   │   ├── flowchart LR.mmd  # ユーザーフロー図
+│   │   └── sequenceDiagram.mmd # 認証・API連携シーケンス図
+│   ├── openapi/          # 外部・内部 API 契約定義 (OpenAPI 3.1)
+│   │   └── instagram-graph-api.openapi.yaml # Instagram Graph API / BFF スキーマ
+│   └── documentation-policy.md # ドキュメント更新ポリシー
+├── scripts/              # リポジトリ共通チェックスクリプト
+└── webapp/               # Next.js Web アプリケーション本体（※詳細は webapp/README.md 参照）
 ```
 
-pipを使う場合:
+> [!TIP]
+> `webapp/` 配下の詳細なディレクトリ構成やコンポーネント配置については、[webapp/README.md](webapp/README.md) を参照してください。
 
-```sh
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .[dev]
+---
+
+## 3. アプリ・設計概要ドキュメント
+
+システムの設計思想、データモデル、認証・通信フロー、運用の詳細は以下のドキュメントを参照してください：
+
+- 📘 [Webapp 詳細設計書](docs/designdoc/designDoc.md)
+  - 目的・要件、モジュール構成、技術選定の経緯（Vite から Next.js への移行、Instagram Login 対応）、トラブルシューティング。
+- ☁️ [インフラ基本設計書・運用手順](docs/designdoc/infra-designdoc.md)
+  - Cloud Run, Secret Manager, WIF, Terraform によるインフラ構成、設計判断の根拠（なぜこの設定なのか）、恒久的メンテナンス手順。
+- 🎨 [UI/UX 設計ガイドライン](docs/designdoc/ui-ux-guidelines.md)
+  - プロダクト哲学（作り込むツールを目指さない）、ターゲットユーザー、デザインシステム（Apple HIG基調×Instagramアクセント）、各画面の役割、レイアウト規約。
+- 🔀 [ユーザーフロー図 (Mermaid)](docs/designdoc/flowchart%20LR.mmd)
+  - ログインから条件指定、フィード取得、EPUB ダウンロードまでの全体フロー。
+- 🗂 [データモデル・ER図 (Mermaid)](docs/designdoc/erDiagram.mmd)
+  - ユーザー、アカウント、セッション、Instagram メディア等の関連図。
+- 🔄 [処理シーケンス図 (Mermaid)](docs/designdoc/sequenceDiagram.mmd)
+  - Next.js フロントエンド、Better Auth、Instagram Graph API 間の認証・データ取得シーケンス。
+- 📜 [ドキュメント更新ポリシー](docs/documentation-policy.md)
+  - 人間および AI エージェントが遵守すべきドキュメント配置、更新義務、品質基準（Markdown / Mermaid の検証ルール）。
+
+---
+
+## 4. 前提環境
+
+開発を始めるにあたり、以下の環境・アカウントが必要です：
+
+### 開発ツール・ランタイム
+
+- **Node.js**: `>= 24.12.0`（リポジトリ直下の `.node-version` 準拠）
+- **パッケージマネージャー**: `pnpm` (`10.x`)
+- **[mkcert](https://github.com/FiloSottile/mkcert)**: ローカル開発環境で HTTPS を有効化するために必要（Instagram OAuth は HTTPS が必須）
+
+### 外部アカウント・権限
+
+- **[Meta for Developers](https://developers.facebook.com/apps/) アカウント**:
+  - アプリタイプ「ビジネス (Business)」でアプリを作成し、「Instagram（Instagram API with Instagram Login）」を追加できること。
+- **Instagram プロアカウント**:
+  - ログインに使用するアカウントは、通常の個人用アカウントではなく **プロアカウント（ビジネスまたはクリエイター）** である必要があります（Instagram アプリから無料で切替可能）。
+
+---
+
+## 5. セットアップ & 開発手順
+
+### ステップ 1: 依存関係のインストール
+
+```bash
+cd webapp
+pnpm install
 ```
 
-- Instaloaderのログインセッションを作成（初回のみ）
+### ステップ 2: ローカル HTTPS 証明書の作成 (mkcert)
 
-```sh
-instaloader --login <your_login_user>
+Instagram OAuth では、ローカル開発環境（localhost）であっても HTTPS 通信が必須となります。
+
+```bash
+# mkcert が未導入の場合 (macOS 例)
+brew install mkcert
+
+# ローカル認証局のインストール（初回のみ）
+mkcert -install
+
+# webapp/certs に localhost 用証明書を生成
+cd webapp
+mkdir -p certs
+mkcert -cert-file certs/localhost.pem -key-file certs/localhost-key.pem localhost
 ```
 
-2FAが有効な場合は手順にしたがって認証してください。成功するとカレントディレクトリに`session-<your_login_user>`が保存されます。
+### ステップ 3: Meta for Developers（Instagram ログイン）の設定
 
-## 使い方
+1. **アプリ作成**:
+   - [Meta for Developers](https://developers.facebook.com/apps/) にアクセスし、アプリを作成します（タイプは **ビジネス** を推奨）。
+   - 左メニューから「Instagram（Instagram API with Instagram Login）」を追加します。
+2. **有効な OAuth リダイレクト URI の登録**:
+   以下の両方の画面で、`https://localhost:3000/api/auth/oauth2/callback/instagram` を追加して保存します：
+   - 「Instagram」➔「API設定」➔「有効なOAuthリダイレクトURI」
+   - 「Facebookログイン」➔「設定」➔「有効なOAuthリダイレクトURI」
+3. **Instagram テスターの追加（開発モード時）**:
+   - Meta Developers の左メニュー「アプリの役割」➔「役割」➔「Instagramテスター」に、ログインに使用する Instagram アカウントを追加します。
+   - Instagram 側（Web またはアプリの 設定 ➔「ウェブサイトのアクセス許可」➔「アプリとウェブサイト」➔「テスターへの招待」）で招待を承認します。
 
-エントリポイントは `instagram_to_epub.py` です。
+### ステップ 4: 環境変数の設定 (`webapp/.env.local`)
 
-- 収集→EPUB生成→一時ファイル削除を一括実行
+`webapp/.env.local` ファイルを作成し、以下の値を設定します：
 
-```sh
-python instagram_to_epub.py all --login_user=<login_user> --hashtags "tag1 tag2"
-# または
-python instagram_to_epub.py all --login_user=<login_user> --target_user=<account>
+```env
+# Meta Developers（Instagram API 設定）のクレデンシャル
+INSTAGRAM_CLIENT_ID=あなたのInstagramアプリID
+INSTAGRAM_CLIENT_SECRET=あなたのInstagramアプリシークレット
+
+# Better Auth の設定
+BETTER_AUTH_SECRET=32文字以上のランダム文字列（例: openssl rand -base64 32 で生成）
+BETTER_AUTH_URL=https://localhost:3000
+
+# 法的ページ等のお問い合わせ窓口フォーム（任意・未設定時は GitHub Issues）
+# NEXT_PUBLIC_CONTACT_FORM_URL=https://forms.gle/xxxxxx
 ```
 
-- 収集のみ
+#### 各環境変数の取得元・注意点
 
-```sh
-python instagram_to_epub.py fetch --login_user=<login_user> --hashtags "tag1 tag2"
-python instagram_to_epub.py fetch --login_user=<login_user> --target_user=<account>
+| 環境変数名                     | 取得元 / 設定方法                                                                                | 説明・注意点                                                                                                                                                                                                             |
+| :----------------------------- | :----------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `INSTAGRAM_CLIENT_ID`          | [Meta for Developers](https://developers.facebook.com/apps/) ➔ アプリ ➔「Instagram」➔「API設定」 | **Instagram アプリ ID**（数値）。<br>⚠️ 親の Meta (Facebook) アプリID（「ベーシック」に表示されるID）を設定すると `Invalid platform app` エラーになります。必ず **Instagram API 設定側** の ID を指定してください。      |
+| `INSTAGRAM_CLIENT_SECRET`      | 同上（「Instagram」➔「API設定」）                                                                | **Instagram アプリシークレット**。「表示」を押してコピーします。                                                                                                                                                         |
+| `BETTER_AUTH_SECRET`           | ローカルで生成                                                                                   | ターミナルで `openssl rand -base64 32` を実行して得られた文字列を設定します。                                                                                                                                            |
+| `BETTER_AUTH_URL`              | 固定値                                                                                           | ローカル開発時は `https://localhost:3000` を設定します。                                                                                                                                                                 |
+| `NEXT_PUBLIC_CONTACT_FORM_URL` | Googleフォーム等のURL（任意）                                                                    | 法的・ポリシーページに表示するお問い合わせフォームのURL。未設定時はリポジトリの GitHub Issues がフォールバックされます（本番環境では GitHub Actions の Repository Variables に設定することでビルド時に埋め込まれます）。 |
+
+### ステップ 5: 開発サーバーの起動
+
+開発サーバーの起動方法は、**ローカル環境（ホスト）直実行** または **Docker Compose** のいずれかを選択できます。どちらも HTTPS（`https://localhost:3000`）およびホットリロード（Fast Refresh）に対応しています。
+
+#### パターン A: ローカル環境で直接起動
+
+```bash
+# プロジェクトルートから実行
+pnpm dev
 ```
 
-- EPUB生成のみ（前段で `posts_data.json` がある前提）
+#### パターン B: Docker Compose で起動（推奨）
 
-```sh
-python instagram_to_epub.py build --title "My Book" --author "Me" --output_epub output.epub
+コンテナ内で隔離された Node.js 24 環境で起動します。ホスト側のソースコード変更が即座にホットリロードされます。
+
+```bash
+# プロジェクトルートから実行
+docker compose up
 ```
 
-- 一時ファイル削除
+起動後、ブラウザで **`https://localhost:3000`** にアクセスし、「Instagramでログイン」から動作確認を行ってください。
 
-```sh
-python instagram_to_epub.py clean
+---
+
+## 6. コード品質と開発コマンド
+
+### Pre-commit Hooks
+
+このリポジトリでは Husky + lint-staged を設定しており、コミット時にステージされたファイルに対して自動的にフォーマットと検証が実行されます：
+
+- **TypeScript / JavaScript** (`*.{js,jsx,ts,tsx}`): `oxlint --fix` による静的解析自動修正 ＋ `oxfmt --write` によるコード整形
+- **Markdown** (`*.md`): `oxfmt --write` による整形 ＋ `markdownlint-cli2 --fix` による構文チェック・自動修正
+- **Mermaid 図面** (`*.mmd`): `scripts/check-mermaid.mjs`（`mmdc`）による構文解析・画像変換検証
+- **Terraform** (`*.tf`): `terraform fmt` によるインフラコードの自動整形
+
+### 主な開発コマンド
+
+すべてのコマンドは **プロジェクトルート** から直接実行できます：
+
+```bash
+# 開発サーバー起動 (HTTPS: https://localhost:3000)
+pnpm dev
+
+# Next.js ビルドキャッシュ (.next) の削除
+pnpm clean
+
+# 本番用ビルド（クリーンビルドは pnpm build:clean）
+pnpm build
+
+# コードの Lint 実行 (oxlint)
+pnpm lint
+
+# Markdown の Lint 実行 (markdownlint-cli2)
+pnpm lint:md
+
+# Markdown の Lint 自動修正
+pnpm lint:md:fix
+
+# コード・Markdown のフォーマット実行 (oxfmt)
+pnpm format
+pnpm format:check
+
+# Mermaid 図面の変換チェック (mmdc)
+pnpm check:mermaid
+
+# Terraform のフォーマット・構文検証
+pnpm terraform:fmt
+pnpm terraform:fmt:check
+pnpm terraform:validate
+
+# 単体・結合・OpenAPI 契約テスト (Vitest)
+pnpm test
+
+# E2E テスト (Playwright + OpenAPI ローカルモックサーバー)
+pnpm e2etest
 ```
 
-### 出力ファイル名とメタデータ
+---
 
-- output_epub未指定時は以下の優先で自動決定
-  - target_user指定あり: `<target_user>.epub`
-  - ハッシュタグ指定あり: 先頭タグの`<tag>.epub`
-  - どちらもなし: `config.py` の `OUTPUT_EPUB_FILE`
-- title未指定時は、最終的なEPUBファイル名（拡張子除去）
-- author未指定時は`Instagram Collector`
+## 7. 今後やりたいこと (Roadmap / TODO)
 
-## 注意事項
+- [x] **Playwright による E2E テスト基盤の整備**
+  - Page Object Model (POM) + Custom Fixture 構造、Oxlint カスタムプラグインによる静的コード解析（10ルール）、および OpenAPI 3.1 モックサーバー連携による安全なフルスタック E2E スイートを構築済み。
+- [ ] **EPUB 生成プレビュー・プログレス表示の向上**
+  - 多数の画像を含む投稿の取得・変換時の進捗状況（プログレスバー）やエラーハンドリングの強化。
+- [x] **本番デプロイ環境の整備（Google Cloud Run）**
+  - Docker マルチステージビルド、Secret Manager、Workload Identity Federation による自動 CI/CD を構築済み。
 
-- Instaloaderの仕様やInstagramの変更により、取得に失敗する可能性があります。
-- 利用は各サービスの利用規約にしたがってください。
+---
 
-## ライセンス
+## 8. 本番運用・デプロイ (Google Cloud Run)
 
-MIT
+本番環境は **Google Cloud Run**（東京リージョン: `asia-northeast1`）で運用され、独自ドメイン **`https://feedstobook.ksanchu.page`** で公開されます。
+
+### 特徴
+
+- **ゼロスケール運用**: リクエストがない待機時はインスタンス数を 0 に保ち、運用コストを最小化。
+- **キーレス CI/CD**: Workload Identity Federation (OIDC) を利用し、永続的なサービスアカウントキーを発行せずに GitHub Actions から自動デプロイ。
+- **Secret Manager 連携**: Instagram API キーやセッション暗号化鍵などの機密情報を安全に注入。
+
+### 詳細な設計仕様・運用メンテナンス手順
+
+インフラアーキテクチャ、各コンポーネントの設計根拠、シークレット更新・独自ドメイン有効化等の運用手順は以下を参照してください：
+
+- 📖 [インフラ基本設計書・運用手順 (docs/designdoc/infra-designdoc.md)](docs/designdoc/infra-designdoc.md)

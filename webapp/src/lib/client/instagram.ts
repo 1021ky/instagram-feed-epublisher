@@ -1,59 +1,61 @@
 /**
- * @file Client-side API wrappers for Instagram and EPUB.
+ * @file InstagramおよびEPUB向けクライアントAPIラッパー。
  */
+import type { CoverThemeId, EpubSortOrder } from "@/types/ui";
+import type { HashtagSuggestion } from "@/lib/instagram/types";
+
+export type { HashtagSuggestion };
 
 /**
- * Instagram media item.
+ * Instagramメディア項目。
  */
 export type InstagramMedia = {
   id: string;
   caption?: string;
-  media_type: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
-  media_url?: string;
-  thumbnail_url?: string;
+  media_url: string;
   permalink: string;
   timestamp: string;
-  children?: {
-    data: {
-      id: string;
-      media_type: "IMAGE" | "VIDEO";
-      media_url?: string;
-      thumbnail_url?: string;
-    }[];
-  };
 };
 
 /**
- * Feed filter for API requests.
+ * APIリクエスト用のフィード絞り込み条件。
  */
 export type FeedFilter = {
   hashtag?: string;
   startDate?: string;
   endDate?: string;
   maxCount: number;
-  sortOrder?: "asc" | "desc";
+  sortOrder?: EpubSortOrder;
 };
 
 /**
- * EPUB metadata payload.
+ * EPUBメタデータのペイロード。
  */
 export type EpubMetadata = {
   title: string;
   author: string;
   contact: string;
   instagramUrl: string;
+  subtitle?: string;
+  coverTheme?: CoverThemeId;
 };
 
 /**
- * EPUB request payload.
+ * EPUB生成リクエストのペイロード。
  */
 export type EpubRequest = {
+  demoMode?: boolean;
   filter: FeedFilter;
   metadata: EpubMetadata;
+  coverTheme?: CoverThemeId;
+  sortOrder?: EpubSortOrder;
+  selectedMediaIds?: string[];
+  excludedMediaIds?: string[];
+  items?: InstagramMedia[];
 };
 
 /**
- * Fetches filtered Instagram media from the backend.
+ * バックエンドから絞り込み済みのInstagramメディアを取得します。
  */
 export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramMedia[]> {
   const params = new URLSearchParams({
@@ -62,10 +64,8 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
   if (filter.hashtag) params.set("hashtag", filter.hashtag);
   if (filter.startDate) params.set("startDate", filter.startDate);
   if (filter.endDate) params.set("endDate", filter.endDate);
-  if (filter.sortOrder) params.set("sortOrder", filter.sortOrder);
 
   const url = `/api/instagram/media?${params.toString()}`;
-  console.debug("[client] feed request", { filter });
 
   const response = await fetch(url, {
     credentials: "include",
@@ -78,34 +78,50 @@ export async function fetchInstagramFeed(filter: FeedFilter): Promise<InstagramM
       const errorJson = JSON.parse(errorText);
       errorMessage = errorJson.error ?? errorText;
     } catch {
-      // Not JSON, use text as-is
+      // JSONでない場合はレスポンステキストをそのまま使う
     }
-    console.error("[client] feed request failed", {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText,
-    });
     throw new Error(`フィード取得に失敗しました: ${response.status} - ${errorMessage}`);
   }
 
   const payload = (await response.json()) as { items: InstagramMedia[] };
-  console.info("[client] feed request succeeded", {
-    status: response.status,
-    count: payload.items?.length ?? 0,
-  });
   return payload.items ?? [];
 }
 
 /**
- * Requests EPUB generation from the backend.
+ * バックエンドから直近投稿のハッシュタグ候補一覧を取得します。
  */
-export async function requestEpub(request: EpubRequest): Promise<Blob> {
-  console.debug("[client] epub request", {
-    filter: request.filter,
-    title: request.metadata.title,
+export async function fetchHashtagSuggestions(limit = 20): Promise<HashtagSuggestion[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+  });
+  const response = await fetch(`/api/instagram/hashtags?${params.toString()}`, {
+    credentials: "include",
   });
 
-  const response = await fetch("/api/epub", {
+  if (!response.ok) {
+    const errorText = await response.text();
+    let errorMessage = errorText;
+    try {
+      const errorJson = JSON.parse(errorText) as { error?: string };
+      errorMessage = errorJson.error ?? errorText;
+    } catch {
+      // JSONでない場合はレスポンステキストをそのまま使う
+    }
+    throw new Error(`ハッシュタグ候補の取得に失敗しました: ${response.status} - ${errorMessage}`);
+  }
+
+  const payload = (await response.json()) as {
+    hashtags?: HashtagSuggestion[];
+    scannedPosts?: number;
+  };
+  return payload.hashtags ?? [];
+}
+
+/**
+ * バックエンドへEPUB生成をリクエストします。
+ */
+export async function requestEpub(request: EpubRequest): Promise<Blob> {
+  const response = await fetch(request.demoMode ? "/api/epub/demo" : "/api/epub", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -120,21 +136,11 @@ export async function requestEpub(request: EpubRequest): Promise<Blob> {
     try {
       const errorJson = JSON.parse(errorText);
       errorMessage = errorJson.error ?? errorText;
-      console.error("[client] epub request error", { error: errorMessage });
     } catch {
-      // Not JSON, use text as-is
+      // JSONでない場合はレスポンステキストをそのまま使う
     }
-    console.error("[client] epub request failed", {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText,
-    });
     throw new Error(`EPUB生成に失敗しました: ${response.status} - ${errorMessage}`);
   }
 
-  console.info("[client] epub request succeeded", {
-    status: response.status,
-    contentType: response.headers.get("content-type"),
-  });
   return response.blob();
 }

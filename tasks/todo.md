@@ -1,0 +1,640 @@
+# タスク管理: ルート README.md 改善とポータル化 (#37)
+
+## 目標
+
+リポジトリ直下の `README.md` を充実させ、プロジェクトの概要・管理対象・ディレクトリ構成・設計へのリンク・前提環境・セットアップ手順・今後の展望を網羅する総合ポータルとする。あわせて `webapp/README.md` を整理する。
+
+## TODO
+
+- [x] Issue #37 の作成
+- [x] `main` からブランチ `docs/issue-37-improve-root-readme` を作成
+- [x] ルート `README.md` の作成・充実
+  - [x] アプリ概要・技術スタック
+  - [x] 管理対象リソース
+  - [x] ディレクトリ構成と役割
+  - [x] アプリ・設計概要ドキュメントへのリンク (`designdoc/`, Mermaid 図等)
+  - [x] 前提環境 (Node.js, pnpm, mkcert, Meta for Developers, Instagramプロアカウント)
+  - [x] セットアップ・ローカル開発手順 (HTTPS証明書, .env.local, Meta設定, 起動)
+  - [x] コード品質・開発コマンド (oxlint, oxfmt, pre-commit)
+  - [x] 今後やりたいこと (Playwright E2Eテスト本格整備等)
+- [x] `webapp/README.md` の整理
+  - [x] 重複しているセットアップ手順をルートへの参照に誘導し、Webapp 固有情報に整理
+- [x] 検証
+  - [x] ドキュメント内のリンクが有効か確認
+  - [x] oxlint / oxfmt / Markdown 構文等の確認
+- [x] 完了・まとめ
+
+---
+
+## 追加タスク: ドキュメント更新ポリシー & 品質ツールの導入
+
+- [x] ツール導入: `markdownlint-cli2`, `@mermaid-js/mermaid-cli`
+- [x] 設定ファイル作成: `.markdownlint-cli2.jsonc`, `scripts/check-mermaid.mjs`
+- [x] ドキュメント更新ポリシー作成:
+  - [x] `docs/documentation-policy.md` (人間向け)
+  - [x] `.github/instructions/documentation.instructions.md` (AIエージェント向け)
+- [x] ドキュメント更新:
+  - [x] `README.md` (ポリシーリンク追加、品質コマンド更新)
+  - [x] `webapp/README.md` (コマンド一覧更新)
+- [x] Husky & CI/CD 更新:
+  - [x] `package.json` (`lint:md`, `check:mermaid`, `lint-staged`)
+  - [x] `.husky/pre-commit` (ルート階層対応)
+  - [x] `.github/workflows/webapp-ci.yml` (CI検証ジョブへの追加)
+- [x] 総合検証:
+  - [x] Markdown リント & フォーマット確認
+  - [x] Mermaid 構文・変換確認
+  - [x] CI コマンド通過確認
+  - [x] コミット作成
+
+---
+
+## 追加タスク: 依存ライブラリのバージョン固定方針 (Exact Version Pinning)
+
+- [x] ルート `.npmrc` 作成 (`save-exact=true`)
+- [x] ルート `package.json` の devDependencies を Exact Version に固定
+- [x] `webapp/package.json` の dependencies / devDependencies を Exact Version に固定
+- [x] `docs/documentation-policy.md` にバージョン固定方針を明記
+- [x] `pnpm install` による lockfile 同期
+- [x] ローカル全検証（Mermaid, Markdown, oxlint, oxfmt, Vitest, tsc）パス確認
+- [x] コミット & プッシュ作成
+- [x] PR #38 の CI 通過確認 (Checks passing)
+
+---
+
+## 追加タスク: CIジョブの分割・名称改善
+
+- [x] `webapp-ci.yml` の `quality` ジョブを `Document check` と `Webapp check` の2つに分割
+- [x] `Document check`: Markdown lint, Format check, Mermaid check
+- [x] `Webapp check`: Code lint, Type check, Unit tests
+- [x] コミット & プッシュ作成
+- [x] PR #38 の CI 通過確認 (`Document check`: 29s, `Webapp check`: 28s)
+
+---
+
+## 追加タスク: CIワークフローファイルの分割
+
+- [x] `.github/workflows/document-ci.yml` 作成（Document check専任）
+- [x] `.github/workflows/webapp-ci.yml` 更新（Webapp check専任）
+- [x] ローカル全検証確認
+- [x] コミット & プッシュ作成
+- [x] PR #38 の CI 通過確認（Document CI: 38s / Webapp CI: 24s 共に成功）
+
+---
+
+## アプリデザイン刷新 (v2) 計画 & Issue準備
+
+- [x] プロトタイプ (`feeds2epub_proto`) と現行実装のギャップ分析
+- [x] モバイルUX（ステップ形式、タップ領域、Instagram WebView制約）の仕様検討
+- [x] プロダクトポリシー策定（いいね数等のSNS付与情報はEPUBに出力しない）
+- [x] `docs/designdoc/designDoc.md` へのプロダクトポリシー反映
+- [x] 並列開発可能な 7 つの Issue 仕様書の作成 (`tasks/design-renewal-issues.md`)
+- [x] GitHub Issue 起票（#39 〜 #45）
+- [x] Issue #1 (#39) の実装着手（Tailwind CSS v4 & Lucide 導入）
+  - [x] パッケージ追加 (Exact Version): `lucide-react`, `@tailwindcss/postcss`, `tailwindcss`
+  - [x] `webapp/postcss.config.mjs` 作成
+  - [x] `webapp/app/globals.css` に Tailwind v4 インポート及び Safe Area / dvh ユーティリティ定義
+  - [x] 共通型定義 `webapp/src/types/ui.ts` 作成
+  - [x] コンポーネント雛形ディレクトリ作成 (`auth`, `feed`, `epub`, `common`)
+  - [x] 単体テスト `webapp/src/lib/ui-base.test.ts` 追加 & 検証パス
+  - [x] `pnpm build` による Tailwind CSS v4 コンパイル・受入基準検証通過
+  - [x] クリーンビルド用コマンドの追加 (`pnpm clean`, `pnpm build:clean`)
+  - [x] セッション解決時の `getAccessToken` リクエスト形式修正 (`body` 指定)
+  - [x] ルート `.gitignore` への SQLite ファイル除外設定追加
+
+---
+
+## Issue #3 (#41): Step 1（絞り込み）& Step 2（投稿確認・選択・固定バー）の実装
+
+- [x] Step 1: 絞り込みフォームコンポーネント (`FeedFilterStep.tsx`)
+  - [x] ハッシュタグ入力 ＋ よく使うタグボタン（`#100日チャレンジ` 等）
+  - [x] 期間指定 ＋ プリセットボタン（「直近100日」「直近30日」「全期間」）
+  - [x] 取得件数スライダー（10〜500件）
+  - [x] 取得完了後のサマリー自動折りたたみ ＆ タップで再展開
+  - [x] 44×44px 以上のタップ領域確保
+- [x] Step 2: 投稿カードコンポーネント (`PostCard.tsx`)
+  - [x] モバイル向け縦1列カードレイアウト（サムネイル画像＋日付＋キャプション冒頭＋いいね数）
+  - [x] カード全体またはチェックボックスでの選択/除外トグル
+  - [x] 44×44px 以上のタップ領域確保
+- [x] Step 2: 投稿確認・選択リストコンポーネント (`PostListStep.tsx`)
+  - [x] 「すべて選択」「選択解除」ボタン
+  - [x] キャプション内キーワード検索バー
+  - [x] 選択件数カウンター・空状態表示
+- [x] 画面下部固定アクションバー (`StickyActionBar.tsx`)
+  - [x] `fixed bottom-0` / iOS Safe Area 対応 (`pb-safe`)
+  - [x] 「選択中: 〇件」表示と「本の設定に進む →」ボタン
+- [x] 単体テスト & 検証
+  - [x] `webapp/src/components/feed/feed-components.test.tsx` 作成 (17テスト)
+  - [x] 受入基準の検証
+  - [x] ビルド、リント、フォーマット確認
+
+---
+
+## PR #49: Step 1 / Step 2 UI コンポーネントと認証・デモモードの統合
+
+- [x] `webapp/app/page.tsx` の UI 統合
+  - [x] `FeedFilterStep` の統合（フィルター状態管理、自動折りたたみ・再展開）
+  - [x] `PostListStep` の統合（投稿一覧、単一トグル、全選択/全解除、検索）
+  - [x] `StickyActionBar` の統合（選択中件数、下部固定、本の設定へのスクロール導線）
+  - [x] デモ体験モード（`handleDemo`）と Step 1 / Step 2 の連携（自動プリロード、サマリー折りたたみ、Step 2 遷移）
+  - [x] EPUB 生成リクエスト（`requestEpub`）における選択中アイテムの連携
+- [x] スタイル・レイアウトの確認と調整
+  - [x] `StickyActionBar` 表示時の下部 Safe Area およびパディング調整
+- [x] 自動テスト・品質ゲートの検証
+  - [x] `pnpm test`
+  - [x] `pnpm lint` && `pnpm format:check` && `pnpm check:mermaid`
+  - [x] `pnpm build`
+- [x] 動作確認 & PR 更新
+
+---
+
+## Issue #54: Better Auth のステートレス化（DBレス化）対応
+
+- [x] `webapp/src/lib/auth.ts` のステートレス化
+  - [x] `better-sqlite3` インポートおよび `database: new Database(...)` の削除
+  - [x] `account: { storeAccountCookie: true }` の設定
+  - [x] `session: { cookieCache: { ... } }` の設定
+- [x] `webapp/src/lib/auth/session-service.ts` の更新
+  - [x] `getAccessToken` 呼び出しに `useAccountCookie: true` を指定
+- [x] 依存関係およびスクリプトの整理
+  - [x] `webapp/package.json` から `better-sqlite3`, `@types/better-sqlite3` を削除
+  - [x] `webapp/package.json` から `auth:migrate`, `predev`, `rebuild:native` を削除
+  - [x] ルート `package.json` から `rebuild`, `rebuild:native` を削除し、`clean:all` を整理
+  - [x] `pnpm-workspace.yaml` の `onlyBuiltDependencies` から `better-sqlite3` を削除
+  - [x] `pnpm install` で lockfile を更新
+- [x] ドキュメント更新
+  - [x] `README.md` のネイティブビルド関連コマンド記述を整理
+- [x] テストの更新と検証
+  - [x] `session-service.test.ts` の更新
+  - [x] `pnpm test` 全通過確認
+  - [x] `pnpm lint` & `pnpm format:check` 全通過確認
+  - [x] `tsc --noEmit` 型チェック全通過確認
+  - [x] `pnpm build` 成功確認
+  - [x] `better-auth.db` が生成されないことの確認
+- [x] 学びと知見（`tasks/lessons.md`）の反映
+
+---
+
+## PR #61 レビュー指摘対応 (Copilot Review)
+
+- [x] `pnpm-lock.yaml` から `better-sqlite3` の完全除去
+  - [x] `package.json` に `pnpm.overrides: { "better-sqlite3": "-" }` を追加
+  - [x] `pnpm-lock.yaml` を再生成し、`better-auth` の依存から `better-sqlite3` が完全に消去されたことを確認
+- [x] `tasks/lessons.md` の記述修正
+  - [x] 削除済みコマンド `rebuild:native` への言及を修正
+  - [x] `pnpm.overrides` による optional peerDependencies 除外の知見を追記
+- [x] 類似ミスの有無の点検
+  - [x] 他のドキュメント（README等）における削除済みコマンド（`rebuild:native`, `clean:all`, `auth:migrate`）の残存がないことを確認
+  - [x] 不要な環境変数（`BETTER_AUTH_DB_PATH` 等）の残存がないことを確認
+- [x] 全検証（lint, format, test, typecheck, build）の通過確認
+
+---
+
+## PR #60: Meta審査向け法的・ポリシーページの改善
+
+- [x] ルート `README.md` と `webapp/README.md` の重複解消（webapp以下を参照化）
+- [x] `docs/documentation-policy.md` の更新（ディレクトリ構成更新方針）
+- [x] `LegalPage.tsx` の「Meta 審査対応」バッジ削除
+- [x] `/data-deletion` のリード文の自然化（エンドユーザー向け案内に改善）
+- [x] お問い合わせ先の改善（環境変数 `NEXT_PUBLIC_CONTACT_FORM_URL` 導入・フォーム誘導へ更新）
+- [x] 内部リンクを `<a>` から `next/link` へ置き換え
+- [x] プライバシーポリシー・利用規約・データ削除手順の「EPUB」表記を「電子書籍」に一般化
+- [x] テストコードの更新（`legal-pages.test.tsx`, `common-components.test.tsx`）
+- [x] ドキュメント（環境変数一覧等）の更新
+- [x] 全検証（test, lint, format, typecheck, build）通過確認
+
+---
+
+## 法的・ポリシーページ（/privacy, /terms, /data-deletion）のデザイン刷新
+
+- [x] `LegalPage.tsx` のレイアウト・タイポグラフィ刷新（余白拡大、戻るボタンのピル化、見出しアクセントバー、セクション区切り線）
+- [x] お問い合わせ用カードコンポーネント（`LegalContactBox`）の新設と適用
+- [x] `globals.css` の法的ページスタイルの整理・Tailwind統合
+- [x] `/privacy`, `/terms`, `/data-deletion` のマークアップ・可読性向上
+- [x] テストおよびビルド検証の実行
+- [x] コミット & プッシュ
+
+---
+
+## グローバル対応プライバシーポリシー更新（日本・EU/GDPR・米国/CCPA対応、日英版）
+
+- [x] `LegalPage.tsx` に `backLabel` と `categoryLabel` の多言語対応プロップスを追加
+- [x] 日本語版プライバシーポリシー（`webapp/app/privacy/page.tsx`）の更新（日本法・GDPR・CCPA要件網羅）
+- [x] 英語版プライバシーポリシー（`webapp/app/privacy/en/page.tsx`）の新規作成
+- [x] 単体テストの更新（日本語・英語版）
+- [x] 全検証（test, lint, format, tsc, build）の実行
+- [x] コミット & プッシュ
+
+---
+
+## サイト内リンク切れ防止・自動検証テストの実装
+
+- [x] リンク切れ包括テスト（`webapp/app/links.test.tsx`）の作成
+  - [x] `SiteFooter`, `/privacy`, `/privacy/en`, `/terms`, `/data-deletion` から全リンク（内部・外部）を DOM 抽出
+  - [x] 内部リンク（`/` で始まるパス）が実在する App Router ページ（`page.tsx`）を指しているかの検証
+  - [x] 外部リンク（`http://`, `https://`）の URL 妥当性検証
+  - [x] リンク切れ検知自体の妥当性テスト（ネガティブテスト）の実装
+- [x] `/data-deletion` にプライバシーポリシーおよび Instagram 連携管理設定への直接リンクを追加
+- [x] 全検証（test, lint, format, tsc, build）の実行
+- [x] コミット & プッシュ
+
+---
+
+## 法的ページ・グローバルポリシー設計経緯のドキュメント化
+
+- [x] `docs/designdoc/designDoc.md` に「11. 法的ページ・グローバルポリシー設計の経緯」を追加
+  - [x] 背景と目的（Meta Live 審査要件、グローバル展開）
+  - [x] 採用方針（GDPR・CCPA・日本法の網羅、ステートレス整合、日英2言語、Googleフォーム、リンク切れ自動テスト）
+  - [x] 検討した選択肢と却下・改善理由（審査用ラベルの削除、電子書籍への表記一般化、next/link SPA遷移）
+- [x] コミット & プッシュ
+
+---
+
+## Issue #57: Dockerfile 作成 & Cloud Run / CI/CD 環境構築
+
+- [x] Next.js 15 standalone 出力対応
+  - [x] `webapp/next.config.mjs` に `output: "standalone"` と適切な `outputFileTracingRoot` を設定
+- [x] 本番用マルチステージ Dockerfile 作成
+  - [x] `webapp/Dockerfile` の作成 (Node.js 24, pnpm, 非rootユーザー, 最小イメージ)
+  - [x] `.dockerignore` の作成
+- [x] ローカル開発用 Docker Compose 環境構築（ホットリロード対応）
+  - [x] `compose.yaml` の作成 (ソースコードバインドマウント, node_modules/ .next ボリューム保護, WATCHPACK_POLLING, HTTPS 証明書・ポート設定)
+  - [x] `webapp/Dockerfile.dev` の作成
+- [x] ローカル Docker 動作確認
+  - [x] 本番用イメージのローカルビルド・起動確認 (コンテンツサイズ 90MB、HTTP 200 応答確認)
+  - [x] compose 起動によるホットリロード検証 (Fast Refresh 反応確認)
+- [x] GitHub Actions CI/CD ワークフロー作成
+  - [x] `.github/workflows/deploy.yml` の作成 (WIF キーレス認証, Artifact Registry push, Cloud Run デプロイ)
+- [x] Terraform によるインフラ・権限 IaC 化
+  - [x] `terraform/` に Cloud Run, Secret Manager, Artifact Registry, WIF, サービスアカウント, 独自ドメインマッピングのリソース定義を作成
+  - [x] `terraform fmt` および `terraform validate` の構文・型検証通過確認
+- [x] インフラ基本設計書・恒久的運用手順の作成
+  - [x] `docs/designdoc/infra-designdoc.md` の作成 (アーキテクチャ図、コンポーネント別設計根拠・選定理由、シークレット更新や独自ドメイン有効化等の運用手順)
+- [x] ドキュメント更新
+  - [x] `README.md` に Docker ローカル開発手順および Cloud Run デプロイ構成を追記
+- [x] 品質ゲート・全検証
+  - [x] lint / format / test / typecheck / build
+- [x] コミット & プッシュ
+
+---
+
+## PR #63 レビュー指摘対応 (Copilot Review: #pullrequestreview-5315832638)
+
+- [x] 指摘 1 対応: `NEXT_PUBLIC_CONTACT_FORM_URL` のビルド時埋め込み化
+  - [x] `webapp/Dockerfile` に `ARG NEXT_PUBLIC_CONTACT_FORM_URL` と `ENV NEXT_PUBLIC_CONTACT_FORM_URL` を追加
+  - [x] `.github/workflows/deploy.yml` の `docker build` に `--build-arg` を追加
+  - [x] `.github/workflows/deploy.yml` の `--set-secrets` から `NEXT_PUBLIC_CONTACT_FORM_URL` を削除
+  - [x] `terraform/secrets.tf` の `local.secrets` から `NEXT_PUBLIC_CONTACT_FORM_URL` を削除
+- [x] 指摘 2 対応: デプロイヤ用サービスアカウントの最小権限化
+  - [x] `terraform/wif.tf` から不要な `deployer_secret_accessor` を削除
+  - [x] `terraform/wif.tf` の `deployer_sa_user` をプロジェクト全体から Cloud Run ランタイム SA 限定（`google_service_account_iam_member`）に変更
+- [x] ドキュメント更新
+  - [x] `docs/designdoc/infra-designdoc.md` のシークレット定義・テーブル・運用手順を更新
+  - [x] `README.md` の環境変数説明を整理
+- [x] 知見の記録
+  - [x] `tasks/lessons.md` にビルド時インライン化と Secret 分離、CI デプロイヤの最小権限化の知見を記録
+- [x] 全検証の実行
+  - [x] `pnpm terraform:fmt:check` & `pnpm terraform:validate`
+  - [x] `pnpm test`
+  - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md`
+  - [x] ローカルでの Docker build 引数検証
+
+---
+
+## 独自ドメイン修正 (ksanchu.info -> ksanchu.page)
+
+- [x] Terraform 設定の修正
+  - [x] `terraform/variables.tf`: `domain_name` の default を `feedstobook.ksanchu.page` に修正
+  - [x] `terraform/terraform.tfvars.example`: `domain_name` を `feedstobook.ksanchu.page` に修正
+- [x] ドキュメントの修正
+  - [x] `README.md`: 本番独自ドメイン URL を `https://feedstobook.ksanchu.page` に修正
+  - [x] `docs/designdoc/designDoc.md`: 親ドメインを `ksanchu.page` に修正
+  - [x] `docs/designdoc/infra-designdoc.md`: 本番ドメインおよび親ドメインの言及をすべて `ksanchu.page` に修正
+- [x] 全品質検証の実行
+  - [x] `pnpm terraform:fmt:check` & `pnpm terraform:validate`
+  - [x] `pnpm test`
+  - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md`
+- [x] コミット & ブランチ push
+- [x] 修正用 Pull Request の作成 (#72)
+- [x] `enable_custom_domain` のデフォルト true 化
+  - [x] `terraform/variables.tf`: `enable_custom_domain` の default を `true` に変更
+  - [x] `terraform/terraform.tfvars.example`: `enable_custom_domain = true` を追加
+  - [x] `docs/designdoc/infra-designdoc.md`: デフォルト true 化の設計根拠と apply 手順の更新
+  - [x] 全品質検証（fmt, validate, test, lint, mermaid）の通過確認
+
+---
+
+## Issue #78 (PR #79): 表紙テーマの選択結果がEPUB出力に反映されない不具合の修正
+
+- [x] 現象確認と原因特定
+  - [x] `page.tsx` における `requestEpub` 呼び出しのパラメータ確認
+  - [x] `/api/epub` および `/api/epub/demo` の `coverTheme` / `sortOrder` 処理確認
+  - [x] `epub-builder.ts` における `coverTheme` 解決順序の確認
+- [x] GitHub Issue #78 の起票
+- [x] 修正実装
+  - [x] `webapp/app/page.tsx`: `requestEpub` に `coverTheme` と `sortOrder` をトップレベルで渡す
+  - [x] `webapp/app/api/epub/route.ts`: `validatePayload` で `value.coverTheme ?? value.metadata?.coverTheme` をフォールバック許容
+  - [x] `webapp/app/api/epub/demo/route.ts`: `coverTheme` と `sortOrder` を受け取り `buildEpub` に渡す
+  - [x] `webapp/src/lib/epub/epub-builder.ts`: `input.coverTheme ?? input.metadata?.coverTheme ?? DEFAULT_COVER_THEME_ID` で解決
+- [x] テストの追加・更新
+  - [x] `webapp/src/lib/epub/epub-builder.test.ts`: `input.metadata.coverTheme` が反映されることのテスト
+  - [x] `webapp/app/api/epub/route.test.ts`: `metadata.coverTheme` からのフォールバックテスト
+  - [x] `webapp/app/api/epub/demo/route.test.ts`: デモAPIで `coverTheme` が渡されることのテスト作成
+- [x] 全品質ゲート検証（test, lint, format, tsc, build）
+- [x] 学びと知見（`tasks/lessons.md`）の記録
+- [x] Issue #78 に対する Pull Request #79 の作成
+
+---
+
+## PR #79 レビュー指摘対応 (Copilot Review: #pullrequestreview-5328624375)
+
+- [x] 指摘 1: `webapp/app/api/epub/demo/route.ts` での二重ソートを解消し `buildEpub` に一本化
+- [x] 指摘 2: `webapp/app/api/epub/demo/route.ts` の型アサーションで `items?: InstagramMedia[]` に修正
+- [x] 指摘 3: `tasks/todo.md` の見出しと項目で Issue #78 と PR #79 の対応関係を明記
+- [x] 全品質ゲート検証（test, lint, format, tsc, build）
+- [x] コミット & プッシュとレビュー返信
+
+---
+
+## Issue #80 (PR #81): 独自ドメインアクセス時に :8080 へリダイレクトされアクセス不能になる不具合の修正
+
+- [x] 現象確認と原因調査
+  - [x] GCP Cloud Logging による HTTP 301 レスポンス確認
+  - [x] curl による `Location: https://feedstobook.ksanchu.page:8080/` 確認
+  - [x] Cloud Run / Google Frontend のプロキシヘッダー（`Host` と `X-Forwarded-Host`）仕様調査
+  - [x] WHATWG URL 仕様（既存ポート保持）による `:8080` 残留原因の特定
+- [x] GitHub Issue #80 の起票
+- [x] 作業ブランチ `fix/issue-80-canonical-host-redirect-port` の作成
+- [x] 修正実装
+  - [x] `webapp/middleware.ts`: `x-forwarded-host` 優先でのホスト判定
+  - [x] `webapp/middleware.ts`: ポート 8080 を含まない安全なリダイレクト URL 構築
+- [x] テストの追加・更新
+  - [x] `webapp/middleware.test.ts`: `x-forwarded-host` による正規ドメイン判定テスト
+  - [x] `webapp/middleware.test.ts`: ポート 8080 が混入しないことのテスト
+- [x] 全品質ゲート検証（test, lint, format, tsc, build）
+- [x] 学びと知見（`tasks/lessons.md`）の記録
+- [x] Issue #80 に対する Pull Request #81 の作成
+
+---
+
+## Issue #84 (PR #85): standalone コンテナ上で Playwright の browsers.json 不足による EPUB 生成 500 エラーの解消およびデプロイヘルスチェック改善
+
+- [x] 現象確認と原因調査
+  - [x] Cloud Run stderr ログ（`Cannot find module '.../playwright-core/browsers.json'`）の確認
+  - [x] Next.js `standalone` 出力で動的読み込みされる `browsers.json` が除外される仕様の確認
+  - [x] GitHub Actions デプロイワークフローでのヘルスチェック（301 リダイレクトによるタイムアウト）の確認
+- [x] GitHub Issue #84 の起票
+- [x] 作業ブランチ `fix/issue-84-playwright-browsers-json-healthcheck` の作成
+- [x] 修正実装
+  - [x] `webapp/Dockerfile`: runner ステージで `browsers.json` を standalone 成果物にコピー配置
+  - [x] `webapp/next.config.mjs`: `serverExternalPackages` に `playwright`, `playwright-core` を追加
+  - [x] `.github/workflows/deploy.yml`: ヘルスチェック curl に `-L`（リダイレクト追従）を追加
+- [x] テスト・検証
+  - [x] `pnpm test` 全通過確認
+  - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md` 全通過確認
+  - [x] `tsc --noEmit` & `pnpm build` 成功確認
+- [x] 学びと知見（`tasks/lessons.md`）の記録
+- [x] Issue #84 に対する Pull Request #85 の作成
+
+---
+
+## PR #85 レビュー指摘対応 (Copilot Review: #pullrequestreview-5328911563)
+
+- [x] 指摘対応: `webapp/Dockerfile` でのバージョン・pnpmフォルダ名ハードコードの解消
+  - [x] builder ステージで `find` を用いて `browsers.json` をバージョン非依存で抽出
+  - [x] runner ステージで standalone 環境内のすべての `playwright-core` フォルダに動的配置
+- [x] テスト・検証
+  - [x] `pnpm test`
+  - [x] `pnpm lint` & `pnpm format:check` & `pnpm check:mermaid` & `pnpm lint:md`
+  - [x] `tsc --noEmit` & `pnpm build`
+- [x] 学びと知見（`tasks/lessons.md`）の反映
+- [x] コミット & プッシュとレビュー返信
+
+---
+
+## Issue #86: Playwright を廃止し Satori による軽量・高速な表紙画像生成に移行する
+
+- [x] パッケージ選定と検証
+  - [x] `satori`, `sharp` の導入・動作検証（約180msで1200x1600 JPG生成成功）
+  - [x] 日本語フォント (Noto Sans JP Bold / Regular) の配置とインメモリキャッシュ機構の実装
+- [x] 不要パッケージの削除
+  - [x] `webapp/package.json` の dependencies から `playwright` を削除
+  - [x] `pnpm-lock.yaml` の更新（Exact Version Pinning 遵守: satori 0.33.5, sharp 0.35.4）
+  - [x] `webapp/next.config.mjs` の `serverExternalPackages` から `playwright`, `playwright-core` を削除し `satori`, `sharp` を追加
+- [x] 表紙画像生成エンジン (`webapp/src/lib/epub/cover-renderer.tsx`) のリファクタリング
+  - [x] Satori による React element (JSX) / SVG レンダリング関数の実装
+  - [x] テーマ（モダン、クラシック、エレガント等）のスタイル適用（Flexboxベースのレイアウト）
+  - [x] SVG から JPEG（1200×1600px）への高速ラスタライズ処理の実装
+- [x] `webapp/Dockerfile` の軽量化・クリーンアップ
+  - [x] builder ステージから `browsers.json` 抽出処理の削除
+  - [x] runner ステージから `apt-get` による Chromium 依存・フォントインストール処理および Playwright インストール処理の全廃
+  - [x] runner ステージから `browsers.json` の配置処理の全廃
+  - [x] コンテナイメージコンテンツサイズを 118MB に削減し、ビルド時間を大幅短縮
+- [x] テストの更新と動作担保
+  - [x] `webapp/src/lib/epub/cover-renderer.test.ts` のモック・テスト更新（7テスト全通過）
+  - [x] `webapp/src/lib/epub/epub-builder.test.ts` を含む全24テストファイル・120テスト全通過確認
+  - [x] 本番 Docker コンテナ内でのデモ EPUB 生成 API (`/api/epub/demo`) 実行による HTTP 200 応答および `cover.jpg` (1200x1600) 含有・品質検証完了
+- [x] 全品質ゲート検証とドキュメント更新
+  - [x] `pnpm test`, `pnpm lint`, `pnpm format:check`, `pnpm check:mermaid`, `pnpm lint:md`
+  - [x] `tsc --noEmit` & `pnpm build`
+  - [x] `docs/designdoc/infra-designdoc.md` のベースイメージおよび表紙生成アーキテクチャの更新
+  - [x] `tasks/lessons.md` に学びと知見を記録
+
+---
+
+## PR #87 レビュー指摘対応 (Copilot Review: #discussion_r4114275608)
+
+- [x] 指摘対応: `cover-renderer.tsx` から不要な `escapeHtml` 関数およびテストを削除
+  - [x] `webapp/src/lib/epub/cover-renderer.tsx`: 未使用となった `escapeHtml` 関数を削除
+  - [x] `webapp/src/lib/epub/cover-renderer.test.ts`: `escapeHtml` のインポートおよびテストケースを削除
+- [x] テスト・検証
+  - [x] `pnpm test`
+  - [x] `pnpm lint` & `pnpm format:check`
+  - [x] `pnpm build`
+- [x] コミット & プッシュ
+
+---
+
+## Issue: 退会時の Instagram 連携解除案内モーダル導入と退会 API の整理
+
+- [x] 退会 API (`webapp/app/api/user/delete/route.ts`) の整理
+  - [x] Instagram Graph API 非対応のエンドポイント呼び出し（`me/permissions`）を撤廃
+  - [x] セッションおよび Better Auth Cookie の完全破棄を中心とした堅牢な設計へ整理
+  - [x] API 単体テスト (`route.test.ts`) の更新と通過確認
+- [x] 退会確認・案内モーダル (`webapp/src/components/auth/AccountDeletionModal.tsx`) の新規実装
+  - [x] 退会前確認ステップ: 本サービス内データ破棄と Instagram 側仕様の説明、キャンセル/実行
+  - [x] 退会完了ステップ: 完了通知、Instagram 管理画面 (`/accounts/manage_access/`) への直接リンク案内、データ削除手順ページへの誘導
+  - [x] WAI-ARIA 対応モーダル設計 (`role="dialog"`, `aria-modal="true"`, フォーカス制御, Esc キー)
+- [x] `webapp/app/page.tsx` へのモーダル統合
+  - [x] `window.confirm` を廃止し、`AccountDeletionModal` での確認・完了フローを適用
+- [x] 単体テストの追加と更新
+  - [x] `webapp/src/components/auth/AccountDeletionModal.test.tsx` の新規作成
+  - [x] 全テストスイートの実行・通過確認 (25ファイル 125テスト全パス)
+- [x] 全品質ゲートの検証 (test, lint, format, typecheck, build, markdown, mermaid)
+- [x] 学びと知見 (`tasks/lessons.md`) の記録
+
+---
+
+## Issue #90: Instagram Graph API の複数ページ取得対応（最大500件・最大2年遡及）および共通通信クライアント（リトライ・タイムアウト）の分離実装
+
+- [x] GitHub Issue #90 の起票と設計・テスト設計・実装計画の記載
+- [x] 作業ブランチ `feat/issue-90-instagram-api-pagination-retry` の作成
+- [x] パッケージ導入: `webapp/package.json` への `p-retry` 追加（Exact Version Pinning）
+- [x] Meta API 共通通信クライアント (`webapp/src/lib/instagram/meta-api-client.ts`) の新規作成
+  - [x] `InstagramGraphApiError` クラスおよび Meta API エラー分類ロジック（`classifyGraphError` / `isRetryableGraphError`）の実装
+  - [x] `p-retry` + `AbortSignal.timeout(10_000)` による Exponential Backoff リトライ＆タイムアウト処理の実装
+  - [x] アクセストークン秘匿（`redactAccessToken`）および構造化ロギングの実装
+- [x] `/me/media` クライアント (`webapp/src/lib/instagram/graph-client.ts`) の改修
+  - [x] カーソル一括ページネーション（`limit=100`、最大スキャン500件、`maxCount` 到達での早期終了）の実装
+  - [x] 期間下限（指定 `startDate` または 最大2年前）による `since` 指定と下限到達時の Early Exit 実装
+  - [x] 重複投稿排除および同一カーソル無限ループ防止の実装
+- [x] API ルートの改修
+  - [x] `webapp/app/api/instagram/media/route.ts`: `fetchGraphMedia` への `filter` 引き渡し、デフォルト `maxCount = 200` 統一、エラー種別に応じた HTTP ステータス返却（401 / 429 / 502 / 504）
+  - [x] `webapp/app/api/epub/route.ts`: `fetchGraphMedia` への `filter` 引き渡し対応
+- [x] テストピラミッド・因子分解に基づくテスト実装
+  - [x] 単体テスト① (`webapp/src/lib/instagram/meta-api-client.test.ts`): エラー分類、リトライ・バックオフ・タイムアウト、トークンマスクの全網羅
+  - [x] 単体テスト② (`webapp/src/lib/instagram/graph-client.test.ts`): `/me/media` ページネーション、最大500件、最大2年下限、Early Exit、境界値・異常系の全網羅
+  - [x] 結合テスト (`webapp/app/api/instagram/media/route.test.ts`): Meta API (`fetch`) 境界モックによる一気通貫テストの新規作成
+  - [x] 結合テスト (`webapp/app/api/epub/route.test.ts`): フィルタ引き渡し・複数ページ投稿収録の検証追加
+- [x] 全品質ゲートの検証 (test, lint, format, typecheck, build, markdown, mermaid)
+- [x] 学びと知見 (`tasks/lessons.md`) の記録
+- [x] コミット、プッシュ、および Pull Request の作成
+
+---
+
+## Issue #35: ハッシュタグ自動補完・クイック選択機能の追加 & Playwright E2E 品質基盤整備
+
+### Phase 1: Playwright ベストプラクティス（POM 構造）の静的コード解析 ＆ Agent-SOP スキル整備
+
+- [x] `oxlint` による Playwright ベストプラクティス・POM 構造強制プラグインの実装
+  - [x] `webapp/scripts/oxlint-plugin-playwright.mjs` の新規作成（Web-First Assertions、`waitForTimeout` 禁止、`force: true` 禁止、`.spec.ts` での直接ロケータ・`goto` 禁止、Fixture 利用強制、POM 内 `expect` 禁止等）
+  - [x] `webapp/.oxlintrc.json`（およびルート実行時の整合）への `jsPlugins` / `overrides` 設定追加
+  - [x] `webapp/scripts/oxlint-plugin-playwright.test.ts` の新規作成（全カスタム Lint ルールの Valid / Invalid 単体テスト）
+- [x] 既存 E2E テストの POM + Custom Fixture 化
+  - [x] `webapp/e2e/pages/TopLoginPage.ts` および `webapp/e2e/pages/FeedFilterPage.ts` の新規作成
+  - [x] `webapp/e2e/fixtures/test.ts` の新規作成（`test.extend` による Page Object 注入）
+  - [x] `webapp/e2e/sso-button.spec.ts` を POM + Fixture 構造へリファクタリング
+- [x] `strands-agents/agent-sop` 形式のスキルおよび常時発火ルールの整備
+  - [x] 実装用 SOP: `.agent/skills/playwright-e2e-authoring/SKILL.md`（および `playwright-e2e-authoring.sop.md`）の作成
+  - [x] セルフレビュー用 SOP: `.agent/skills/playwright-e2e-self-review/SKILL.md`（および `playwright-e2e-self-review.sop.md`）の作成
+  - [x] 常時発火ディレクトリルール: `webapp/e2e/AGENTS.md` および `.github/instructions/playwright.instructions.md` の作成
+- [x] ローカル & CI での静的解析・単体テスト・ドキュメント検証の通過確認
+
+### Phase 2: Instagram API 連携サービスにおける Playwright E2E テスト戦略（モック / OpenAPI 等）の調査・決定
+
+- [x] E2E における外部 API 連携テスト手法（5手法）の調査とメリット・デメリット比較
+- [x] 本プロジェクトで採用する E2E API モック／契約検証方式（Option A: OpenAPI 3.1 スキーマ + ローカルモックサーバー BFF 貫通 + 異常系 `page.route` 分離）の決定
+
+### Phase 3: Issue #35（ハッシュタグ自動補完・クイック選択機能）の実装・テスト検証
+
+- [x] OpenAPI 3.1 スキーマ定義（`docs/openapi/instagram-graph-api.openapi.yaml`）および検証器・モックサーバー実装（`webapp/scripts/openapi-contract.mjs`, `webapp/scripts/mock-instagram-server.mjs`, `webapp/scripts/openapi-contract.test.ts`）
+- [x] `HashtagSuggestion` 型定義（`webapp/src/lib/instagram/types.ts`, `webapp/src/types/ui.ts`）
+- [x] ハッシュタグ抽出サービス（`webapp/src/lib/instagram/hashtag-service.ts`）＆ 単体テスト（`hashtag-service.test.ts`）
+- [x] バックエンド API（`webapp/app/api/instagram/hashtags/route.ts`）＆ 結合・OpenAPI 契約テスト（`route.test.ts`）
+- [x] クライアント関数（`webapp/src/lib/client/instagram.ts`）＆ 単体テスト（`instagram.test.ts`）
+- [x] フロントエンド UI（`FeedFilterStep.tsx` / `page.tsx`）＆ コンポーネント単体テスト（`feed-components.test.tsx`）
+- [x] Agent-SOP に従った POM + E2E テスト実装（`FeedFilterPage.ts` / `TopLoginPage.ts` / `e2e/fixtures/test.ts` / `hashtag-suggestions.spec.ts`）とセルフレビュー SOP 実践検証
+- [x] CI への Playwright E2E ジョブ追加（`.github/workflows/webapp-ci.yml`）およびドキュメント更新・全品質ゲート通過確認
+
+---
+
+## PR #92 レビュー指摘対応・テスト漏れ横展開監査・テスト番号整理
+
+- [x] Copilot レビュー指摘対応（`resolveMetaGraphApiBaseUrl` / `buildMetaApiUrls` の境界値防御と単体テスト追加）
+  - [x] `webapp/src/lib/instagram/meta-api-client.ts`: スラッシュのみ（`"/"`, `"  ///  "`）の環境変数値でも空文字にならず本番デフォルト URL へ安全にフォールバックするよう改善
+  - [x] `webapp/src/lib/instagram/meta-api-client.test.ts`: 因子分析に基づき未設定・空白のみ・スラッシュのみ・前後空白＋複数末尾スラッシュ・サブパス・`buildMetaApiUrls` 結合の単体テストを追加
+- [x] PR #92 全体の因子分析・横展開によるテスト漏れ補強と潜在不具合修正
+  - [x] `webapp/src/lib/auth.ts` & `webapp/src/lib/auth.test.ts`: `resolveInstagramOAuthUrls()` を純粋関数として切り出し、OAuth エンドポイント URL 解決の全水準テストを新設
+  - [x] `webapp/app/api/instagram/hashtags/route.test.ts`: `InstagramGraphApiError.recommendedHttpStatus` の非 `401` ステータス（`429` / `502` / `504` / `400`）伝播および非 `Error` 例外フォールバックのテストを追加
+  - [x] `webapp/src/lib/instagram/hashtag-service.ts` & `hashtag-service.test.ts`: 降順（最新→過去）投稿入力時の `lastUsedAt` 保持、小数・不正 `limit` 正規化、および V8 非標準 `Date.parse()` 推測を排した ISO タイムスタンプ比較・ソート順序のテストと修正を反映
+  - [x] `webapp/src/lib/client/instagram.test.ts` & `webapp/src/components/feed/feed-components.test.tsx`: デフォルト `limit=20`・`hashtags` 省略・非 JSON エラー応答、空/`#`/`＃` 入力や全角・NFD/NFC 選択解除、既存候補あり時のローディング表示抑止のテストを追加
+- [x] コード上の一時的なテスト番号プレフィックスの完全削除（振る舞いベースのテスト名へ統一）
+- [x] 全単体テスト・結合テスト・E2E テストの `describe` / `it` / `test` 表記の日本語統一
+- [x] 次回以降もテストケース表記を日本語で記述するスキル・指示定義の整備（`.agent/skills/vitest-test-authoring/SKILL.md`, `playwright-e2e-authoring`, `playwright-e2e-self-review`, `.github/instructions/testing.instructions.md`）
+- [x] 全品質ゲート検証（lint, format, markdown, mermaid, typecheck, unit test, Playwright E2E）および PR #92 への反映
+
+---
+
+## アトミックデザイン（3層＋App Router計4層）への全面移行とテストコロケーション整備
+
+- [x] 全コンポーネントの層分類・配置方針の設計および合意（/grill-me インタビュー完了）
+  - [x] 旧4ディレクトリ（`auth/`, `feed/`, `epub/`, `common/`）の完全廃止と 3 層（`atoms/`, `molecules/`, `organisms/`）への一本化
+  - [x] テストファイルの完全コロケーション（1コンポーネント = 1テストファイル `[ComponentName].test.tsx`）の採用
+- [x] `refactor/atomic-design-migration` ブランチの切り出し
+- [x] Layer 1: Atoms (`webapp/src/components/atoms/`)
+  - [x] `FilterChip.tsx` / `FilterChip.test.tsx`
+  - [x] `InlineLoadingStatus.tsx` / `InlineLoadingStatus.test.tsx`
+  - [x] `index.ts`（バレルエクスポート定義）
+- [x] Layer 2: Molecules (`webapp/src/components/molecules/`)
+  - [x] `AlertBanner.tsx` / `AlertBanner.test.tsx`
+  - [x] `HashtagQuickSelect.tsx` / `HashtagQuickSelect.test.tsx`
+  - [x] `InAppBrowserAlert.tsx` / `InAppBrowserAlert.test.tsx`（旧 `auth/` より移行）
+  - [x] `CoverThemeSelector.tsx` / `CoverThemeSelector.test.tsx`（旧 `epub/` より移行）
+  - [x] `PostCard.tsx` / `PostCard.test.tsx`（旧 `feed/` より移行）
+  - [x] `index.ts`（バレルエクスポート定義）
+- [x] Layer 3: Organisms (`webapp/src/components/organisms/`)
+  - [x] `Navbar.tsx` / `Navbar.test.tsx`（旧 `auth/` より移行）
+  - [x] `LoginCard.tsx` / `LoginCard.test.tsx`（旧 `auth/` より移行）
+  - [x] `AccountDeletionModal.tsx` / `AccountDeletionModal.test.tsx`（旧 `auth/` より移行）
+  - [x] `FeedFilterStep.tsx` / `FeedFilterStep.test.tsx`（旧 `feed/` より移行）
+  - [x] `PostListStep.tsx` / `PostListStep.test.tsx`（旧 `feed/` より移行）
+  - [x] `StickyActionBar.tsx` / `StickyActionBar.test.tsx`（旧 `feed/` より移行）
+  - [x] `EpubCustomizeStep.tsx` / `EpubCustomizeStep.test.tsx`（旧 `epub/` より移行）
+  - [x] `ExportModal.tsx` / `ExportModal.test.tsx`（旧 `epub/` より移行）
+  - [x] `SiteFooter.tsx` / `SiteFooter.test.tsx`（旧 `common/` より移行）
+  - [x] `LegalPage.tsx` / `LegalPage.test.tsx`（旧 `common/` より移行）
+  - [x] `index.ts`（バレルエクスポート定義）
+- [x] 旧ディレクトリ（`auth/`, `feed/`, `epub/`, `common/`）の完全削除
+- [x] 呼び出し側の import パス一括更新
+  - [x] `webapp/app/page.tsx`
+  - [x] `webapp/app/page.test.tsx`
+  - [x] `webapp/app/layout.tsx`
+  - [x] `webapp/app/links.test.tsx`
+  - [x] `webapp/app/data-deletion/page.tsx`
+  - [x] `webapp/app/privacy/page.tsx`
+  - [x] `webapp/app/privacy/en/page.tsx`
+  - [x] `webapp/app/terms/page.tsx`
+- [x] Agent-SOP スキル・ルール・エージェント指示の更新
+  - [x] `.agent/skills/atomic-design-components/SKILL.md`
+  - [x] `.agent/skills/atomic-design-components/atomic-design-components.sop.md`
+  - [x] `.github/instructions/atomic-design.instructions.md`
+  - [x] `webapp/src/components/AGENTS.md`
+  - [x] `webapp/README.md`
+- [x] 品質ゲート検証（TypeScript 型チェック、Vitest 単体テスト全324件、Playwright E2E、Oxlint、Oxfmt、マークダウン検証）
+- [x] コミット作成および PR 作成（`refactor(ui): アトミックデザイン（Atoms/Molecules/Organisms）への全面移行とコロケーションテスト整備`）
+
+---
+
+## ログインおよびハッシュタグ取得パフォーマンス改善（OAuth並列化・フィールド軽量化・1往復化）
+
+- [x] 改善 1: OAuth コールバックの高速化（`webapp/src/lib/auth.ts`）
+  - [x] 短期トークン取得後、長期トークン交換とユーザー情報（`/me`）取得を `Promise.all` で並列実行
+  - [x] `webapp/src/lib/auth.test.ts` での並列実行およびエラー時の挙動検証
+- [x] 改善 2 & 3: ハッシュタグ取得 API の高速化（`webapp/app/api/instagram/hashtags/route.ts`, `webapp/src/lib/instagram/graph-client.ts`）
+  - [x] `fetchGraphMedia` に `fields` オプションを追加し、ハッシュタグ取得時は `id,caption,timestamp` のみに限定（不要な `media_url`, `permalink` を除外）
+  - [x] `HASHTAG_SCAN_MAX_POSTS` を 200 から 100（1 ページ分）に最適化し、ページネーションの 2 往復通信を 1 往復に削減
+  - [x] 関連テスト（`graph-client.test.ts`, `hashtags/route.test.ts`）の更新
+- [x] 品質ゲート検証（TypeScript 型チェック、Vitest 単体テスト全329件、Oxlint、Oxfmt、ビルド検証）
+- [x] コミット作成および PR #94 へのプッシュ反映
+
+---
+
+## 仕様ベースの命名・コメントへのリファクタリング（内部実装詳細の排除）
+
+- [x] `webapp/app/api/instagram/hashtags/route.ts`: 定数 `HASHTAG_SCAN_MAX_POSTS` のコメントから「1往復で完結」等の内部事情を削除
+- [x] `webapp/app/api/instagram/hashtags/route.test.ts`: テスト名から「高速に取得する」「1ページ上限」等の実装詳細表現を排し仕様ベースの命名へ変更
+- [x] `webapp/src/lib/instagram/graph-client.ts`: `HASHTAG_SCAN_FIELDS` のコメントを仕様ベースに変更
+- [x] `webapp/src/lib/auth.ts`: docstring およびインラインコメントから並列化等の実装言及を整理
+- [x] `webapp/src/lib/auth.test.ts`: describe / it / コメントを関数の振る舞い（仕様）ベースに変更
+- [x] 品質ゲート検証（型チェック、Vitest、Oxlint、Oxfmt、ビルド）
+- [x] コミット作成および PR #94 へのプッシュ反映
+
+---
+
+## TOPページ起動・健全性検証のCI組み込み（Next.js ビルド＆E2Eスモークテスト）
+
+- [x] CI ワークフロー更新: `webapp-ci.yml` の `Webapp check` ジョブに `pnpm build` を追加
+- [x] Page Object 拡張: `webapp/e2e/pages/TopLoginPage.ts` に見出し・フッター・エラー画面の User-Facing ロケータを追加
+- [x] E2E 設定更新: `webapp/playwright.config.ts` に `ignoreHTTPSErrors: true` を追加
+- [x] E2E スモークテスト新設: `webapp/e2e/top-page-smoke.spec.ts` を作成（HTTP 200, コンソールエラー0件, 主要コンポーネント描画検証）
+- [x] ローカル検証（Oxlint, Oxfmt, tsc, Vitest 329件, Next.js build, Playwright smoke test パス）
+- [x] コミット作成および PR #94 へのプッシュ反映

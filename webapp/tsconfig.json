@@ -11,7 +11,8 @@
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "noUncheckedSideEffectImports": true,
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*", "./app/*"]
@@ -23,6 +24,15 @@
       }
     ]
   },
-  "include": ["app", "next-env.d.ts", "src", ".next/types/**/*.ts"],
+  "include": [
+    "app",
+    "e2e",
+    "next-env.d.ts",
+    "playwright.config.ts",
+    "scripts/**/*.d.mts",
+    "src",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

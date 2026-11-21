@@ -32,10 +32,10 @@ dist/
 .ipynb_checkpoints/
 
 # Project-specific
-/auth.json
-/session-*
+auth.json
 *.epub
-/posts_data.json
+posts_data.json
+
 
 # Test compatibility alias modules (auto-generated for testing)
 commands.py
@@ -47,4 +47,23 @@ instagram_fetch.py
 # NextJS
 node_modules/
 .next/
+
+# Database
+*.db
+*.db-journal
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+!*.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
 

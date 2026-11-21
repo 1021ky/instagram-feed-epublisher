@@ -1,6 +1,7 @@
 /**
  * @file EPUB HTML template renderer aligned with book_layout.
  */
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { parseHTML } from "linkedom";
@@ -9,15 +10,26 @@ import type { InstagramMedia } from "@/lib/instagram/types";
 
 const logger = getLogger("epub.template-renderer");
 
-// book_layout is at repo root (one level up from webapp)
-const layoutDir = path.resolve(process.cwd(), "..", "book_layout");
-const layoutHtmlPath = path.join(layoutDir, "layout.html");
-const layoutCssPath = path.join(layoutDir, "layout.css");
+function getLayoutDir(): string {
+  const candidates = [
+    path.resolve(process.cwd(), "book_layout"),
+    path.resolve(process.cwd(), "..", "book_layout"),
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(/*turbopackIgnore: true*/ candidate)) {
+      return candidate;
+    }
+  }
+  return candidates[0];
+}
 
 /**
  * Loads the HTML/CSS template from book_layout.
  */
 export async function loadLayoutTemplate() {
+  const layoutDir = getLayoutDir();
+  const layoutHtmlPath = path.join(layoutDir, "layout.html");
+  const layoutCssPath = path.join(layoutDir, "layout.css");
   const [layoutHtml, cssContent] = await Promise.all([
     readFile(layoutHtmlPath, "utf-8"),
     readFile(layoutCssPath, "utf-8"),
@@ -72,7 +84,7 @@ function validateXhtml(html: string): boolean {
 export function renderChapterHtml(
   template: { layoutHtml: string; cssContent: string },
   item: InstagramMedia,
-  imagePath: string
+  imagePath: string,
 ): string {
   // 重要: 改行を<br />に変換する前にXMLエスケープを行う
   // これにより<br />タグ自体がエスケープされることを防ぐ

@@ -1,0 +1,278 @@
+# Webapp設計ドキュメント
+
+## 1. 目的・背景
+
+- Instagramの投稿を取得し、EPUBとしてまとめてダウンロードできるWeb UIを提供する。
+- 認証はInstagram Login（Instagram API with Instagram Login）を使用し、同一オリジンでAPIとUIを運用する。
+
+## 2. プロダクトのポリシー
+
+本アプリは、以下の製品哲学およびポリシーに基づいて設計・実装されています。詳細な UI/UX 設計方針やレイアウト規約については、[UI/UX 設計ガイドライン](ui-ux-guidelines.md) を参照してください。
+
+1. **作品・記録そのものの価値（プラットフォーム数値の非掲載）**:
+   本アプリが出力する電子書籍（EPUB）の価値は、**「著者がInstagramに投稿した表現・記録そのもの（写真やキャプション文章）」** にあります。
+   Instagramのプラットフォームの仕組みによって外的に付与された数値情報（いいね数、インプレッション数、フォロワー数など）は、著者の創作や記録という本本来の価値とは異なるため、**生成されるEPUB書籍には一切含めません（出力しない）**。
+   ※Web UIの一覧表示において、ユーザーが投稿を選定・確認するための参考情報として表示することは許容しますが、電子書籍への書き出し対象からは厳密に除外します。
+
+2. **「書籍を作り込むツールを目指さない」ポリシー**:
+   本アプリの核は、「Instagramの投稿から、迷わず・素早く・シンプルな電子書籍にして手軽に楽しんでもらうこと」です。
+   カラーコードの自由指定、複雑なレイアウト変更、独自カスタムページの無制限な追加、画像補正などはあえて提供しません。細かい装丁や組版を行いたい場合は、他の EPUB 専門編集ツールに委ねる役割分担とします。
+
+3. **投稿内容の非加工・非改変ポリシー**:
+   アプリ内で投稿の写真加工（切り抜きやフィルタ適用）やテキストの直接編集は行いません。修正したい場合は元の Instagram 投稿側を編集してもらう思想とし、アプリ内では「本に入れる投稿や写真の選定」に集中させます。
+
+## 3. 要件
+
+### 3.1 機能要件
+
+- Instagramログイン（OAuth）
+- 自分の投稿（メディア）の取得
+- フィルタ（ハッシュタグ/期間/件数）
+- EPUB生成とダウンロード
+- ログアウト
+
+### 3.2 非機能要件
+
+- 同一オリジンでUI/APIを提供すること
+- HTTPS必須（Meta側の要件に対応）
+- ローカル開発でもHTTPSで検証可能
+- 最小限の依存で運用を簡潔化
+
+### 3.3 外部サービス要件
+
+- Instagram Login（Instagram API with Instagram Login）
+- Instagram Graph API（ユーザー/メディア取得）
+
+## 4. 機能一覧
+
+### 4.1 Web UI
+
+- ログイン/ログアウト
+- フィルタ入力（直近投稿からのハッシュタグ自動補完 `<datalist>`・クイック選択チップ対応）
+- フィード取得
+- EPUB生成
+
+### 4.2 API
+
+- `/api/auth/*` 認証フロー
+- `/api/instagram/hashtags` 直近投稿からのハッシュタグ候補集計・取得
+- `/api/instagram/media` メディア取得
+- `/api/epub` EPUB生成（デモ用: `/api/epub/demo`）
+
+### 4.3 出力仕様
+
+- EPUBにタイトル/著者/連絡先/Instagram URLを埋め込み
+- 生成後にブラウザでダウンロード
+
+## 5. 設計
+
+### 5.1 全体構成
+
+- Next.js App Router単体運用
+- Better Auth + Instagram Login
+- APIはNextのRoute Handlerで提供
+
+### 5.2 データフロー
+
+- ログイン → OAuthコールバック → 長期トークン取得
+- `/me` でユーザーID取得 → `/<IG_ID>/media` で投稿取得
+- 取得データをフィルタ → EPUB生成
+
+### 5.3 モジュール構成
+
+- 認証: `webapp/src/lib/auth.ts`
+- セッション解決: `webapp/src/lib/auth/session-service.ts`
+- Meta API 共通通信基盤: `webapp/src/lib/instagram/meta-api-client.ts`
+- Graph API メディア取得: `webapp/src/lib/instagram/graph-client.ts`
+- ハッシュタグ抽出・集計: `webapp/src/lib/instagram/hashtag-service.ts`
+- UI: `webapp/app/page.tsx`、`webapp/src/components/feed/FeedFilterStep.tsx`
+
+## 6. 設計の経緯
+
+- Vite SPA構成は同一オリジン要件と相性が悪く、Next単体構成へ移行。
+- Instagram Basic Display API終了により、Instagram Loginに切替。
+- ローカルHTTPSをmkcertで用意し、MetaのHTTPS必須要件に対応。
+
+## 7. つまずいた点と対策
+
+### 7.1 OAuthリダイレクトURI
+
+- 実際のコールバックは `/api/auth/oauth2/callback/instagram` だったため、Metaの設定と不一致。
+- 対策: MetaのリダイレクトURIに実際のURLを登録。
+
+### 7.2 HTTPS
+
+- Meta側でHTTPS必須。
+- 対策: mkcertでローカル証明書を発行し、HTTPS devスクリプトを追加。
+
+### 7.3 Better Authユーザー情報
+
+- Instagram Loginはemailを返さないため `email_is_missing`。
+- 対策: `getUserInfo` で `id`/`name` を返し、疑似メールを生成。
+
+### 7.4 callbackURLのフラグメント
+
+- `/#filters` はOAuthで無効。
+- 対策: `/?scroll=filters` などクエリで遷移。
+
+## 8. 運用・テスト
+
+### 8.1 起動
+
+- HTTP: `pnpm dev`
+- HTTPS: `pnpm dev:https`
+
+### 8.2 環境変数
+
+- `BETTER_AUTH_URL` はHTTPSを指定
+- `INSTAGRAM_CLIENT_ID` / `INSTAGRAM_CLIENT_SECRET`
+
+### 8.3 テスト
+
+- 単体・結合・OpenAPI 契約テスト: `pnpm test`
+- E2E テスト（OpenAPI モックサーバー連携）: `pnpm e2etest`
+
+### 8.4 トラブルシュート
+
+- OAuthエラーはリダイレクトURI/アプリIDの一致を最優先で確認
+- `user_info_is_missing` は `getUserInfo` の実装を確認
+- `email_is_missing` は疑似メール付与で回避
+
+## 9. 本番インフラ構成決定の経緯
+
+### 9.1 採用構成
+
+- **基盤**: **Google Cloud Run**（単体コンテナ構成、東京リージョン `asia-northeast1`）
+- **ドメイン**: 独自ドメイン `ksanchu.page`（Cloudflare にて取得・DNS管理済み。Cloudflare 経由で Cloud Run に接続し、SSL/TLS、DDoS防御、静的アセットのCDNキャッシュを併用）
+- **シークレット管理**: **Google Cloud Secret Manager**（機密環境変数を安全にマウント）
+- **CI/CD**: GitHub Actions（Workload Identity Federation によるキーレス連携で、`main` マージ時に即時自動デプロイ）
+
+### 9.2 検討した選択肢と却下理由
+
+1. **Vercel（Hobby無料枠）**:
+   - **却下理由**: 実行時間上限（10秒）およびレスポンスボディ上限（4.5MB）が厳格すぎるため。複数投稿の画像取得・EPUB生成（数十MB以上）で確実にタイムアウトおよび転送エラーが発生する。また無料枠は商用利用禁止のため将来の有料化規約に抵触する。
+2. **Compute Engine（GCE）での自前 Docker 運用**:
+   - **却下理由**: 無料枠・低スペックマシン（`e2-micro`: メモリ1GB）では OOM（メモリ枯渇）によるプロセス突然死リスクが高い。また障害検知・自動復旧・OS保守・IPv4アドレス課金・バックアップスクリプト作成など、運用保守負荷が高すぎるため却下。
+3. **静的配信 ＋ Cloud Run ＋ Cloud SQL / RDS**:
+   - **却下理由**: フルマネージド RDB はアクセスゼロでも月額約1,500円〜1万円以上の固定費が発生する。初期の小規模・低コスト運用（月500円以下目標）に反するため過剰投資と判断。
+4. **Cloud Run ＋ Pub/Sub / Cloud Tasks（非同期 Worker 構成）**:
+   - **評価**: 500フィード（1500枚以上の高画質画像）を安定処理するための「将来の理想形」だが、初期公開にはコンポーネント数・UI実装が過剰（YAGNI の原則）。
+
+### 9.3 Cloud Run 採用の決め手
+
+- **完全従量課金 / 無料枠**: 最小インスタンス 0（ゼロスケール）により、アクセスがない間の稼働コストは完全 0 円。
+- **長時間の処理耐性**: タイムアウトを最大60分まで設定可能、レスポンスサイズも32MB（ストリーミングなら無制限）と、EPUB生成処理に最適。
+- **GCP 内完結 & 堅牢な CI/CD**: Secret Manager による機密情報保護、Workload Identity による安全な自動デプロイが容易。
+- **Cloudflare との親和性**: DNS 設定およびプロキシ（CDN）との組み合わせが容易で、静的キャッシュにより Cloud Run の負荷をさらに抑制可能。
+
+### 9.4 将来インフラを変更・拡張する際の考慮事項
+
+- **500フィード（大量画像）対応時**: 同期 HTTP リクエストではブラウザ切断や Instagram API レート制限のリスクがあるため、**「Cloud Tasks ＋ Cloud Run Job ＋ Cloud Storage (GCS) による非同期ジョブ化」** へ移行すること。
+
+---
+
+## 10. DB・セッション管理構成決定の経緯
+
+### 10.1 採用構成
+
+- **構成**: **Better Auth ステートレス（DBレス・暗号化 Cookie）構成**
+- **保存方式**: サーバー側に一切 DB を持たず、Instagram の長期アクセストークンおよびユーザーセッションを、サーバー秘密鍵（`BETTER_AUTH_SECRET`）で AES 暗号化した HttpOnly Cookie（`storeAccountCookie: true`）としてブラウザ側のみに保持。
+
+### 10.2 検討した選択肢と却下理由
+
+1. **ローカル SQLite (`better-sqlite3`)**:
+   - **却下理由**: Cloud Run のゼロスケールおよび複数インスタンス起動時に、ローカルファイル（`better-auth.db`）が消失・不整合を起こすため本番運用不可。
+2. **Cloud Run ＋ Cloud Storage (GCS FUSE マウント) ＋ SQLite**:
+   - **却下理由**: ネットワークファイルマウント越しの SQLite は排他ロックを保証できず、複数リクエストで即座に DB 破損（malformed）を起こす致命的なアンチパターンのため絶対禁止。
+3. **外部サーバーレス DB（Neon / Turso 等）**:
+   - **却下理由**: 無料枠はあるものの、パブリックインターネットに DB エンドポイントが露出する。GCP 内完結・閉域性・シークレット流出リスクの観点から見送り。
+
+### 10.3 ステートレス構成採用の決め手
+
+- **プロダクト思想との完全一致**: 「作成した本のデータもサーバーに置かない」「フィードデータも残さない」という方針同様、サーバー側に個人情報やトークンを一切保存しないため、**「サーバーからのデータ漏洩」リスクが物理的にゼロ**。
+- **コスト・運用リスクゼロ**: DB 費用 0 円。DB サーバーのクラッシュ、容量監視、バックアップ、スケールアウト競合の考慮がすべて不要。
+- **Meta 審査との親和性**: サーバー上にデータを永続保持しないため、データ削除要件やプライバシーポリシーの整合性が極めて明快。
+
+### 10.4 制約事項と将来 DB を導入する際の基準
+
+- **現在の制約（トレードオフ）**:
+  - サーバー側からの「セッション即時失効（強制ログアウト）」ができない（※ただし、将来認可レイヤを挟むことで利用停止は可能）。
+  - Cookie の 4KB 制限があるため、余計なデータを詰め込めない。
+- **将来 DB を導入するタイミング**:
+  - 「ユーザーごとの設定（装丁プリセット等）」や「課金ステータス（有料会員フラグ）」を保存する必要が出た段階で、**Google Cloud Firestore**（毎日5万回アクセス無料、GCP内部通信、IAMキーレス認証）を追加する「ハイブリッド構成」へ移行する。
+  - **移行時の注意**: DB クエリは API ハンドラーに直書きせず、`src/lib/db/` などの独立層にカプセル化して実装すること（将来 NoSQL から RDB への乗り換えを容易にするため）。
+
+---
+
+## 11. 法的ページ・グローバルポリシー設計の経緯
+
+### 11.1 背景と目的
+
+- **Meta Live モード審査の必須要件**: Instagram Graph API を本番利用するためには、Meta for Developers の規約に基づく「プライバシーポリシー URL」および「データ削除手順（Data Deletion Instructions）URL」の公開が必須。
+- **グローバル展開への備え**: 日本国内の利用者に限らず、将来的な海外展開および Meta 審査員の英語レビューを想定し、日本法（個人情報保護法・電気通信事業法）に加えて EU/UK（GDPR）および米国カリフォルニア州（CCPA/CPRA）の要件を充足する法的ガバナンス体制を初期から構築する。
+
+### 11.2 採用方針と設計意図
+
+1. **グローバル法規制要件の網羅**:
+   - **GDPR（EU/UK）対応**: 利用目的ごとに取り扱うデータカテゴリおよび GDPR 第 6 条上の法的根拠（契約履行: Art. 6(1)(b)、正当な利益: Art. 6(1)(f)、同意: Art. 6(1)(a)、法的義務: Art. 6(1)(c)）を表形式で明示。各居住者向けの権利行使規定（アクセス・訂正・消去・データポータビリティ等）を規定。
+   - **CCPA / CPRA（米国カリフォルニア州）対応**: 過去 12 か月間の収集カテゴリを開示し、個人情報の「販売（Sale）」および「クロスコンテキスト行動広告目的での共有（Share）」を一切行わない旨、並びに Global Privacy Control (GPC) シグナルへの尊重を明記。
+   - **個人情報保護法・電気通信事業法（日本）対応**: 保有個人データの開示請求手続き、および外部送信規律に基づく送信先（Meta Platforms, Inc. / Google LLC）と送信目的・データの開示。
+2. **ステートレス・アーキテクチャとの完全整合**:
+   - 「投稿データや生成された電子書籍をサーバー上に恒久保存しない（インメモリ一時処理）」というプロダクトのステートレス設計をポリシーの核として明記。
+   - 「保持しないため、サーバーからの漏洩リスクが存在しない」「ログアウトまたはブラウザ Cookie 削除により即座に連携・セッションが終了する」という実態に即した説明により、利用者の安心感と Meta 審査における透明性を両立。
+3. **静的プリレンダリング（Static Rendering）による確実な配信**:
+   - 法的ページ群（`/privacy`, `/privacy/en`, `/terms`, `/data-deletion`）は Server Component として実装し、ビルド時に完全な HTML としてプリレンダリング（Static / SSG）される構成を採用。
+   - クライアント側 JavaScript のロードやハイドレーションを待つことなく、審査員や Web クローラーに即座に完全な文書 HTML が返却されるため、Meta のクローラー巡回および人手審査における信頼性を最大化。
+4. **日英 2 言語対応と公開構成**:
+   - 日本語版（`/privacy`）と英語版（`/privacy/en`）の双方を整備。
+   - 一般の UI ナビゲーション（フッター等）からの直リンクは日本語版（`/privacy`）としつつ、URL 直打ちや審査員・海外ユーザー向けに英語版（`/privacy/en`）にもアクセス可能な構成を採用。`LegalPage` コンポーネントに多言語用プロップス（`backLabel`, `categoryLabel`, `updatedAtPrefix` 等）を設け、UI パーツも自然に英語化。
+5. **データ削除手順（`/data-deletion`）の 3 段構え設計**:
+   - Meta 審査において最も厳格に確認されるデータ削除要件に対し、
+     1. アプリ内ログアウト & Cookie 削除によるセッション終了
+     2. Instagram Web 版「アプリとウェブサイト」設定（`https://www.instagram.com/accounts/manage_access/`）への直接リンクによる連携解除
+     3. サーバー上に投稿データ・生成物を永続保管しないステートレス運用の明記
+        の 3 段階で構成し、審査員が直感的に納得できる明確な導線を提供。
+6. **お問い合わせ窓口の安全な分離**:
+   - GitHub Issues を直接問い合わせ窓口にすると、一般ユーザーや審査員にオープンソースの Issue が露出する懸念があるため、専用の Google フォームを採用。
+   - 環境変数 `NEXT_PUBLIC_CONTACT_FORM_URL` でフォーム URL を注入可能とし、未設定時も GitHub Issues へ安全にフォールバックする耐障害性を確保。
+7. **CSS セレクタ詳細度の適正化とデザイン刷新**:
+   - Tailwind CSS v4 を活用し、見出しアクセントバー、セクション区切り線、十分な行間を確保した可読性の高いモダンレイアウトに刷新。
+   - 本文リンク（`[&_:where(a)]:text-blue-600`）に `:where()` を導入して詳細度を加算させない設計とし、子要素のお問い合わせボタン（`!text-white`）の白文字視認性が上書き破壊されないよう保護。
+8. **テスト自動化によるリンク切れ防止**:
+   - 法的ページ・フッター内のすべての内部リンクおよび外部リンクを DOM 解析（`linkedom`）し、Next.js App Router のソースファイル実在確認と URL 構文検証を自動実行する統合テスト（`webapp/app/links.test.tsx`）を配備。CI 上でリンク切れの発生を恒久的に防止。
+
+### 11.3 検討した選択肢と却下・改善理由
+
+- **「Meta 審査用」等の内部向けラベルの表示**:
+  - **却下理由**: ページ上に「審査用」と記載されていると、審査員から「本番用ではなく仮設のモックサイトである」と誤認され却下されるリスクがあるため、完全に一般ユーザー向けの本番公式規約として表記を統一。
+- **書籍フォーマットの「EPUB」表記への限定**:
+  - **改善理由**: 将来的な他フォーマット（PDF、Kindle Mobi 等）の追加や仕様変更を見据え、規約上の定義は「電子書籍」に一般化。
+- **外部リンク（`<a>`）によるページ遷移**:
+  - **改善理由**: 内部リンクを純粋な `<a>` タグで実装するとページ全体のフルリロードが発生するため、Next.js の `next/link` へ統一し、高速な SPA 画面遷移を実現。
+
+---
+
+## 12. Playwright E2E テスト基盤および OpenAPI モック戦略
+
+### 12.1 背景と課題
+
+1. **コード保守性とベストプラクティス強制**: Playwright E2E テストの増加に伴い、Page Object Model (POM) 構造や Web-First Assertions を機械的・継続的に担保する仕組みが必要。
+2. **外部 API（Instagram Graph API）へのアクセス安全性と仕様追従の両立**: E2E テストのたびに本番 Instagram API へアクセスするとレート制限や自動化ボット検知（アカウント制限）のリスクがあり、一方で単純なブラウザモックのみでは Next.js Route Handler 以降のバックエンドコードが検証されない。
+
+### 12.2 採用アーキテクチャ
+
+1. **Oxlint カスタムプラグイン ＋ Agent-SOP による二重ガード**:
+   - `webapp/scripts/oxlint-plugin-playwright.mjs` により、`waitForTimeout` 禁止、`.spec.ts` での直接ロケータ・`goto` 禁止、Custom Fixture（`e2e/fixtures/test.ts`）インポート強制、POM 内での `expect` 禁止など 10 ルールを静的コード解析で強制。
+   - AI エージェント向けに `strands-agents/agent-sop` 形式の作成 SOP（`playwright-e2e-authoring`）およびセルフレビュー SOP（`playwright-e2e-self-review`）を整備。
+2. **OpenAPI 3.1 契約検証付きローカルモックサーバー ＋ ハイブリッド E2E（Option A）**:
+   - `docs/openapi/instagram-graph-api.openapi.yaml` に Meta OAuth / Graph API（`/me/media` 等）および内部 BFF API（`/api/instagram/hashtags`）のスキーマを定義。
+   - E2E 実行時は `playwright.config.ts` が OpenAPI スキーマ検証付きのローカルモックサーバー（`webapp/scripts/mock-instagram-server.mjs`）と E2E 専用 Next.js サーバーを自動起動し、OAuth ログインから Route Handler・`graph-client.ts`・`hashtag-service.ts` まで本番 Instagram に一切触れずに一気通貫で検証。
+   - エラー応答（502）やローディング待機などの異常系・境界値シナリオは、Custom Fixture 内の `page.route()` ゲートを用いてテストケース単位で完全分離して検証。
+
+---
+
+## 13. Architecture Decision Records (ADR)
+
+設計上の主要な意思決定ログは `docs/adr/` 配下に記録しています。
+
+- [ADR-0001: Instagram OAuth ログイン時の再認証制御とアカウント切り替え導線の設計](../adr/0001-instagram-oauth-login-and-account-switching.md)
