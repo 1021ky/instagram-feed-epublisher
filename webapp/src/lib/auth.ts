@@ -217,7 +217,6 @@ export const auth = betterAuth({
           scopes: ["instagram_business_basic"],
           authorizationUrlParams: {
             enable_fb_login: "0",
-            force_authentication: "1",
             scope: "instagram_business_basic",
           },
           getToken: exchangeInstagramToken,

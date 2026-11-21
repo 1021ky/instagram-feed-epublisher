@@ -11,6 +11,7 @@ describe("ログインカード (LoginCard)", () => {
 
     expect(html).toContain("FeedsToBook");
     expect(html).toContain("Instagramでログイン");
+    expect(html).not.toContain("別のアカウントでログイン");
     expect(html).toContain("デモを体験する");
     expect(html).toContain("かんたん 3 ステップ");
     expect(html).toContain("投稿をしぼり込む");
@@ -18,12 +19,13 @@ describe("ログインカード (LoginCard)", () => {
     expect(html).toContain("端末ですぐに読書");
   });
 
-  it("ログイン処理中（loadingLogin=true）のとき移動中テキストが表示されること", () => {
+  it("ログイン処理中（loadingLogin=true）のとき移動中テキストが表示されログインボタンが無効化されること", () => {
     const html = renderToStaticMarkup(
       <LoginCard loadingLogin={true} onDemo={vi.fn()} onLogin={vi.fn()} />,
     );
 
     expect(html).toContain("移動中...");
     expect(html).not.toContain("Instagramでログイン");
+    expect(html).toContain('disabled=""');
   });
 });

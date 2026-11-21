@@ -4,8 +4,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { authClient } from "@/lib/auth-client";
-import { AlertBanner, InAppBrowserAlert } from "@/components/molecules";
+import { authClient, formatLogoutBannerTitle, signInWithInstagram } from "@/lib/auth-client";
+import { AlertBanner, InAppBrowserAlert, StatusBanner } from "@/components/molecules";
 import {
   AccountDeletionModal,
   type AccountDeletionStep,
@@ -92,6 +92,7 @@ export default function Page() {
   const downloadUrlRef = useRef<string | null>(null);
 
   const [appMode, setAppMode] = useState<AppMode>("real");
+  const [logoutNotice, setLogoutNotice] = useState<{ username?: string } | null>(null);
 
   const session = authClient.useSession();
   const isLoggedIn = Boolean(session.data);
@@ -209,11 +210,9 @@ export default function Page() {
   const handleLogin = async () => {
     setLoadingLogin(true);
     setError(null);
+    setLogoutNotice(null);
     try {
-      await authClient.signIn.oauth2({
-        providerId: "instagram",
-        callbackURL: "/?scroll=filters",
-      });
+      await signInWithInstagram();
     } catch (e) {
       console.error(e);
       setError(e instanceof Error ? e.message : "ログインに失敗しました");
@@ -226,10 +225,12 @@ export default function Page() {
       resetDemoState();
       return;
     }
+    const loggedOutUsername = activeProfile?.username;
     await authClient.signOut();
     setFeed([]);
     setIsFilterCollapsed(false);
     setHasFetched(false);
+    setLogoutNotice({ username: loggedOutUsername });
   };
 
   /**
@@ -555,7 +556,16 @@ export default function Page() {
 
         <main className="max-w-3xl mx-auto w-full space-y-6">
           {!canUseApp && !isSessionPending && (
-            <LoginCard loadingLogin={loadingLogin} onLogin={handleLogin} onDemo={handleDemo} />
+            <>
+              {logoutNotice && (
+                <StatusBanner
+                  className="max-w-xl mx-auto"
+                  title={formatLogoutBannerTitle(logoutNotice.username)}
+                  onDismiss={() => setLogoutNotice(null)}
+                />
+              )}
+              <LoginCard loadingLogin={loadingLogin} onLogin={handleLogin} onDemo={handleDemo} />
+            </>
           )}
 
           {canUseApp && (
