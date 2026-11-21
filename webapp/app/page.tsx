@@ -561,14 +561,16 @@ export default function Page() {
                 <StatusBanner
                   className="max-w-xl mx-auto"
                   title={formatLogoutBannerTitle(logoutNotice.username)}
-                  description="Instagram のログイン状態はブラウザに維持されています。別アカウントに切り替える場合は下の「別のアカウントでログイン」をご利用ください。"
+                  description="Instagram のログイン状態はブラウザに維持されています。"
+                  actionLabel="別のアカウントでログイン"
+                  onAction={() => handleLogin(true)}
+                  actionDisabled={loadingLogin}
                   onDismiss={() => setLogoutNotice(null)}
                 />
               )}
               <LoginCard
                 loadingLogin={loadingLogin}
                 onLogin={() => handleLogin(false)}
-                onForceReauthLogin={() => handleLogin(true)}
                 onDemo={handleDemo}
               />
             </>

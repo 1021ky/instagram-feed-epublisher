@@ -4,19 +4,14 @@ import { describe, expect, it, vi } from "vitest";
 import { LoginCard } from "./LoginCard";
 
 describe("ログインカード (LoginCard)", () => {
-  it("ログインと別アカウント導線、デモ体験の導線、3つのステップ案内が正しく描画されること", () => {
+  it("ログインとデモ体験の導線、3つのステップ案内が正しく描画されること", () => {
     const html = renderToStaticMarkup(
-      <LoginCard
-        loadingLogin={false}
-        onDemo={vi.fn()}
-        onLogin={vi.fn()}
-        onForceReauthLogin={vi.fn()}
-      />,
+      <LoginCard loadingLogin={false} onDemo={vi.fn()} onLogin={vi.fn()} />,
     );
 
     expect(html).toContain("FeedsToBook");
     expect(html).toContain("Instagramでログイン");
-    expect(html).toContain("別のアカウントでログイン");
+    expect(html).not.toContain("別のアカウントでログイン");
     expect(html).toContain("デモを体験する");
     expect(html).toContain("かんたん 3 ステップ");
     expect(html).toContain("投稿をしぼり込む");
@@ -26,12 +21,7 @@ describe("ログインカード (LoginCard)", () => {
 
   it("ログイン処理中（loadingLogin=true）のとき移動中テキストが表示されログインボタンが無効化されること", () => {
     const html = renderToStaticMarkup(
-      <LoginCard
-        loadingLogin={true}
-        onDemo={vi.fn()}
-        onLogin={vi.fn()}
-        onForceReauthLogin={vi.fn()}
-      />,
+      <LoginCard loadingLogin={true} onDemo={vi.fn()} onLogin={vi.fn()} />,
     );
 
     expect(html).toContain("移動中...");

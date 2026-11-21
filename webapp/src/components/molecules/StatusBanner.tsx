@@ -12,6 +12,12 @@ export interface StatusBannerProps {
   title: string;
   /** 補足説明テキスト */
   description?: string;
+  /** バナー内アクションボタンのラベル */
+  actionLabel?: string;
+  /** バナー内アクションボタン押下時のハンドラ */
+  onAction?: () => void;
+  /** アクションボタンの無効化状態 */
+  actionDisabled?: boolean;
   /** 閉じるボタン押下時のハンドラ */
   onDismiss?: () => void;
   /** 閉じるボタンのアクセシビリティラベル */
@@ -26,6 +32,9 @@ export interface StatusBannerProps {
 export function StatusBanner({
   title,
   description,
+  actionLabel,
+  onAction,
+  actionDisabled = false,
   onDismiss,
   dismissLabel = "通知を閉じる",
   className = "",
@@ -40,6 +49,18 @@ export function StatusBanner({
         <p className="text-sm font-bold text-sky-950 m-0">{title}</p>
         {description && (
           <p className="text-xs text-sky-800 mt-1 leading-relaxed m-0">{description}</p>
+        )}
+        {actionLabel && onAction && (
+          <div className="mt-2.5">
+            <button
+              type="button"
+              onClick={onAction}
+              disabled={actionDisabled}
+              className="px-3.5 py-2 rounded-lg border border-sky-300 bg-white text-sky-900 hover:bg-sky-100 text-xs font-medium transition cursor-pointer disabled:opacity-50 min-h-[44px] inline-flex items-center"
+            >
+              {actionLabel}
+            </button>
+          </div>
         )}
       </div>
       {onDismiss && (

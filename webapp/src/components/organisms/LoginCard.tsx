@@ -4,7 +4,6 @@ export type LoginCardProps = {
   loadingLogin: boolean;
   onDemo: () => void;
   onLogin: () => void;
-  onForceReauthLogin?: () => void;
 };
 
 const steps = [
@@ -25,7 +24,7 @@ const steps = [
   },
 ];
 
-export function LoginCard({ loadingLogin, onDemo, onLogin, onForceReauthLogin }: LoginCardProps) {
+export function LoginCard({ loadingLogin, onDemo, onLogin }: LoginCardProps) {
   return (
     <section className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm border border-slate-200/80 max-w-xl mx-auto">
       {/* ヘッダー・メイン見出し */}
@@ -61,7 +60,7 @@ export function LoginCard({ loadingLogin, onDemo, onLogin, onForceReauthLogin }:
       </div>
 
       {/* CTAボタン群（横幅いっぱいに収まる横並び等幅配置） */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 w-full">
         <button
           type="button"
           onClick={onLogin}
@@ -82,20 +81,6 @@ export function LoginCard({ loadingLogin, onDemo, onLogin, onForceReauthLogin }:
           <span className="text-[11px] text-slate-400 font-normal">(登録不要)</span>
         </button>
       </div>
-
-      {/* 別アカウントでの再認証ログイン導線 */}
-      {onForceReauthLogin && (
-        <div className="mb-6 flex justify-center">
-          <button
-            type="button"
-            onClick={onForceReauthLogin}
-            disabled={loadingLogin}
-            className="px-3 py-2 text-xs text-slate-500 hover:text-slate-800 underline underline-offset-4 transition cursor-pointer disabled:opacity-50 min-h-[44px] flex items-center"
-          >
-            別のアカウントでログイン
-          </button>
-        </div>
-      )}
 
       {/* かんたん 3 ステップ（縦並び配置） */}
       <div className="pt-5 border-t border-slate-100">

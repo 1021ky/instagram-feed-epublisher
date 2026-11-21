@@ -39,7 +39,7 @@ Meta 公式ドキュメント（[Business Login for Instagram](https://developer
 
 1. `webapp/src/lib/auth.ts` の `authorizationUrlParams` から `force_authentication: "1"` を削除する。
 2. Meta App Dashboard の Valid OAuth Redirect URIs（`/api/auth/oauth2/callback/instagram`）との不一致を防ぐため、`providerId: "instagram"` は 1 つのまま維持し、`POST /api/auth/sign-in/oauth2?force_reauth=true` が要求された場合のみ `webapp/app/api/auth/[...all]/route.ts` にて返却認可 URL へ `force_reauth=true` を付与する。
-3. ログイン画面（`LoginCard`）に「別のアカウントでログイン」導線を配置し、本アプリからログアウトした直後には「ブラウザ上の Instagram ログイン状態は維持されている」旨の補足案内を表示する。
+3. 初回未ログイン画面（`LoginCard`）はシンプルな 2 ボタン構成を維持し、本アプリからログアウトした直後のみ、`LoginCard` 直上に Actionable Banner（`StatusBanner`）として「`@<username> からログアウトしました`」の通知と「別のアカウントでログイン」アクションボタンを表示する（Progressive Disclosure の原則に基づき、文脈のあるタイミングでのみ切替導線を提示する）。
 
 ## 4. 影響・トレードオフ (Consequences)
 
