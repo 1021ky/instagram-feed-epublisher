@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { authClient, signInWithInstagram } from "@/lib/auth-client";
-import { AlertBanner, InAppBrowserAlert } from "@/components/molecules";
+import { AlertBanner, InAppBrowserAlert, StatusBanner } from "@/components/molecules";
 import {
   AccountDeletionModal,
   type AccountDeletionStep,
@@ -555,13 +555,22 @@ export default function Page() {
 
         <main className="max-w-3xl mx-auto w-full space-y-6">
           {!canUseApp && !isSessionPending && (
-            <LoginCard
-              loadingLogin={loadingLogin}
-              onLogin={() => handleLogin(false)}
-              onForceReauthLogin={() => handleLogin(true)}
-              justLoggedOut={justLoggedOut}
-              onDemo={handleDemo}
-            />
+            <>
+              {justLoggedOut && (
+                <StatusBanner
+                  className="max-w-xl mx-auto"
+                  title="本アプリからログアウトしました"
+                  description="Instagram のログイン状態はブラウザに維持されています。別アカウントに切り替える場合は下の「別のアカウントでログイン」をご利用ください。"
+                  onDismiss={() => setJustLoggedOut(false)}
+                />
+              )}
+              <LoginCard
+                loadingLogin={loadingLogin}
+                onLogin={() => handleLogin(false)}
+                onForceReauthLogin={() => handleLogin(true)}
+                onDemo={handleDemo}
+              />
+            </>
           )}
 
           {canUseApp && (

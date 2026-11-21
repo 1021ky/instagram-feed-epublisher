@@ -11,3 +11,4 @@ export {
 } from "./HashtagQuickSelect";
 export { InAppBrowserAlert, isInstagramOrFacebookInAppBrowser } from "./InAppBrowserAlert";
 export { formatPostDate, PostCard, type PostCardProps } from "./PostCard";
+export { StatusBanner, type StatusBannerProps } from "./StatusBanner";

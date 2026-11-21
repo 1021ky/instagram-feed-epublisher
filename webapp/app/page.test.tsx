@@ -12,6 +12,7 @@ vi.mock("@/lib/auth-client", () => ({
 vi.mock("@/components/molecules", () => ({
   AlertBanner: ({ message }: { message: string }) => <div>ALERT_BANNER:{message}</div>,
   InAppBrowserAlert: () => <div>IN_APP_BROWSER_ALERT</div>,
+  StatusBanner: ({ title }: { title: string }) => <div>STATUS_BANNER:{title}</div>,
 }));
 
 vi.mock("@/components/organisms", () => ({

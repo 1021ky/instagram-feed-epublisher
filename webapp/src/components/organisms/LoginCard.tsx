@@ -5,7 +5,6 @@ export type LoginCardProps = {
   onDemo: () => void;
   onLogin: () => void;
   onForceReauthLogin?: () => void;
-  justLoggedOut?: boolean;
 };
 
 const steps = [
@@ -26,13 +25,7 @@ const steps = [
   },
 ];
 
-export function LoginCard({
-  loadingLogin,
-  onDemo,
-  onLogin,
-  onForceReauthLogin,
-  justLoggedOut = false,
-}: LoginCardProps) {
+export function LoginCard({ loadingLogin, onDemo, onLogin, onForceReauthLogin }: LoginCardProps) {
   return (
     <section className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm border border-slate-200/80 max-w-xl mx-auto">
       {/* ヘッダー・メイン見出し */}
@@ -66,17 +59,6 @@ export function LoginCard({
           お使いの端末の電子書籍リーダー（KindleやApple Booksなど）でいつでも読めます。
         </p>
       </div>
-
-      {/* ログアウト後の補足案内 */}
-      {justLoggedOut && (
-        <div
-          role="status"
-          className="mb-5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-600 leading-relaxed"
-        >
-          本アプリからログアウトしました。ブラウザ上の Instagram
-          ログイン状態は維持されているため、別のアカウントに切り替える場合は下の「別のアカウントでログイン」をご利用ください。
-        </div>
-      )}
 
       {/* CTAボタン群（横幅いっぱいに収まる横並び等幅配置） */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3 w-full">
