@@ -48,53 +48,6 @@ const logAuthRequest = (request: Request) => {
   });
 };
 
-/**
- * 別アカウントログイン（`?force_reauth=true`）が要求された場合、
- * Better Auth が生成した認可リダイレクト URL に `force_reauth=true` を付与して返却します。
- * `redirect_uri`（`/api/auth/oauth2/callback/instagram`）や `state` 発行処理は変更しません。
- */
-async function appendForceReauthIfRequested(
-  request: Request,
-  response: Response,
-): Promise<Response> {
-  const requestUrl = new URL(request.url);
-  if (
-    requestUrl.pathname !== "/api/auth/sign-in/oauth2" ||
-    requestUrl.searchParams.get("force_reauth") !== "true"
-  ) {
-    return response;
-  }
-
-  const contentType = response.headers.get("content-type") ?? "";
-  if (!response.ok || !contentType.includes("application/json")) {
-    return response;
-  }
-
-  const cloned = response.clone();
-  let payload: { url?: unknown; [key: string]: unknown };
-  try {
-    payload = (await cloned.json()) as { url?: unknown; [key: string]: unknown };
-  } catch {
-    return response;
-  }
-
-  if (typeof payload.url !== "string" || !payload.url) {
-    return response;
-  }
-
-  const authorizeUrl = new URL(payload.url);
-  authorizeUrl.searchParams.set("force_reauth", "true");
-
-  const headers = new Headers(response.headers);
-  headers.delete("content-length");
-
-  return new Response(JSON.stringify({ ...payload, url: authorizeUrl.toString() }), {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
-}
-
 export const GET = async (request: Request) => {
   logAuthRequest(request);
   return handlers.GET(request);
@@ -102,6 +55,5 @@ export const GET = async (request: Request) => {
 
 export const POST = async (request: Request) => {
   logAuthRequest(request);
-  const response = await handlers.POST(request);
-  return appendForceReauthIfRequested(request, response);
+  return handlers.POST(request);
 };

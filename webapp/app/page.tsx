@@ -207,12 +207,12 @@ export default function Page() {
     setError(null);
   }, [defaultDates.end, defaultDates.start]);
 
-  const handleLogin = async (forceReauth = false) => {
+  const handleLogin = async () => {
     setLoadingLogin(true);
     setError(null);
     setLogoutNotice(null);
     try {
-      await signInWithInstagram({ forceReauth });
+      await signInWithInstagram();
     } catch (e) {
       console.error(e);
       setError(e instanceof Error ? e.message : "ログインに失敗しました");
@@ -561,18 +561,10 @@ export default function Page() {
                 <StatusBanner
                   className="max-w-xl mx-auto"
                   title={formatLogoutBannerTitle(logoutNotice.username)}
-                  description="Instagram のログイン状態はブラウザに維持されています。"
-                  actionLabel="別のアカウントでログイン"
-                  onAction={() => handleLogin(true)}
-                  actionDisabled={loadingLogin}
                   onDismiss={() => setLogoutNotice(null)}
                 />
               )}
-              <LoginCard
-                loadingLogin={loadingLogin}
-                onLogin={() => handleLogin(false)}
-                onDemo={handleDemo}
-              />
+              <LoginCard loadingLogin={loadingLogin} onLogin={handleLogin} onDemo={handleDemo} />
             </>
           )}
 

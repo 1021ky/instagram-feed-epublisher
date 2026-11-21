@@ -13,13 +13,11 @@ export const authClient = createAuthClient({
 
 /**
  * Instagram OAuth ログインを開始します。
- * `forceReauth: true` を指定した場合は、Instagram 側で再認証（別アカウントログイン）を強制します。
  */
-export async function signInWithInstagram({ forceReauth = false }: { forceReauth?: boolean } = {}) {
+export async function signInWithInstagram() {
   return authClient.signIn.oauth2({
     providerId: "instagram",
     callbackURL: "/?scroll=filters",
-    ...(forceReauth ? { fetchOptions: { query: { force_reauth: "true" } } } : {}),
   });
 }
 
