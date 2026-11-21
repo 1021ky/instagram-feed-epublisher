@@ -14,9 +14,7 @@ describe("正規ホストリダイレクト Proxy (proxy)", () => {
   it("本番環境では非正規ホストを独自ドメインへ301リダイレクトする", () => {
     process.env.NODE_ENV = "production";
 
-    const response = proxy(
-      createRequest("https://service-12345-an.a.run.app/feed?tag=nextjs"),
-    );
+    const response = proxy(createRequest("https://service-12345-an.a.run.app/feed?tag=nextjs"));
 
     expect(response.status).toBe(301);
     expect(response.headers.get("location")).toBe(
