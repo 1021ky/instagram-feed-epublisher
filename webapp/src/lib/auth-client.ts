@@ -27,8 +27,8 @@ export async function signInWithInstagram() {
 export function formatLogoutBannerTitle(username?: string): string {
   const trimmed = username?.trim();
   if (!trimmed) {
-    return "本アプリからログアウトしました";
+    return "FeedsToBook からログアウトしました";
   }
   const normalized = trimmed.startsWith("@") ? trimmed : `@${trimmed}`;
-  return `${normalized} からログアウトしました`;
+  return `FeedsToBook からログアウトしました（${normalized}）`;
 }

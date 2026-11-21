@@ -32,12 +32,12 @@ Meta 公式ドキュメント（[Business Login for Instagram](https://developer
 - 当初は OAuth 2.0 ベストプラクティスに沿った **案2（2導線型）** も実装・検証しましたが、実機レビューの結果、以下の理由から **案1-B** が本アプリのユーザー体験に最も適していると判断しました。
   1. 本アプリからはブラウザ上の `instagram.com` で現在ログイン中のアカウント名をリアルタイム取得できないため、「別のアカウントでログイン」の対となる「〇〇として再ログイン」を保証できず、2つのログイン導線が並ぶと利用者が迷う。
   2. 「Instagram のログイン状態はブラウザに維持されています」といったシステム都合の説明文はユーザーのメンタルモデルと合わずノイズになる。
-  3. 複数アカウント利用者は Instagram 側でログイン中のアカウントが使われることを理解しているため、ログイン導線をシンプルに一本化し、ログアウト時のみ直前のユーザー名（メモリ保持・端末非保存）を添えて「`@<username> からログアウトしました`」と通知するのが最も明快である。
+  3. 複数アカウント利用者は Instagram 側でログイン中のアカウントが使われることを理解しているため、ログイン導線をシンプルに一本化し、ログアウト時のみ直前のユーザー名（メモリ保持・端末非保存）を添えて「`FeedsToBook からログアウトしました（@<username>）`」と通知するのが最も明快である。
 
 ### 実装方針
 
 1. `webapp/src/lib/auth.ts` の `authorizationUrlParams` から `force_authentication: "1"` を削除する。
-2. `webapp/app/page.tsx` および `webapp/src/components/molecules/StatusBanner.tsx` にて、ログアウト直後のみ `@<username> からログアウトしました` の閉じるボタン付き `StatusBanner` を `LoginCard` 直上に表示する（リロードで消えるメモリ保持のみ）。
+2. `webapp/app/page.tsx` および `webapp/src/components/molecules/StatusBanner.tsx` にて、ログアウト直後のみ `FeedsToBook からログアウトしました（@<username>）` の閉じるボタン付き `StatusBanner` を `LoginCard` 直上に表示する（リロードで消えるメモリ保持のみ）。
 
 ## 4. 影響・トレードオフ (Consequences)
 
