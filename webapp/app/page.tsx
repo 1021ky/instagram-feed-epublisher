@@ -18,6 +18,7 @@ import {
 } from "@/components/organisms";
 import { PostListStep } from "@/features/feed";
 import { fetchHashtagSuggestions, fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";
+import { validateEpubTitle } from "@/lib/epub/epub-request.schema";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";
 import { extractHashtagsFromPosts } from "@/lib/instagram/hashtag-service";
@@ -90,7 +91,9 @@ export default function Page() {
     message: "",
   });
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [showCustomizeErrors, setShowCustomizeErrors] = useState(false);
   const downloadUrlRef = useRef<string | null>(null);
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
 
   const [appMode, setAppMode] = useState<AppMode>("real");
   const [logoutNotice, setLogoutNotice] = useState<{ username?: string } | null>(null);
@@ -205,6 +208,7 @@ export default function Page() {
     setFeed([]);
     setIsFilterCollapsed(false);
     setHasFetched(false);
+    setShowCustomizeErrors(false);
     setError(null);
   }, [defaultDates.end, defaultDates.start]);
 
@@ -469,6 +473,14 @@ export default function Page() {
       setError("収録する投稿が1件も選択されていません。投稿を選択してください。");
       return;
     }
+    const titleError = validateEpubTitle(customSettings.title);
+    if (titleError) {
+      setShowCustomizeErrors(true);
+      setError(titleError);
+      titleInputRef.current?.focus();
+      return;
+    }
+    setShowCustomizeErrors(false);
     setError(null);
     setIsExportModalOpen(true);
     if (downloadUrlRef.current) {
@@ -518,7 +530,7 @@ export default function Page() {
         demoMode: isDemoMode,
         filter: cleanFilter,
         metadata: {
-          title: customSettings.title || recommendedTitle,
+          title: customSettings.title.trim(),
           subtitle: customSettings.subtitle,
           author: customSettings.author,
           contact: customSettings.contact ?? "",
@@ -678,6 +690,8 @@ export default function Page() {
                   settings={customSettings}
                   onChange={setCustomSettings}
                   defaultTitle={recommendedTitle}
+                  showValidationErrors={showCustomizeErrors}
+                  titleInputRef={titleInputRef}
                 />
 
                 <div className="pt-2">

@@ -3,24 +3,45 @@
  */
 import * as React from "react";
 import { CoverThemeSelector } from "@/components/molecules";
+import { validateEpubTitle } from "@/lib/epub/epub-request.schema";
 import type { EpubCustomSettings } from "@/types/ui";
 
 type EpubCustomizeStepProps = {
   settings: EpubCustomSettings;
   onChange: (settings: EpubCustomSettings) => void;
   defaultTitle: string;
+  showValidationErrors?: boolean;
+  titleInputRef?: React.RefObject<HTMLInputElement | null>;
 };
+
+const TITLE_INPUT_ID = "epub-book-title-input";
+const TITLE_ERROR_ID = "epub-book-title-error";
 
 /**
  * EPUB 書き出し向けの Step 3 装丁設定フォームを表示する。
  */
-export function EpubCustomizeStep({ settings, onChange, defaultTitle }: EpubCustomizeStepProps) {
+export function EpubCustomizeStep({
+  settings,
+  onChange,
+  defaultTitle,
+  showValidationErrors = false,
+  titleInputRef,
+}: EpubCustomizeStepProps) {
+  const [titleTouched, setTitleTouched] = React.useState(false);
+
   const update = <Key extends keyof EpubCustomSettings>(
     key: Key,
     value: EpubCustomSettings[Key],
   ) => {
     onChange({ ...settings, [key]: value });
   };
+
+  const titleValidationMessage = validateEpubTitle(settings.title);
+  const titleError =
+    (titleTouched || showValidationErrors) && titleValidationMessage
+      ? titleValidationMessage
+      : null;
+  const isTitleEmpty = settings.title.trim().length === 0;
 
   return (
     <section className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6 space-y-6">
@@ -39,16 +60,51 @@ export function EpubCustomizeStep({ settings, onChange, defaultTitle }: EpubCust
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <label className="flex flex-col gap-1.5 text-xs font-semibold text-slate-700">
-          <span>書籍タイトル</span>
+        <div className="flex flex-col gap-1.5 text-xs font-semibold text-slate-700">
+          <div className="flex items-center justify-between gap-2">
+            <label htmlFor={TITLE_INPUT_ID} className="inline-flex items-center gap-1.5">
+              <span>書籍タイトル</span>
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200/70 text-[10px] font-bold">
+                必須
+              </span>
+            </label>
+            {isTitleEmpty && (
+              <button
+                type="button"
+                onClick={() => {
+                  update("title", defaultTitle);
+                  setTitleTouched(false);
+                }}
+                className="text-[11px] font-medium text-slate-600 hover:text-slate-900 underline cursor-pointer"
+              >
+                推奨タイトルを入力
+              </button>
+            )}
+          </div>
           <input
+            ref={titleInputRef}
+            id={TITLE_INPUT_ID}
             type="text"
+            required
+            aria-required="true"
+            aria-invalid={Boolean(titleError)}
+            aria-describedby={titleError ? TITLE_ERROR_ID : undefined}
             placeholder={defaultTitle}
             value={settings.title}
+            onBlur={() => setTitleTouched(true)}
             onChange={(event) => update("title", event.target.value)}
-            className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100 outline-none transition min-h-[44px]"
+            className={`w-full px-3 py-2 text-sm rounded-xl outline-none transition min-h-[44px] ${
+              titleError
+                ? "bg-rose-50/40 border border-rose-400 focus:bg-white focus:border-rose-500 focus:ring-2 focus:ring-rose-100"
+                : "bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+            }`}
           />
-        </label>
+          {titleError && (
+            <p id={TITLE_ERROR_ID} role="alert" className="text-xs font-medium text-rose-600 m-0">
+              {titleError}
+            </p>
+          )}
+        </div>
         <label className="flex flex-col gap-1.5 text-xs font-semibold text-slate-700">
           <span>サブタイトル</span>
           <input
