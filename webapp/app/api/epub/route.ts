@@ -9,8 +9,6 @@ import { parseEpubRequestPayload } from "@/lib/epub/epub-request.schema";
 
 const logger = getLogger("api.epub");
 
-export const runtime = "nodejs";
-
 /**
  * ユーザーのInstagramフィードからEPUBを生成します。
  */

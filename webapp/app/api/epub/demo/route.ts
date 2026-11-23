@@ -15,8 +15,6 @@ import { getLogger } from "@/lib/logger";
 const logger = getLogger("api.epub.demo");
 const sampleDemoItemsById = new Map(sampleDemoFeedData.posts.map((item) => [item.id, item]));
 
-export const runtime = "nodejs";
-
 function resolveAllowedDemoItems(items: InstagramMedia[]): InstagramMedia[] {
   return items.map((item) => {
     const sampleItem = sampleDemoItemsById.get(item.id);
