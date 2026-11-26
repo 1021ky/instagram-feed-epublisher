@@ -1,5 +1,5 @@
 /**
- * @file 44px以上のタップ領域・focus-visible・必須 aria-label を保証する汎用アイコンボタン (Atom)
+ * @file 閉じるボタン・クリアボタン等に用いる汎用アイコンボタン
  */
 "use client";
 
@@ -9,9 +9,9 @@ export type IconButtonVariant = "neutral" | "sky" | "amber" | "emerald";
 export type IconButtonShape = "rounded" | "circle";
 
 export interface IconButtonProps {
-  /** スクリーンリーダー向け操作ラベル（必須） */
+  /** スクリーンリーダー向け操作ラベル */
   "aria-label": string;
-  /** 表示するアイコン要素（aria-hidden="true" の SVG / Lucide アイコン等） */
+  /** 表示する装飾アイコン要素（読み上げは aria-label で代替） */
   icon: React.ReactNode;
   /** クリック時ハンドラ */
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
@@ -40,9 +40,6 @@ const SHAPE_CLASSES: Record<IconButtonShape, string> = {
   circle: "rounded-full",
 };
 
-/**
- * 閉じるボタン・クリアボタン等に用いる最小タップ領域保証付きアイコンボタン。
- */
 export function IconButton({
   "aria-label": ariaLabel,
   icon,

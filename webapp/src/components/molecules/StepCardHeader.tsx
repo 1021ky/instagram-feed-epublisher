@@ -1,6 +1,5 @@
 /**
- * @file ステップカード共通ヘッダー (Molecule)
- * Step 1〜3 で共有される「丸数字バッジ + 見出し + 説明文 + 右側スロット」を統一します。
+ * @file Step 1〜3 で共有するステップカード共通ヘッダー
  */
 import type * as React from "react";
 
@@ -19,9 +18,6 @@ export interface StepCardHeaderProps {
   className?: string;
 }
 
-/**
- * ステップカードの共通ヘッダーコンポーネント。
- */
 export function StepCardHeader({
   stepNumber,
   title,

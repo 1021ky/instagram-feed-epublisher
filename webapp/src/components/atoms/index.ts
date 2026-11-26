@@ -1,6 +1,3 @@
-/**
- * @file Atoms 層コンポーネントのエクスポート定義
- */
 export { ActionButton, type ActionButtonProps, type ActionButtonVariant } from "./ActionButton";
 export { FilterChip, type FilterChipProps } from "./FilterChip";
 export {

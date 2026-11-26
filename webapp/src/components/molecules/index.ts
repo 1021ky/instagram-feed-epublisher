@@ -1,6 +1,3 @@
-/**
- * @file Molecules 層コンポーネントのエクスポート定義
- */
 export { AlertBanner, type AlertBannerProps } from "./AlertBanner";
 export { CoverThemeSelector } from "./CoverThemeSelector";
 export {

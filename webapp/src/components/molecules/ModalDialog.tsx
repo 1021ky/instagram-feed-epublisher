@@ -1,6 +1,5 @@
 /**
- * @file 共通モーダルダイアログシェル (Molecule)
- * Escape キー・Backdrop クリック制御・ARIA 属性・任意の閉じるボタンを統一します。
+ * @file 共通モーダルダイアログシェル
  */
 "use client";
 
@@ -13,13 +12,13 @@ export interface ModalDialogProps {
   isOpen: boolean;
   /** 閉じる要求時のハンドラ（closeDisabled=true のときは呼ばれない） */
   onClose: () => void;
-  /** ダイアログ見出し要素の ID（aria-labelledby） */
+  /** ダイアログ見出し要素の ID */
   labelledBy: string;
-  /** ダイアログ説明要素の ID（aria-describedby） */
+  /** ダイアログ説明要素の ID */
   describedBy?: string;
   /** true の間は Escape キー・Backdrop クリック・閉じるボタンによるクローズを抑止する */
   closeDisabled?: boolean;
-  /** 右上に閉じる IconButton を表示するか */
+  /** 右上に閉じるボタンを表示するか */
   showCloseButton?: boolean;
   /** 右上閉じるボタンのアクセシビリティラベル */
   closeButtonLabel?: string;
@@ -29,9 +28,6 @@ export interface ModalDialogProps {
   children: React.ReactNode;
 }
 
-/**
- * 共通モーダルダイアログシェルコンポーネント。
- */
 export function ModalDialog({
   isOpen,
   onClose,

@@ -1,6 +1,5 @@
 /**
- * @file セグメント切替コントロール (Molecule)
- * 期間プリセットや並び順切替など、排他的オプション選択用のボタングループを提供します。
+ * @file 排他的オプション選択用のセグメント切替ボタングループ
  */
 "use client";
 
@@ -30,9 +29,6 @@ export interface SegmentedControlProps<T extends string = string> {
   className?: string;
 }
 
-/**
- * 排他的セグメント切替ボタングループコンポーネント。
- */
 export function SegmentedControl<T extends string = string>({
   ariaLabel,
   options,

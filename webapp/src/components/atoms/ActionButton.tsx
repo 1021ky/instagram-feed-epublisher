@@ -1,5 +1,5 @@
 /**
- * @file 4種のコンテキストバリアントと44pxタップ領域・focus-visible を備えた汎用アクションボタン (Atom)
+ * @file 主要アクション向けの統一ボタン
  */
 "use client";
 
@@ -14,7 +14,7 @@ export interface ActionButtonProps {
   variant?: ActionButtonVariant;
   /** 横幅いっぱいに広げるか */
   fullWidth?: boolean;
-  /** ローディング中状態（aria-busy と disabled を同時付与） */
+  /** ローディング中状態 */
   isLoading?: boolean;
   /** ボタン種別 */
   type?: "button" | "submit" | "reset";
@@ -22,7 +22,7 @@ export interface ActionButtonProps {
   disabled?: boolean;
   /** クリック時ハンドラ */
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  /** 明示的なアクセシビリティラベル（任意） */
+  /** 明示的なアクセシビリティラベル */
   "aria-label"?: string;
   /** 呼び出し側での配置・余白調整用クラス */
   className?: string;
@@ -39,9 +39,6 @@ const VARIANT_CLASSES: Record<ActionButtonVariant, string> = {
     "text-white bg-rose-600 hover:bg-rose-700 active:bg-rose-800 disabled:opacity-60 shadow-xs focus-visible:ring-rose-500",
 };
 
-/**
- * 主要アクション向けの統一ボタンコンポーネント。
- */
 export function ActionButton({
   children,
   variant = "primary",
