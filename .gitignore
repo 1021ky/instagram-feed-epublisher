@@ -67,3 +67,6 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# Local task notes
+tasks/todo.md
+

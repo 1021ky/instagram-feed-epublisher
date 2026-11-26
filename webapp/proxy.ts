@@ -3,6 +3,8 @@ import type { NextRequest } from "next/server";
 
 const CANONICAL_HOST = "feedstobook.ksanchu.page";
 
+// NOTE: インフラコスト最小化のため GCLB 等を置かず Cloud Run Domain Mapping を採用しており
+// （terraform/cloud_run.tf 参照）、*.run.app への直接アクセスをアプリ側で正規ホストへ寄せる。
 export function proxy(request: NextRequest) {
   if (process.env.NODE_ENV !== "production") {
     return NextResponse.next();
@@ -31,5 +33,13 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon\\.ico).*)"],
+  matcher: [
+    {
+      source: "/((?!_next/static|_next/image|favicon\\.ico).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
+  ],
 };
