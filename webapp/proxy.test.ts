@@ -1,22 +1,19 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
-import { config, middleware } from "./middleware";
-
-const originalNodeEnv = process.env.NODE_ENV;
+import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
+import { config, proxy } from "./proxy";
 
 const createRequest = (url: string, headers?: HeadersInit) => new NextRequest(url, { headers });
 
-describe("正規ホストリダイレクトミドルウェア (middleware)", () => {
+describe("正規ホストリダイレクト Proxy (proxy)", () => {
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv;
+    vi.unstubAllEnvs();
   });
 
   it("本番環境では非正規ホストを独自ドメインへ301リダイレクトする", () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
 
-    const response = middleware(
-      createRequest("https://service-12345-an.a.run.app/feed?tag=nextjs"),
-    );
+    const response = proxy(createRequest("https://service-12345-an.a.run.app/feed?tag=nextjs"));
 
     expect(response.status).toBe(301);
     expect(response.headers.get("location")).toBe(
@@ -25,9 +22,9 @@ describe("正規ホストリダイレクトミドルウェア (middleware)", () 
   });
 
   it("内部ポート（:8080等）が含まれていてもリダイレクト先にポート番号が混入しない", () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
 
-    const response = middleware(
+    const response = proxy(
       createRequest("http://localhost:8080/feed?tag=nextjs", {
         host: "localhost:8080",
       }),
@@ -40,18 +37,18 @@ describe("正規ホストリダイレクトミドルウェア (middleware)", () 
   });
 
   it("正規ホストではリダイレクトしない", () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
 
-    const response = middleware(createRequest("https://feedstobook.ksanchu.page/feed"));
+    const response = proxy(createRequest("https://feedstobook.ksanchu.page/feed"));
 
     expect(response.status).toBe(200);
     expect(response.headers.get("location")).toBeNull();
   });
 
   it("リバースプロキシ環境で x-forwarded-host が正規ホストの場合はリダイレクトしない", () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
 
-    const response = middleware(
+    const response = proxy(
       createRequest("http://localhost:8080/feed", {
         host: "service-12345-an.a.run.app:8080",
         "x-forwarded-host": "feedstobook.ksanchu.page",
@@ -64,9 +61,9 @@ describe("正規ホストリダイレクトミドルウェア (middleware)", () 
   });
 
   it("x-forwarded-host にポート（:443等）が含まれていても正規ホストとして認識する", () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
 
-    const response = middleware(
+    const response = proxy(
       createRequest("http://localhost:8080/feed", {
         host: "service-12345-an.a.run.app:8080",
         "x-forwarded-host": "feedstobook.ksanchu.page:443",
@@ -79,18 +76,18 @@ describe("正規ホストリダイレクトミドルウェア (middleware)", () 
   });
 
   it("localhost の開発環境ではリダイレクトしない", () => {
-    process.env.NODE_ENV = "development";
+    vi.stubEnv("NODE_ENV", "development");
 
-    const response = middleware(createRequest("http://localhost:3000/feed?tag=dev"));
+    const response = proxy(createRequest("http://localhost:3000/feed?tag=dev"));
 
     expect(response.status).toBe(200);
     expect(response.headers.get("location")).toBeNull();
   });
 
   it("auth API パスも本番では正規ホストへリダイレクトする", () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
 
-    const response = middleware(
+    const response = proxy(
       createRequest(
         "https://service-12345-an.a.run.app/api/auth/sign-in/instagram?provider=instagram",
       ),
@@ -102,9 +99,41 @@ describe("正規ホストリダイレクトミドルウェア (middleware)", () 
     );
   });
 
-  it("matcher で静的アセットのみを除外する", () => {
-    expect(config).toEqual({
-      matcher: ["/((?!_next/static|_next/image|favicon\\.ico).*)"],
-    });
+  it.each([
+    { label: "トップページへの通常アクセス", url: "https://example.com/", expected: true },
+    {
+      label: "auth API パスへの通常アクセス",
+      url: "https://example.com/api/auth/sign-in/instagram",
+      expected: true,
+    },
+    {
+      label: "Next.js 静的アセット (_next/static)",
+      url: "https://example.com/_next/static/chunks/main.js",
+      expected: false,
+    },
+    {
+      label: "Next.js 画像最適化 (_next/image)",
+      url: "https://example.com/_next/image?url=%2Ftest.png&w=64&q=75",
+      expected: false,
+    },
+    {
+      label: "ファビコン (favicon.ico)",
+      url: "https://example.com/favicon.ico",
+      expected: false,
+    },
+    {
+      label: "Next.js ルータープリフェッチ (next-router-prefetch)",
+      url: "https://example.com/privacy",
+      headers: { "next-router-prefetch": "1" },
+      expected: false,
+    },
+    {
+      label: "ブラウザプリフェッチ (purpose: prefetch)",
+      url: "https://example.com/privacy",
+      headers: { purpose: "prefetch" },
+      expected: false,
+    },
+  ])("matcher が $label に対して $expected を返す", ({ url, headers, expected }) => {
+    expect(unstable_doesMiddlewareMatch({ config, url, headers })).toBe(expected);
   });
 });

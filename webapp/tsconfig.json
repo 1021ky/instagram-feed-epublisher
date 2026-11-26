@@ -29,6 +29,8 @@
     "e2e",
     "next-env.d.ts",
     "playwright.config.ts",
+    "proxy.ts",
+    "proxy.test.ts",
     "scripts/**/*.d.mts",
     "src",
     ".next/types/**/*.ts",

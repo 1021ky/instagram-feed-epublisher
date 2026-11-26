@@ -84,6 +84,12 @@ resource "google_cloud_run_v2_service_iam_member" "public_access" {
 }
 
 # 独自ドメインマッピング (所有権確認後に enable_custom_domain = true で有効化)
+# NOTE: 本来は前段に GCLB や Cloudflare（プロキシ + Redirect Rule）等を置き、
+# Next.js コンテナ起動前のエッジ／ロードバランサー層で 301/308 リダイレクトする
+# （または *.run.app への直接 ingress を閉じる）のが最も理想的で高速だが、
+# コストを最小化するため無料の Cloud Run Domain Mapping を採用している。
+# この構成では ingress = "INGRESS_TRAFFIC_ALL" が必要になり *.run.app へも到達可能なため、
+# 正規ホストへのリダイレクトはアプリ側（webapp/proxy.ts）で担保している。
 resource "google_cloud_run_domain_mapping" "domain" {
   count    = var.enable_custom_domain ? 1 : 0
   location = var.region
