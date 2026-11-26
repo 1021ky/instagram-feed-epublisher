@@ -1,51 +1,10 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import {
-  HashtagQuickSelect,
-  MAX_QUICK_SELECT_CHIPS,
-  resolveNextHashtagOnChipClick,
-} from "./HashtagQuickSelect";
+import { MAX_QUICK_SELECT_CHIPS } from "../model/hashtag";
+import { HashtagQuickSelect } from "./HashtagQuickSelect";
 
 describe("ハッシュタグクイック選択 (HashtagQuickSelect)", () => {
-  it.each([
-    {
-      label: "未選択から新規タグを選択",
-      current: undefined,
-      clicked: "京都カフェ",
-      expected: "京都カフェ",
-    },
-    {
-      label: "別タグから切り替え",
-      current: "朝活",
-      clicked: "#京都カフェ",
-      expected: "京都カフェ",
-    },
-    {
-      label: "同一タグ再クリックで解除",
-      current: "京都カフェ",
-      clicked: "京都カフェ",
-      expected: undefined,
-    },
-    {
-      label: "大文字小文字の違いを無視して同一タグ解除",
-      current: "Travel",
-      clicked: "travel",
-      expected: undefined,
-    },
-    {
-      label: "全角・NFD/NFCゆれを正規化して同一タグ解除",
-      current: "＃ふ\u309Aりん",
-      clicked: "ぷりん",
-      expected: undefined,
-    },
-    { label: "空文字クリックで解除", current: "朝活", clicked: "", expected: undefined },
-    { label: "空白のみクリックで解除", current: "朝活", clicked: "#   ", expected: undefined },
-    { label: "全角＃のみクリックで解除", current: "朝活", clicked: "＃", expected: undefined },
-  ])("resolveNextHashtagOnChipClick: $label", ({ current, clicked, expected }) => {
-    expect(resolveNextHashtagOnChipClick(current, clicked)).toBe(expected);
-  });
-
   it.each([
     {
       label: "候補0件かつ非ローディングのときは何も描画しない（空文字）",

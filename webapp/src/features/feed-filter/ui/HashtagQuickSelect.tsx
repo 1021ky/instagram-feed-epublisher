@@ -1,38 +1,16 @@
-/**
- * @file ハッシュタグ候補の集計中ステータスとクイック選択チップ群
- */
 "use client";
 
 import { FilterChip, InlineLoadingStatus } from "@/components/atoms";
 import type { HashtagSuggestion } from "@/types/ui";
-
-/** クイック選択チップとして画面上に並べる最大件数 */
-export const MAX_QUICK_SELECT_CHIPS = 10;
+import {
+  MAX_QUICK_SELECT_CHIPS,
+  normalizeHashtagForComparison,
+  resolveNextHashtagOnChipClick,
+} from "../model/hashtag";
 
 /**
- * ハッシュタグのクイック選択チップがクリックされた際の次の入力値（選択または解除）を算出します。
+ * ハッシュタグクイック選択チップ群コンポーネントの Props。
  */
-export function resolveNextHashtagOnChipClick(
-  currentHashtag: string | undefined,
-  clickedTag: string,
-): string | undefined {
-  const cleanClicked = clickedTag.replace(/^[#＃]/, "").trim();
-  if (!cleanClicked) {
-    return undefined;
-  }
-  const normalizedCurrent = (currentHashtag ?? "")
-    .replace(/^[#＃]/, "")
-    .trim()
-    .normalize("NFC")
-    .toLowerCase();
-  const normalizedClicked = cleanClicked.normalize("NFC").toLowerCase();
-
-  if (normalizedCurrent && normalizedCurrent === normalizedClicked) {
-    return undefined;
-  }
-  return cleanClicked;
-}
-
 export interface HashtagQuickSelectProps {
   /** ハッシュタグ候補リスト */
   suggestions: HashtagSuggestion[];
@@ -70,11 +48,7 @@ export function HashtagQuickSelect({
     return null;
   }
 
-  const normalizedCurrent = (selectedHashtag ?? "")
-    .replace(/^[#＃]/, "")
-    .trim()
-    .normalize("NFC")
-    .toLowerCase();
+  const normalizedCurrent = normalizeHashtagForComparison(selectedHashtag);
 
   return (
     <div className="pt-1.5 space-y-1.5">
