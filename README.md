@@ -206,6 +206,9 @@ pnpm build
 # コードの Lint 実行 (oxlint)
 pnpm lint
 
+# 型チェック実行 (next typegen + tsc --noEmit)
+pnpm typecheck
+
 # Markdown の Lint 実行 (markdownlint-cli2)
 pnpm lint:md
 

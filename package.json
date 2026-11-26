@@ -8,6 +8,7 @@
     "build:clean": "pnpm --filter instagram-feed-epublisher-webapp build:clean",
     "start": "pnpm --filter instagram-feed-epublisher-webapp start",
     "lint": "pnpm --filter instagram-feed-epublisher-webapp lint",
+    "typecheck": "pnpm --filter instagram-feed-epublisher-webapp typecheck",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" \"#**/.next/**\"",
     "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#**/node_modules/**\" \"#**/.next/**\"",
     "format": "oxfmt --write .",

@@ -10,6 +10,7 @@
     "build:clean": "pnpm clean && pnpm build",
     "start": "pnpm next start",
     "lint": "oxlint .",
+    "typecheck": "pnpm next typegen && pnpm tsc --noEmit",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "test": "pnpm vitest run --config vitest.config.ts",
