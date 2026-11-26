@@ -3,7 +3,7 @@ import { userEvent } from "@vitest/browser/context";
 import { render } from "vitest-browser-react";
 import { AccountDeletionModal } from "./AccountDeletionModal";
 
-describe("退会確認・完了モーダルの実ブラウザ動作 (AccountDeletionModal)", () => {
+describe("退会確認・完了モーダルの操作 (AccountDeletionModal)", () => {
   it.each([
     {
       label: "キャンセルボタンをクリックした場合",
@@ -49,7 +49,7 @@ describe("退会確認・完了モーダルの実ブラウザ動作 (AccountDele
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("確認ステップでモーダルカード本体をクリックしてもイベント伝播せず閉じないこと", async () => {
+  it("確認ステップでモーダルカード本体をクリックしても閉じないこと", async () => {
     const onClose = vi.fn();
     const screen = await render(
       <AccountDeletionModal
@@ -83,7 +83,7 @@ describe("退会確認・完了モーダルの実ブラウザ動作 (AccountDele
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it("退会処理中（isDeleting=true）は Escape キーやバックドロップ操作でも閉じずボタンが無効化されること", async () => {
+  it("退会処理中は Escape キーやバックドロップ操作でも閉じずボタンが無効化されること", async () => {
     const onClose = vi.fn();
     const screen = await render(
       <AccountDeletionModal

@@ -1,6 +1,5 @@
 /**
- * @file Vitest Browser Mode 用の next/link 互換シム。
- * Next.js ルーターに依存せず標準の <a> 要素として描画します。
+ * @file ブラウザテスト用の next/link フェイク。
  */
 import type * as React from "react";
 
@@ -10,7 +9,7 @@ type UrlObject = {
   hash?: string | null;
 };
 
-export interface NextLinkShimProps extends Omit<
+export interface FakeNextLinkProps extends Omit<
   React.AnchorHTMLAttributes<HTMLAnchorElement>,
   "href"
 > {
@@ -29,7 +28,7 @@ function resolveHref(href: string | UrlObject): string {
   return `${href.pathname ?? ""}${href.search ?? ""}${href.hash ?? ""}`;
 }
 
-export default function NextLinkShim({
+export default function FakeNextLink({
   href,
   prefetch: _prefetch,
   replace: _replace,
@@ -38,7 +37,7 @@ export default function NextLinkShim({
   locale: _locale,
   children,
   ...rest
-}: NextLinkShimProps) {
+}: FakeNextLinkProps) {
   return (
     <a href={resolveHref(href)} {...rest}>
       {children}

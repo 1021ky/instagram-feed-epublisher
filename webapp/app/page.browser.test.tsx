@@ -1,8 +1,5 @@
 /**
- * @file トップページの Medium 結合テスト（Vitest Browser Mode）。
- *
- * 認証状態に応じた画面表示、デモ体験・フィード絞り込み・投稿選択・装丁設定・EPUB 生成・退会フローなど、
- * 主要なユーザー操作と画面状態遷移を実ブラウザ上で検証します。
+ * @file トップページの結合テスト。
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "@vitest/browser/context";

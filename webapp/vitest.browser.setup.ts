@@ -1,6 +1,5 @@
 /**
- * @file Vitest Browser Mode（実ブラウザ Medium テスト）用の共通セットアップ。
- * Tailwind CSS v4 と globals.css を読み込み、実ブラウザ上でのレイアウト・タップ領域・操作を検証可能にします。
+ * @file ブラウザテスト共通セットアップ（レイアウト検証用スタイル適用と環境初期化）。
  */
 import "./app/globals.css";
 import "vitest-browser-react";

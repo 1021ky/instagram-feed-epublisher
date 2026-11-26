@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import { StatusBanner } from "./StatusBanner";
 
-describe("ステータス通知バナーの実ブラウザ動作 (StatusBanner)", () => {
+describe("ステータス通知バナーの操作 (StatusBanner)", () => {
   it("閉じるボタンをクリックすると onDismiss が呼ばれ、44px 以上のタップ領域を持つこと", async () => {
     const onDismiss = vi.fn();
     const screen = await render(

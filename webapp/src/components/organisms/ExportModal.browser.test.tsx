@@ -3,7 +3,7 @@ import { userEvent } from "@vitest/browser/context";
 import { render } from "vitest-browser-react";
 import { ExportModal } from "./ExportModal";
 
-describe("エクスポートモーダルの実ブラウザ動作 (ExportModal)", () => {
+describe("エクスポートモーダルの操作 (ExportModal)", () => {
   it("完了状態でダウンロードボタンと閉じるボタンがそれぞれ対応するハンドラを呼ぶこと", async () => {
     const onDownload = vi.fn();
     const onClose = vi.fn();

@@ -1,6 +1,5 @@
 /**
- * @file Vitest Browser Mode 用の next/image 互換シム。
- * Next.js 画像最適化ランタイムに依存せず標準の <img> 要素として描画します。
+ * @file ブラウザテスト用の next/image フェイク。
  */
 import type * as React from "react";
 
@@ -10,7 +9,7 @@ type StaticImageData = {
   width?: number;
 };
 
-export interface NextImageShimProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src"> {
+export interface FakeNextImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src"> {
   src: string | StaticImageData;
   fill?: boolean;
   unoptimized?: boolean;
@@ -20,7 +19,7 @@ export interface NextImageShimProps extends Omit<React.ImgHTMLAttributes<HTMLIma
   blurDataURL?: string;
 }
 
-export default function NextImageShim({
+export default function FakeNextImage({
   src,
   alt = "",
   fill,
@@ -31,7 +30,7 @@ export default function NextImageShim({
   blurDataURL: _blurDataURL,
   style,
   ...rest
-}: NextImageShimProps) {
+}: FakeNextImageProps) {
   const resolvedSrc = typeof src === "string" ? src : src.src;
   const fillStyle: React.CSSProperties | undefined = fill
     ? {

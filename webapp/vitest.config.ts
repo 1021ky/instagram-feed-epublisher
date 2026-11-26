@@ -30,14 +30,11 @@ export default defineConfig({
       },
       {
         plugins: [react()],
-        define: {
-          "process.env": JSON.stringify({ NODE_ENV: "test" }),
-        },
         resolve: {
           alias: {
             ...commonAlias,
-            "next/link": path.resolve(__dirname, "./test-shims/next-link.tsx"),
-            "next/image": path.resolve(__dirname, "./test-shims/next-image.tsx"),
+            "next/link": path.resolve(__dirname, "./test-fakes/next-link.tsx"),
+            "next/image": path.resolve(__dirname, "./test-fakes/next-image.tsx"),
           },
         },
         test: {

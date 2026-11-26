@@ -33,7 +33,7 @@
     "proxy.test.ts",
     "scripts/**/*.d.mts",
     "src",
-    "test-shims",
+    "test-fakes",
     "vitest.browser.setup.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
