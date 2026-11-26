@@ -23,6 +23,7 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 ├── .github/              # GitHub Actions CI ワークフロー、エージェント向け指示定義
 ├── book_layout/          # EPUB 生成時の HTML / CSS レイアウトテンプレート
 ├── docs/                 # 設計資産・ドキュメント更新ポリシー
+│   ├── adr/              # アーキテクチャ決定記録 (ADR)
 │   ├── designdoc/        # 設計ドキュメント・Mermaid 図面
 │   │   ├── designDoc.md      # Webapp 詳細設計書
 │   │   ├── infra-designdoc.md # インフラ基本設計書・運用手順
@@ -31,7 +32,9 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 │   │   ├── flowchart LR.mmd  # ユーザーフロー図
 │   │   └── sequenceDiagram.mmd # 認証・API連携シーケンス図
 │   ├── openapi/          # 外部・内部 API 契約定義 (OpenAPI 3.1)
-│   │   └── instagram-graph-api.openapi.yaml # Instagram Graph API / BFF スキーマ
+│   │   ├── instagram-graph-api.openapi.yaml # Instagram Graph API / モック契約スキーマ
+│   │   ├── bff-api.openapi.json # BFF API OpenAPI 3.1.0 仕様書（自動生成 / Git 管理外）
+│   │   └── index.html           # BFF API 静的 HTML ドキュメント（自動生成 / Git 管理外）
 │   └── documentation-policy.md # ドキュメント更新ポリシー
 ├── scripts/              # リポジトリ共通チェックスクリプト
 └── webapp/               # Next.js Web アプリケーション本体（※詳細は webapp/README.md 参照）
@@ -60,6 +63,9 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
   - Next.js フロントエンド、Better Auth、Instagram Graph API 間の認証・データ取得シーケンス。
 - 📜 [ドキュメント更新ポリシー](docs/documentation-policy.md)
   - 人間および AI エージェントが遵守すべきドキュメント配置、更新義務、品質基準（Markdown / Mermaid の検証ルール）。
+- 🏛 [アーキテクチャ決定記録 (ADR)](docs/adr/)
+  - [ADR-0001: Instagram OAuth ログイン時の再認証制御とログアウト通知の設計](docs/adr/0001-instagram-oauth-login-and-account-switching.md)
+  - [ADR-0002: Next.js Route Handler の責務分離と Zod v4 ＋ `zod-openapi` による BFF 契約管理](docs/adr/0002-api-validation-and-openapi-architecture.md)
 
 ---
 
@@ -220,6 +226,10 @@ pnpm terraform:validate
 
 # 単体・結合・OpenAPI 契約テスト (Vitest)
 pnpm test
+
+# BFF API OpenAPI 仕様書 (JSON / 静的 HTML) の生成・同期確認
+pnpm openapi:generate
+pnpm openapi:check
 
 # E2E テスト (Playwright + OpenAPI ローカルモックサーバー)
 pnpm e2etest

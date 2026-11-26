@@ -1,3 +1,6 @@
+/**
+ * @file 投稿リストステップ (PostListStep) の単体テスト
+ */
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
@@ -45,15 +48,12 @@ describe("投稿リストステップ (PostListStep)", () => {
       />,
     );
 
-    // 3件中2件選択中
     expect(html).toContain("選択中: 2 / 3 件");
     expect(html).toContain("すべて選択");
     expect(html).toContain("選択解除");
     expect(html).toContain("Day 98: 朝のランニング記録");
     expect(html).toContain("Day 99: カフェで読書");
     expect(html).toContain("Day 100: 祝・完走！");
-
-    // 固定バーと被らない余白が設定されていること
     expect(html).toContain("pb-28");
   });
 
@@ -86,5 +86,43 @@ describe("投稿リストステップ (PostListStep)", () => {
     expect(html).toContain("未取得");
     expect(html).toContain("投稿はまだ取得されていません");
     expect(html).toContain("この条件で投稿を取得");
+  });
+
+  it.each([
+    {
+      label: "未指定時（デフォルトで古い順がアクティブ）",
+      sortOrder: undefined,
+      ascPressed: 'aria-pressed="true"',
+      descPressed: 'aria-pressed="false"',
+    },
+    {
+      label: "古い順 (asc) 指定時",
+      sortOrder: "asc" as const,
+      ascPressed: 'aria-pressed="true"',
+      descPressed: 'aria-pressed="false"',
+    },
+    {
+      label: "新しい順 (desc) 指定時",
+      sortOrder: "desc" as const,
+      ascPressed: 'aria-pressed="false"',
+      descPressed: 'aria-pressed="true"',
+    },
+  ])("並び順選択 UI が $label に正しく描画されること", ({ sortOrder, ascPressed, descPressed }) => {
+    const html = renderToStaticMarkup(
+      <PostListStep
+        posts={samplePosts}
+        sortOrder={sortOrder}
+        onSortOrderChange={vi.fn()}
+        onToggleSelect={vi.fn()}
+        onSelectAll={vi.fn()}
+        onDeselectAll={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('aria-label="投稿の並び順"');
+    expect(html).toContain("古い順（おすすめ）");
+    expect(html).toContain("新しい順");
+    expect(html).toContain(ascPressed);
+    expect(html).toContain(descPressed);
   });
 });

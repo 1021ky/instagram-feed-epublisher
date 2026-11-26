@@ -259,4 +259,26 @@ describe("投稿一覧取得 API の結合テスト (GET /api/instagram/media)",
     const body = (await response.json()) as { error: string };
     expect(body.error).toContain("Graph API error: 400");
   });
+
+  it("【並び順指定】sortOrder=asc 指定時は古い順に並び替えて返却する", async () => {
+    const posts = buildMockPosts(3, {
+      prefix: "order",
+      baseTimestampMs: Date.parse("2026-10-15T12:00:00Z"),
+    });
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ data: posts }),
+    } as Response);
+
+    const response = await GET(
+      new Request(
+        "http://localhost/api/instagram/media?startDate=2026-10-01&endDate=2026-10-20&sortOrder=asc",
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { items: InstagramMedia[] };
+    expect(body.items.map((item) => item.id)).toEqual(["order-3", "order-2", "order-1"]);
+  });
 });

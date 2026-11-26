@@ -24,8 +24,11 @@ vi.mock("@/components/organisms", () => ({
   Navbar: ({ user }: { user?: { username?: string; displayName?: string } | null }) => (
     <div>{user ? `NAVBAR:${user.username ?? user.displayName ?? "unknown"}` : "NAVBAR:guest"}</div>
   ),
-  PostListStep: () => <div>POST_LIST_STEP</div>,
   StickyActionBar: () => <div>STICKY_ACTION_BAR</div>,
+}));
+
+vi.mock("@/features/feed", () => ({
+  PostListStep: () => <div>POST_LIST_STEP</div>,
 }));
 
 import Page from "./page";

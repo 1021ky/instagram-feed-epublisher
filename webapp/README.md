@@ -12,20 +12,22 @@ Next.js (App Router) + TypeScript + Better Auth を採用しています。
 
 すべてのコマンドは `webapp/` ディレクトリ内で実行します（プロジェクトルートからも `pnpm <コマンド>` で直接実行可能です）。
 
-| コマンド             | 説明                                                         |
-| :------------------- | :----------------------------------------------------------- |
-| `pnpm dev`           | 開発サーバー起動（ローカル HTTPS: `https://localhost:3000`） |
-| `pnpm clean`         | Next.js ビルドキャッシュ（`.next`）の削除                    |
-| `pnpm build`         | Next.js 本番用ビルド                                         |
-| `pnpm build:clean`   | ビルドキャッシュ削除後のクリーンビルド                       |
-| `pnpm start`         | ビルド済みアプリケーションの起動                             |
-| `pnpm lint`          | oxlint による静的解析                                        |
-| `pnpm format`        | oxfmt によるコードフォーマット                               |
-| `pnpm format:check`  | oxfmt によるフォーマットチェック                             |
-| `pnpm test`          | Vitest による単体・結合・OpenAPI 契約テスト実行              |
-| `pnpm e2etest`       | Playwright によるフルスタック E2E テスト実行                 |
-| `pnpm e2etest:ui`    | Playwright UI モードでのテスト実行                           |
-| `pnpm e2etest:debug` | Playwright デバッグモードでのテスト実行                      |
+| コマンド                | 説明                                                          |
+| :---------------------- | :------------------------------------------------------------ |
+| `pnpm dev`              | 開発サーバー起動（ローカル HTTPS: `https://localhost:3000`）  |
+| `pnpm clean`            | Next.js ビルドキャッシュ（`.next`）の削除                     |
+| `pnpm build`            | Next.js 本番用ビルド                                          |
+| `pnpm build:clean`      | ビルドキャッシュ削除後のクリーンビルド                        |
+| `pnpm start`            | ビルド済みアプリケーションの起動                              |
+| `pnpm lint`             | oxlint による静的解析                                         |
+| `pnpm format`           | oxfmt によるコードフォーマット                                |
+| `pnpm format:check`     | oxfmt によるフォーマットチェック                              |
+| `pnpm test`             | Vitest による単体・結合・OpenAPI 契約テスト実行               |
+| `pnpm openapi:generate` | Zod v4 スキーマから `docs/openapi/` へ OpenAPI JSON/HTML 生成 |
+| `pnpm openapi:check`    | `docs/openapi/` の生成済み OpenAPI JSON/HTML の最新性検証     |
+| `pnpm e2etest`          | Playwright によるフルスタック E2E テスト実行                  |
+| `pnpm e2etest:ui`       | Playwright UI モードでのテスト実行                            |
+| `pnpm e2etest:debug`    | Playwright デバッグモードでのテスト実行                       |
 
 ---
 
@@ -55,8 +57,9 @@ webapp/
     │   └── organisms/    # 独立セクション・ステップ・モーダル (Navbar, LoginCard, AccountDeletionModal, 各Step, StickyActionBar, SiteFooter, LegalPage)
     ├── lib/              # 共通ライブラリ・ロジック
     │   ├── auth/         # Better Auth 設定・セッションサービス
-    │   ├── epub/         # EPUB ビルダー・レンダラー
-    │   └── instagram/    # Instagram Graph API クライアント
+    │   ├── epub/         # EPUB ビルダー・レンダラー・Zod v4 スキーマ・生成サービス
+    │   ├── instagram/    # Instagram Graph API クライアント
+    │   └── openapi/      # Zod v4 スキーマからの OpenAPI 3.1.0 ドキュメント生成
     └── types/            # UI・ドメイン共通型定義 (ui.ts 等)
 ```
 

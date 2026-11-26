@@ -19,9 +19,16 @@ const logger = getLogger("instagram.graph-client");
 
 const MEDIA_ENDPOINT_PATH = "/me/media";
 /** 通常のフィード取得で要求するデフォルトフィールド一覧 */
-export const DEFAULT_MEDIA_FIELDS = ["id", "caption", "media_url", "permalink", "timestamp"].join(
-  ",",
-);
+export const DEFAULT_MEDIA_FIELDS = [
+  "id",
+  "caption",
+  "media_type",
+  "media_url",
+  "thumbnail_url",
+  "permalink",
+  "timestamp",
+  "children{id,media_type,media_url,thumbnail_url}",
+].join(",");
 
 /** ハッシュタグ候補集計に必要な投稿フィールド一覧 */
 export const HASHTAG_SCAN_FIELDS = ["id", "caption", "timestamp"].join(",");

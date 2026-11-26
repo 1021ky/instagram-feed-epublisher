@@ -2,12 +2,14 @@
  * @file Filter utilities for Instagram media.
  */
 import type { FeedFilter, InstagramMedia } from "@/lib/instagram/types";
+import { sortItemsByTimestamp } from "@/lib/epub/sort";
 
 /**
  * Applies filter rules to Instagram media items.
+ * 件数上限（maxCount）で最新側の投稿を確定したうえで、sortOrder 指定時のみ並び替えます。
  */
 export function applyFeedFilter(items: InstagramMedia[], filter: FeedFilter): InstagramMedia[] {
-  return items
+  const sliced = items
     .filter((item) => {
       if (filter.hashtag) {
         const caption = item.caption ?? "";
@@ -28,4 +30,10 @@ export function applyFeedFilter(items: InstagramMedia[], filter: FeedFilter): In
       return true;
     })
     .slice(0, filter.maxCount);
+
+  if (filter.sortOrder) {
+    return sortItemsByTimestamp(sliced, filter.sortOrder);
+  }
+
+  return sliced;
 }

@@ -380,4 +380,21 @@ describe("投稿一覧ページネーション・絞り込み取得クライア�
     const calledUrl = new URL(fetchMock.mock.calls[0]?.[0] as string);
     expect(calledUrl.searchParams.get("fields")).toBe("id,caption,timestamp");
   });
+
+  it("【デフォルト fields】media_type・thumbnail_url・children を含むフィールドを要求すること", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ data: createMediaItems(1) }),
+    } as Response);
+    globalThis.fetch = fetchMock;
+
+    await fetchGraphMedia("token", { maxScanItems: 10 });
+
+    const calledUrl = new URL(fetchMock.mock.calls[0]?.[0] as string);
+    const fields = calledUrl.searchParams.get("fields") ?? "";
+    expect(fields).toContain("media_type");
+    expect(fields).toContain("thumbnail_url");
+    expect(fields).toContain("children{id,media_type,media_url,thumbnail_url}");
+  });
 });

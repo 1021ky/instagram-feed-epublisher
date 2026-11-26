@@ -45,4 +45,61 @@ describe("メディア画像のダウンロード保存 (downloadMedia)", () => 
       ),
     ).rejects.toThrow("画像の取得に失敗しました");
   });
+
+  it.each([
+    {
+      label: "動画投稿 (VIDEO) の thumbnail_url",
+      item: {
+        id: "v1",
+        media_type: "VIDEO" as const,
+        media_url: "http://example.com/video.mp4",
+        thumbnail_url: "http://example.com/video-thumb.jpg",
+        permalink: "p",
+        timestamp: "t",
+      },
+      expectedFetchUrl: "http://example.com/video-thumb.jpg",
+      expectedPath: "/tmp/v1.jpg",
+    },
+    {
+      label: "カルーセル投稿 (CAROUSEL_ALBUM) の先頭画像",
+      item: {
+        id: "c1",
+        media_type: "CAROUSEL_ALBUM" as const,
+        permalink: "p",
+        timestamp: "t",
+        children: {
+          data: [
+            { id: "ch1", media_type: "IMAGE" as const, media_url: "http://example.com/ch1.jpg" },
+            { id: "ch2", media_type: "IMAGE" as const, media_url: "http://example.com/ch2.jpg" },
+          ],
+        },
+      },
+      expectedFetchUrl: "http://example.com/ch1.jpg",
+      expectedPath: "/tmp/c1.jpg",
+    },
+  ])("$label を解決してダウンロードすること", async ({ item, expectedFetchUrl, expectedPath }) => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => new TextEncoder().encode("img").buffer,
+    } as Response);
+    globalThis.fetch = fetchMock;
+
+    const filePath = await downloadMedia(item, "/tmp");
+    expect(fetchMock).toHaveBeenCalledWith(expectedFetchUrl);
+    expect(filePath).toBe(expectedPath);
+  });
+
+  it("解決できる画像 URL が存在しない場合にエラーを送出する", async () => {
+    await expect(
+      downloadMedia(
+        {
+          id: "empty-1",
+          media_type: "VIDEO",
+          permalink: "p",
+          timestamp: "t",
+        },
+        "/tmp",
+      ),
+    ).rejects.toThrow("画像のURLが見つかりません: empty-1");
+  });
 });
