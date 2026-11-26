@@ -10,4 +10,11 @@ export {
   resolveNextHashtagOnChipClick,
 } from "./HashtagQuickSelect";
 export { InAppBrowserAlert, isInstagramOrFacebookInAppBrowser } from "./InAppBrowserAlert";
-export { StatusBanner, type StatusBannerProps } from "./StatusBanner";
+export { ModalDialog, type ModalDialogProps } from "./ModalDialog";
+export {
+  SegmentedControl,
+  type SegmentedControlOption,
+  type SegmentedControlProps,
+} from "./SegmentedControl";
+export { StatusBanner, type StatusBannerProps, type StatusBannerTone } from "./StatusBanner";
+export { StepCardHeader, type StepCardHeaderProps } from "./StepCardHeader";
