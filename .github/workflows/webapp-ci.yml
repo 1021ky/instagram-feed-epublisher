@@ -42,11 +42,11 @@ jobs:
           - name: Build webapp
             run: pnpm build
 
-          - name: Unit tests
-            run: pnpm test
+          - name: Small tests
+            run: pnpm test:small
 
   webapp-e2e:
-    name: Playwright E2E
+    name: Browser tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -70,8 +70,11 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm --filter instagram-feed-epublisher-webapp exec playwright install --with-deps chromium
 
-      - name: Run Playwright E2E tests
-        run: pnpm e2etest
+      - name: Medium tests
+        run: pnpm test:medium
+
+      - name: Large tests
+        run: pnpm test:large
 
       - name: Upload Playwright HTML report
         if: ${{ !cancelled() }}

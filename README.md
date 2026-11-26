@@ -227,15 +227,17 @@ pnpm terraform:fmt
 pnpm terraform:fmt:check
 pnpm terraform:validate
 
-# 単体・結合・OpenAPI 契約テスト (Vitest)
+# テスト実行 (Small -> Medium -> Large 全件)
 pnpm test
+
+# 粒度別テスト実行
+pnpm test:small   # Small テスト (Node / Vitest)
+pnpm test:medium  # Medium テスト (Browser Mode / Vitest)
+pnpm test:large   # Large テスト (Playwright E2E + OpenAPI ローカルモックサーバー)
 
 # BFF API OpenAPI 仕様書 (JSON / 静的 HTML) の生成・同期確認
 pnpm openapi:generate
 pnpm openapi:check
-
-# E2E テスト (Playwright + OpenAPI ローカルモックサーバー)
-pnpm e2etest
 ```
 
 ---

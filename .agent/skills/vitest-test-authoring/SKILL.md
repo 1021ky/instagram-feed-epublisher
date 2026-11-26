@@ -25,6 +25,8 @@ description: >-
 - 関数名・API エンドポイント・コンポーネント名を併記する場合は、**日本語の責務・振る舞い名を主とし、識別子は括弧書き等で補助する**形式にすること（例: `describe("Instagram アクセストークン解決 (resolveInstagramAccessToken)", ...)`、`describe("ハッシュタグ候補取得 API の結合・OpenAPI 契約テスト (GET /api/instagram/hashtags)", ...)`）。
 - 英語のみの `describe` や `it` / `test`（例: `describe("resolveInstagramAccessToken")`、`it("returns items on success")`、`describe("GET handler")`）を記述してはならない（MUST NOT）。
 - PR や計画時の一時的な管理番号（`UT-1:`、`IT-01:`、`TC-01:`、`E2E-1:` 等）をコード上の `describe` / `it` / `test` やコメントに含めてはならない（MUST NOT）。
+- 1 つの `it` / `test` ブロックには「1 つの論理的な振る舞い」のみを検証させ、無関係な複数シナリオを直列に詰め込んで `// 1. ... // 2. ...` のような手続きコメントで区切らないこと（MUST NOT）。関心事ごとに独立した `it` へ分割し、`describe` で階層化することで、失敗時にどの仕様が壊れたかをレポートから即座に判別できるようにすること（共通の前処理はヘルパー関数または `beforeEach` に切り出す）。
+- テストケース名やコメントには検証対象の仕様・振る舞いのみを記述し、「古典派」「非モック」「子モック」等のテスト手法・実装詳細に関する表現を書かないこと（MUST NOT）。モック方針は本 SOP 側で担保する。
 
 ### 2. 因子分析に基づくテストケース設計とパラメータ化（`it.each` 必須）
 
@@ -48,7 +50,10 @@ description: >-
 
 - トップレベル `vi.mock(...)` と `afterEach(() => vi.restoreAllMocks())` を併用する場合は、`beforeEach` 内でモックのデフォルト戻り値を毎回明示的に設定し、2件目以降のテストで `undefined` になる順序依存を防ぐこと（MUST）。
 - `process.env` や `globalThis.fetch` を書き換えるテストでは、元の値を退避し `afterEach` で確実に復元すること（MUST）。
-- React コンポーネントの単体テスト（`*.test.tsx`）は、Vitest の `environment: "node"` 環境上で `react-dom/server` の `renderToStaticMarkup` を用いて軽量・高速に検証すること（SHOULD）。インタラクションを伴うブラウザ実挙動は Playwright E2E（`playwright-e2e-authoring` スキル）で検証する。
+- React コンポーネントのテストは以下の 2 層を使い分けること（SHOULD）：
+  - **Small テスト（`*.test.tsx` / `small` プロジェクト・`pnpm test:small`）**: `react-dom/server` の `renderToStaticMarkup` を用いて静的なマークアップ・WAI-ARIA 属性・各表示バリエーションを高速検証する。
+  - **Medium テスト（`*.browser.test.tsx` / `medium` プロジェクト・`pnpm test:medium` / Vitest Browser Mode）**: 実ブラウザ（Playwright Chromium）＋ Tailwind CSS 上で、クリック・入力・キーボード操作（`Escape` / 矢印キー等）・フォーカス移動・実タップ領域（`getBoundingClientRect()`）・画面内状態遷移を検証する。**原則としてモックはシステム境界（`fetch`・認証クライアント・ブラウザ API 等の外部 I/O）のみに限定し、子コンポーネントはモックしないこと**。
+  - サーバー（Next.js BFF）や認証リダイレクトまで含む一気通貫の主要導線（Large テスト・`pnpm test:large`）は Playwright E2E（`playwright-e2e-authoring` スキル）で検証する。
 - Route Handler 等の結合テストで OpenAPI 定義対象エンドポイントを扱う場合は、`webapp/scripts/openapi-contract.mjs` の `assertValidOpenApiSchema` でレスポンス契約もあわせて検証すること（SHOULD）。
 
 ### 4. 品質ゲート実行とセルフレビュー
@@ -57,7 +62,7 @@ description: >-
 
 **Constraints:**
 
-- `pnpm test`、`pnpm lint`、`pnpm --filter instagram-feed-epublisher-webapp exec tsc --noEmit` を実行し、すべてエラー・警告 0 件で通過することを確認すること（MUST）。
+- `pnpm test:small`、`pnpm test:medium`（`*.browser.test.tsx` を追加・変更した場合）、必要に応じて全件実行の `pnpm test`（Small → Medium → Large）、および `pnpm lint`、`pnpm format:check`、`pnpm typecheck` を実行し、すべてエラー・警告 0 件で通過することを確認すること（MUST）。
 - 変更・追加したテストファイル内のすべての `describe` / `it` / `test` が日本語で記述されており、英語のみのタイトルや一時番号プレフィックスが残っていないことを目視または検索で確認すること（MUST）。
 
 ## Examples
