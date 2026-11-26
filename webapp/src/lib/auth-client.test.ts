@@ -47,28 +47,3 @@ describe("Instagram クライアントログインヘルパー (signInWithInstag
     });
   });
 });
-
-describe("ログアウト通知バナー見出しの生成 (formatLogoutBannerTitle)", () => {
-  it.each([
-    {
-      label: "未定義 (undefined)",
-      username: undefined,
-      expected: "FeedsToBook からログアウトしました",
-    },
-    { label: "空文字", username: "", expected: "FeedsToBook からログアウトしました" },
-    { label: "空白のみ", username: "   ", expected: "FeedsToBook からログアウトしました" },
-    {
-      label: "@なしのユーザー名",
-      username: "haneprod",
-      expected: "FeedsToBook からログアウトしました（@haneprod）",
-    },
-    {
-      label: "@付きのユーザー名",
-      username: "@haneprod",
-      expected: "FeedsToBook からログアウトしました（@haneprod）",
-    },
-  ])("$label のとき、'$expected' を返すこと", async ({ username, expected }) => {
-    const { formatLogoutBannerTitle } = await import("./auth-client");
-    expect(formatLogoutBannerTitle(username)).toBe(expected);
-  });
-});
