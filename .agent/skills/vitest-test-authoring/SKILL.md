@@ -48,7 +48,10 @@ description: >-
 
 - トップレベル `vi.mock(...)` と `afterEach(() => vi.restoreAllMocks())` を併用する場合は、`beforeEach` 内でモックのデフォルト戻り値を毎回明示的に設定し、2件目以降のテストで `undefined` になる順序依存を防ぐこと（MUST）。
 - `process.env` や `globalThis.fetch` を書き換えるテストでは、元の値を退避し `afterEach` で確実に復元すること（MUST）。
-- React コンポーネントの単体テスト（`*.test.tsx`）は、Vitest の `environment: "node"` 環境上で `react-dom/server` の `renderToStaticMarkup` を用いて軽量・高速に検証すること（SHOULD）。インタラクションを伴うブラウザ実挙動は Playwright E2E（`playwright-e2e-authoring` スキル）で検証する。
+- React コンポーネントのテストは以下の 2 層を使い分けること（SHOULD）：
+  - **Small テスト（`*.test.tsx` / `node` プロジェクト）**: `react-dom/server` の `renderToStaticMarkup` を用いて静的なマークアップ・WAI-ARIA 属性・各表示バリエーションを高速検証する。
+  - **Medium テスト（`*.browser.test.tsx` / `browser` プロジェクト・Vitest Browser Mode）**: 実ブラウザ（Playwright Chromium）＋ Tailwind CSS 上で、クリック・入力・キーボード操作（`Escape` / 矢印キー等）・フォーカス移動・実タップ領域（`getBoundingClientRect()`）・画面内状態遷移を検証する。**古典派（Classical）方針に従い、原則として子コンポーネントはモックせず、外部 I/O 境界（`fetch`・`authClient`・Blob URL 等）のみをスタブすること**。
+  - サーバー（Next.js BFF）や認証リダイレクトまで含む一気通貫の主要導線（Large テスト）は Playwright E2E（`playwright-e2e-authoring` スキル）で検証する。
 - Route Handler 等の結合テストで OpenAPI 定義対象エンドポイントを扱う場合は、`webapp/scripts/openapi-contract.mjs` の `assertValidOpenApiSchema` でレスポンス契約もあわせて検証すること（SHOULD）。
 
 ### 4. 品質ゲート実行とセルフレビュー
@@ -57,7 +60,7 @@ description: >-
 
 **Constraints:**
 
-- `pnpm test`、`pnpm lint`、`pnpm --filter instagram-feed-epublisher-webapp exec tsc --noEmit` を実行し、すべてエラー・警告 0 件で通過することを確認すること（MUST）。
+- `pnpm test`、`pnpm test:browser`（`*.browser.test.tsx` を追加・変更した場合）、`pnpm lint`、`pnpm format:check`、`pnpm typecheck` を実行し、すべてエラー・警告 0 件で通過することを確認すること（MUST）。
 - 変更・追加したテストファイル内のすべての `describe` / `it` / `test` が日本語で記述されており、英語のみのタイトルや一時番号プレフィックスが残っていないことを目視または検索で確認すること（MUST）。
 
 ## Examples

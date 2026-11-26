@@ -70,6 +70,9 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm --filter instagram-feed-epublisher-webapp exec playwright install --with-deps chromium
 
+      - name: Run Vitest Browser Mode tests
+        run: pnpm test:browser
+
       - name: Run Playwright E2E tests
         run: pnpm e2etest
 

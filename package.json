@@ -14,6 +14,8 @@
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "test": "pnpm --filter instagram-feed-epublisher-webapp test",
+    "test:browser": "pnpm --filter instagram-feed-epublisher-webapp test:browser",
+    "test:all": "pnpm --filter instagram-feed-epublisher-webapp test:all",
     "openapi:generate": "pnpm --filter instagram-feed-epublisher-webapp openapi:generate",
     "openapi:check": "pnpm --filter instagram-feed-epublisher-webapp openapi:check",
     "e2etest": "pnpm --filter instagram-feed-epublisher-webapp e2etest",
