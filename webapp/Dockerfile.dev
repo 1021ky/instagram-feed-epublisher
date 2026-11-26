@@ -1,0 +1,24 @@
+FROM node:24-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache libc6-compat
+RUN npm install -g pnpm@10.26.0
+
+# 依存関係定義ファイルのコピー
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY patches/ ./patches/
+COPY webapp/package.json ./webapp/
+
+# 依存パッケージのインストール
+RUN pnpm install
+
+ENV NODE_ENV=development
+ENV WATCHPACK_POLLING=true
+ENV HTTPS_HOST=0.0.0.0
+ENV HTTPS_PORT=3000
+
+EXPOSE 3000
+
+CMD ["pnpm", "dev"]
+

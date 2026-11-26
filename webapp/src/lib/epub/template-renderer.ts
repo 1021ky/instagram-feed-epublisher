@@ -1,6 +1,7 @@
 /**
  * @file EPUB HTML template renderer aligned with book_layout.
  */
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { parseHTML } from "linkedom";
@@ -9,15 +10,26 @@ import type { InstagramMedia } from "@/lib/instagram/types";
 
 const logger = getLogger("epub.template-renderer");
 
-// book_layout is at repo root (one level up from webapp)
-const layoutDir = path.resolve(process.cwd(), "..", "book_layout");
-const layoutHtmlPath = path.join(layoutDir, "layout.html");
-const layoutCssPath = path.join(layoutDir, "layout.css");
+function getLayoutDir(): string {
+  const candidates = [
+    path.resolve(process.cwd(), "book_layout"),
+    path.resolve(process.cwd(), "..", "book_layout"),
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(/*turbopackIgnore: true*/ candidate)) {
+      return candidate;
+    }
+  }
+  return candidates[0];
+}
 
 /**
  * Loads the HTML/CSS template from book_layout.
  */
 export async function loadLayoutTemplate() {
+  const layoutDir = getLayoutDir();
+  const layoutHtmlPath = path.join(layoutDir, "layout.html");
+  const layoutCssPath = path.join(layoutDir, "layout.css");
   const [layoutHtml, cssContent] = await Promise.all([
     readFile(layoutHtmlPath, "utf-8"),
     readFile(layoutCssPath, "utf-8"),
@@ -66,21 +78,35 @@ function validateXhtml(html: string): boolean {
   }
 }
 
+export type ChapterRenderOptions = {
+  /** カルーセル展開時のページ番号（0始まり） */
+  pageIndex?: number;
+  /** カルーセル展開時の総ページ数 */
+  totalPages?: number;
+};
+
 /**
  * Renders a chapter HTML using the book_layout template.
  */
 export function renderChapterHtml(
   template: { layoutHtml: string; cssContent: string },
   item: InstagramMedia,
-  imagePath: string
+  imagePath: string,
+  options?: ChapterRenderOptions,
 ): string {
+  const totalPages = options?.totalPages ?? 1;
+  const pageIndex = options?.pageIndex ?? 0;
+  const isSubsequentCarouselPage = totalPages > 1 && pageIndex > 0;
+
   // 重要: 改行を<br />に変換する前にXMLエスケープを行う
   // これにより<br />タグ自体がエスケープされることを防ぐ
-  const escapedCaption = escapeXml(item.caption ?? "");
+  const rawCaption = isSubsequentCarouselPage ? "" : (item.caption ?? "");
+  const escapedCaption = escapeXml(rawCaption);
   const captionHtml = escapedCaption.replace(/\n/g, "<br />");
 
-  // チャプタータイトルもエスケープ
-  const rawTitle = item.caption?.slice(0, 32) || "Instagram Post";
+  // チャプタータイトルもエスケープ（複数枚展開時は連番を付与）
+  const baseTitle = item.caption?.slice(0, 32) || "Instagram Post";
+  const rawTitle = totalPages > 1 ? `${baseTitle} (${pageIndex + 1}/${totalPages})` : baseTitle;
   const chapterTitle = escapeXml(rawTitle);
 
   // post_urlもエスケープ（URLのクエリパラメータに&が含まれる場合があるため）

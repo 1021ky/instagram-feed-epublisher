@@ -1,5 +1,5 @@
 /**
- * @file Better Authのセッションから Instagram アクセストークンを取得するサービス
+ * @file Session service for resolving Instagram access tokens from Better Auth sessions.
  */
 import { auth } from "@/lib/auth";
 
@@ -15,26 +15,53 @@ export async function resolveInstagramAccessToken(request: Request): Promise<str
     headers: request.headers,
   });
 
-  if (!session?.session || !session?.user) {
-    throw new Error("User not authenticated");
+  if (!session?.user) {
+    throw new Error("未ログインです");
   }
 
-  // Get the account linked to the user for Instagram provider
-  const accounts = await auth.api.listUserAccounts({
-    headers: request.headers,
-  });
-
-  const instagramAccount = accounts.find((account: { providerId: string; accessToken?: string }) => account.providerId === "instagram");
-
-  if (!instagramAccount) {
-    throw new Error("Instagram account not linked");
+  // getAccessToken API が利用可能な場合はアクセストークンを直接取得（ステートレス Cookie 対応）
+  if (typeof (auth.api as Record<string, unknown>).getAccessToken === "function") {
+    try {
+      const tokenResult = await (
+        auth.api as unknown as {
+          getAccessToken: (options: {
+            headers: Headers;
+            body: {
+              providerId: string;
+              useAccountCookie?: boolean;
+              accountId?: string;
+            };
+          }) => Promise<{ accessToken?: string } | null>;
+        }
+      ).getAccessToken({
+        headers: request.headers,
+        body: { providerId: "instagram", useAccountCookie: true },
+      });
+      if (tokenResult?.accessToken) {
+        return tokenResult.accessToken;
+      }
+    } catch {
+      // 取得失敗時は後続の listUserAccounts を試行
+    }
   }
 
-  const accessToken = instagramAccount.accessToken;
+  // Get user accounts linked to the user
+  if (typeof (auth.api as Record<string, unknown>).listUserAccounts === "function") {
+    const accounts = await (
+      auth.api as unknown as {
+        listUserAccounts: (options: {
+          headers: Headers;
+        }) => Promise<Array<{ providerId: string; accessToken?: string }>>;
+      }
+    ).listUserAccounts({
+      headers: request.headers,
+    });
 
-  if (!accessToken) {
-    throw new Error("Instagram access token not found in session");
+    const instagramAccount = accounts.find((account) => account.providerId === "instagram");
+    if (instagramAccount?.accessToken) {
+      return instagramAccount.accessToken;
+    }
   }
 
-  return accessToken;
+  throw new Error("Instagram access token not found in session");
 }

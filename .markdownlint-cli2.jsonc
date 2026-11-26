@@ -1,0 +1,21 @@
+{
+  "config": {
+    "default": true,
+    "MD013": false,
+    "MD033": false,
+    "MD024": {
+      "siblings_only": true,
+    },
+  },
+  "globs": ["**/*.md", ".agent/**/*.md", ".github/**/*.md"],
+  "ignores": [
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/build/**",
+    "**/dist/**",
+    "**/.git/**",
+    "**/CLAUDE.md",
+    "**/test-results/**",
+    "**/playwright-report/**",
+  ],
+}

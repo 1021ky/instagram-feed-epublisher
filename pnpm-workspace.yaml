@@ -1,0 +1,6 @@
+packages:
+  - webapp
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp

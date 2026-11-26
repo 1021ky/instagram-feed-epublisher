@@ -1,0 +1,44 @@
+name: Document CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  document-check:
+    name: Document check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint markdown
+        run: pnpm lint:md
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Check Mermaid diagrams
+        run: pnpm check:mermaid
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome

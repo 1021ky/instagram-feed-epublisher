@@ -5,6 +5,8 @@ node_modules/
 .next/
 dist/
 build/
+*.tsbuildinfo
+next-env.d.ts
 
 # Logs
 logs/
@@ -27,6 +29,8 @@ Thumbs.db
 
 # Testing
 coverage/
+test-results/
+playwright-report/
 
 # Database
 *.db

@@ -33,12 +33,9 @@ dist/
 
 # Project-specific
 auth.json
-# Instaloaderが生成するセッションファイルを個別に指定
-# ワイルドカード（session-*）だと将来追加される同名の別ファイル（.json、.mdなど）まで
-# 巻き込んで無視してしまうため、既知のファイルのみを明示的に指定
-session-vaivailx
 *.epub
 posts_data.json
+
 
 # Test compatibility alias modules (auto-generated for testing)
 commands.py
@@ -50,4 +47,30 @@ instagram_fetch.py
 # NextJS
 node_modules/
 .next/
+
+# Database
+*.db
+*.db-journal
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+!*.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Generated OpenAPI docs
+docs/openapi/bff-api.openapi.json
+docs/openapi/index.html
+
+# Local task notes
+tasks/todo.md
 

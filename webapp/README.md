@@ -1,111 +1,76 @@
 # Webapp
 
-## 開発
+`instagram-feed-epublisher` の Web アプリケーション本体です。
+Next.js (App Router) + TypeScript + Better Auth を採用しています。
 
-- Next.js: `pnpm dev`
-- HTTPS（mkcert）: `pnpm dev:https`
+> [!NOTE]
+> リポジトリ全体の概要、前提環境、Meta for Developers のセットアップ手順、環境変数の設定方法は、**[プロジェクトルートの README.md](../README.md)** を参照してください。
 
-### HTTPS（mkcert）セットアップ
+---
 
-1. mkcertをインストール（未導入の場合）
-2. ルートCAをインストール
-3. localhost用の証明書を作成し、`webapp/server/certs` に配置
+## 開発コマンド一覧
 
-例:
+すべてのコマンドは `webapp/` ディレクトリ内で実行します（プロジェクトルートからも `pnpm <コマンド>` で直接実行可能です）。
 
-- `mkcert -install`
-- `mkcert -cert-file webapp/server/certs/localhost.pem -key-file webapp/server/certs/localhost-key.pem localhost`
+| コマンド                | 説明                                                          |
+| :---------------------- | :------------------------------------------------------------ |
+| `pnpm dev`              | 開発サーバー起動（ローカル HTTPS: `https://localhost:3000`）  |
+| `pnpm clean`            | Next.js ビルドキャッシュ（`.next`）の削除                     |
+| `pnpm build`            | Next.js 本番用ビルド                                          |
+| `pnpm build:clean`      | ビルドキャッシュ削除後のクリーンビルド                        |
+| `pnpm start`            | ビルド済みアプリケーションの起動                              |
+| `pnpm lint`             | oxlint による静的解析                                         |
+| `pnpm format`           | oxfmt によるコードフォーマット                                |
+| `pnpm format:check`     | oxfmt によるフォーマットチェック                              |
+| `pnpm test`             | Vitest による単体・結合・OpenAPI 契約テスト実行               |
+| `pnpm openapi:generate` | Zod v4 スキーマから `docs/openapi/` へ OpenAPI JSON/HTML 生成 |
+| `pnpm openapi:check`    | `docs/openapi/` の生成済み OpenAPI JSON/HTML の最新性検証     |
+| `pnpm e2etest`          | Playwright によるフルスタック E2E テスト実行                  |
+| `pnpm e2etest:ui`       | Playwright UI モードでのテスト実行                            |
+| `pnpm e2etest:debug`    | Playwright デバッグモードでのテスト実行                       |
 
-起動:
+---
 
-- `pnpm dev:https`
+## ディレクトリ構成
 
-補足:
-
-- `BETTER_AUTH_URL` は `https://localhost:3000` に合わせる（[webapp/server/.env](webapp/server/.env)）。
-- MetaのリダイレクトURIは `https://localhost:3000/api/auth/callback/instagram` に設定。
-- 既定の証明書パスは `webapp/server/certs/localhost.pem` と `webapp/server/certs/localhost-key.pem`。
-- 変更したい場合は `HTTPS_CERT_FILE` / `HTTPS_KEY_FILE` / `HTTPS_PORT` / `HTTPS_HOST` を指定。
-
-## ビルド
-
-- Next.js: `pnpm build`
-
-## コード品質
-
-### Pre-commit Hooks
-
-このプロジェクトでは、コミット前に自動でコードフォーマットとlintを実行する pre-commit hooks を設定しています。
-
-#### 自動実行される内容
-
-- **TypeScript/JavaScript ファイル** (`.ts`, `.tsx`, `.js`, `.jsx`):
-  - ESLint による自動修正 (`eslint --fix`)
-  - Prettier によるフォーマット (`prettier --write`)
-
-- **その他のファイル** (`.json`, `.md`, `.css`, `.html`, `.yml`, `.yaml`):
-  - Prettier によるフォーマットのみ (`prettier --write`)
-
-#### セットアップ
-
-初回の `pnpm install` 時に自動でセットアップされます。手動でセットアップする場合:
-
-```bash
-pnpm install
-pnpm run prepare
+```text
+webapp/
+├── app/                  # Next.js App Router
+│   ├── api/              # API Route Handlers
+│   │   ├── auth/         # Better Auth 認証エンドポイント
+│   │   ├── epub/         # EPUB 生成 API
+│   │   └── instagram/    # Instagram Graph API プロキシ
+│   ├── data-deletion/    # Meta 審査向けデータ削除手順ページ
+│   ├── layout.tsx        # ルートレイアウト
+│   ├── privacy/          # Meta 審査向けプライバシーポリシーページ
+│   ├── page.tsx          # メイン UI 画面
+│   └── terms/            # Meta 審査向け利用規約ページ
+├── certs/                # ローカル HTTPS 用証明書 (mkcert)
+├── e2e/                  # Playwright E2E テスト (POM + Custom Fixtures)
+│   ├── fixtures/         # Page Object・API モック注入用 Custom Fixtures
+│   └── pages/            # Page Object Model クラス群
+├── scripts/              # 開発サーバー・OpenAPI モックサーバー・Oxlint プラグイン
+└── src/
+    ├── components/       # UI コンポーネント (atoms, molecules, organisms)
+    │   ├── atoms/        # 最小単位 UI 要素 (FilterChip, InlineLoadingStatus)
+    │   ├── molecules/    # 単一責務の複合パーツ (AlertBanner, HashtagQuickSelect, InAppBrowserAlert, CoverThemeSelector, PostCard)
+    │   └── organisms/    # 独立セクション・ステップ・モーダル (Navbar, LoginCard, AccountDeletionModal, 各Step, StickyActionBar, SiteFooter, LegalPage)
+    ├── lib/              # 共通ライブラリ・ロジック
+    │   ├── auth/         # Better Auth 設定・セッションサービス
+    │   ├── epub/         # EPUB ビルダー・レンダラー・Zod v4 スキーマ・生成サービス
+    │   ├── instagram/    # Instagram Graph API クライアント
+    │   └── openapi/      # Zod v4 スキーマからの OpenAPI 3.1.0 ドキュメント生成
+    └── types/            # UI・ドメイン共通型定義 (ui.ts 等)
 ```
 
-#### 動作
+---
 
-`git commit` を実行すると、ステージされたファイルに対して自動的にlint/formatが実行されます。
-エラーがある場合は自動修正され、修正後のファイルがコミットに含まれます。
+## E2E テスト（Playwright）について
 
-#### 手動実行
-
-pre-commit hook を通さずに手動でlint/formatを実行する場合:
-
-```bash
-# すべてのファイルをlint
-pnpm lint
-
-# すべてのファイルをformat
-pnpm format
-
-# formatのチェックのみ（修正なし）
-pnpm format:check
-```
-
-## E2E（Playwright）
-
-- デフォルトの baseURL: `http://localhost:3000`
-- 本番/ステージングでは `PLAYWRIGHT_BASE_URL` を指定します。
-  - 例: `PLAYWRIGHT_BASE_URL=https://example.com pnpm test:e2e`
-- ローカル実行時はテスト前に Next dev サーバが自動起動されます。
-
-## 環境変数
-
-- `PLAYWRIGHT_BASE_URL`（任意）: E2E対象URL
-- `BETTER_AUTH_SECRET`: Better Authのシークレット
-- `BETTER_AUTH_URL`: Better AuthのBase URL（例: https://localhost:3000）
-- `INSTAGRAM_CLIENT_ID`: Instagram OAuth Client ID
-- `INSTAGRAM_CLIENT_SECRET`: Instagram OAuth Client Secret
-- `BETTER_AUTH_DB_PATH`（任意）: SQLite DBパス
-
-## Instagram API（Instagramログイン）
-
-本プロジェクトは「Instagramログインを使ったInstagram API」に対応しています。
-
-準備:
-
-1. Meta DevelopersでInstagramログインを有効化
-2. Instagramビジネス/クリエイターアカウントであることを確認
-3. OAuthリダイレクトURIを設定
-   - `https://localhost:3000/api/auth/callback/instagram`
-4. App ID/Secretを `INSTAGRAM_CLIENT_ID` / `INSTAGRAM_CLIENT_SECRET` に設定
-
-使用スコープ:
-
-- `instagram_business_basic`
-- `instagram_business_content_publish`
-- `instagram_business_manage_comments`
-- `instagram_business_manage_messages`
+- テスト実行（ヘッドレス）: `pnpm e2etest`
+- ブラウザ目視実行（実ウィンドウ表示・1ワーカー・500ms スロー再生）: `pnpm e2etest:headed`
+- インタラクティブ UI モード: `pnpm e2etest:ui`
+- レポート出力付き実行（サーバーを常駐させず `webapp/playwright-report/` 配下に `index.html`・`summary.md`・`results.json`・動画・スクリーンショットを静的出力して終了）: `pnpm e2etest:report`
+- デフォルトの E2E `baseURL`: `http://localhost:3100`（ローカル開発用の `https://localhost:3000` とポート競合しない独立プロセスで自動起動）
+- 外部通信の安全性: `docs/openapi/instagram-graph-api.openapi.yaml` に準拠したローカルモックサーバー（`127.0.0.1:4010`）が自動起動し、本番 Instagram API へ一切アクセスせずに OAuth ログイン〜BFF API〜UI 操作を一気通貫で検証します。
+- コード品質ガード: `webapp/e2e/AGENTS.md` および `scripts/oxlint-plugin-playwright.mjs` により、POM 構造・User-Facing ロケータ・Web-First Assertions が `pnpm lint` で機械的に強制されます。

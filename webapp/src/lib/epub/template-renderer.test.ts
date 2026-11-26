@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for EPUB template renderer.
+ * @file EPUBテンプレートレンダラーの単体テスト。
  */
 import { expect, test, describe } from "vitest";
 import {
@@ -8,11 +8,12 @@ import {
   mockMediaNoCaption,
   mockMediaWithNewlines,
 } from "@/__fixtures__/instagram-media";
+import type { InstagramMedia } from "@/lib/instagram/types";
 
 const realModulePath = "./template-renderer";
 
-describe("renderChapterHtml", () => {
-  test("replaces placeholders", async () => {
+describe("EPUB 章 HTML レンダリング (renderChapterHtml)", () => {
+  test("プレースホルダーを置換する", async () => {
     const { renderChapterHtml } = await import(realModulePath);
     const html = renderChapterHtml(
       { layoutHtml: "{chapter_title}-{image_filename}-{caption_html}-{post_url}", cssContent: "" },
@@ -23,7 +24,7 @@ describe("renderChapterHtml", () => {
         permalink: "p",
         timestamp: "t",
       },
-      "file:///tmp/a.jpg"
+      "file:///tmp/a.jpg",
     );
     expect(html).toContain("Hello");
     expect(html).toContain("file:///tmp/a.jpg");
@@ -89,6 +90,31 @@ describe("renderChapterHtml", () => {
     expect(html).toContain("🎉");
   });
 
+  test("UI向けのいいね数やコメント数を本文HTMLへ出力しない", async () => {
+    const { renderChapterHtml } = await import(realModulePath);
+    const template = {
+      layoutHtml:
+        '<html><body><h1>{chapter_title}</h1><p>{caption_html}</p><a href="{post_url}">Link</a></body></html>',
+      cssContent: "",
+    };
+    const html = renderChapterHtml(
+      template,
+      {
+        ...mockMediaBasic,
+        caption: "本文だけを出力する",
+        like_count: 999,
+        comments_count: 321,
+      } as InstagramMedia & { like_count: number; comments_count: number },
+      "image.jpg",
+    );
+
+    expect(html).toContain("本文だけを出力する");
+    expect(html).not.toContain("999");
+    expect(html).not.toContain("321");
+    expect(html).not.toContain("いいね");
+    expect(html).not.toContain("コメント");
+  });
+
   test("生成されたHTMLがXHTMLとして有効である", async () => {
     const { renderChapterHtml } = await import(realModulePath);
     const template = {
@@ -107,9 +133,33 @@ describe("renderChapterHtml", () => {
 
     expect(parseErrors.length).toBe(0);
   });
+
+  test("複数ページカルーセルの1ページ目はキャプション付き、2ページ目以降は連番見出しのみで重複出力しない", async () => {
+    const { renderChapterHtml } = await import(realModulePath);
+    const template = {
+      layoutHtml:
+        '<html><body><h1>{chapter_title}</h1><img src="{image_filename}"/><p class="caption">{caption_html}</p><a href="{post_url}">Link</a></body></html>',
+      cssContent: "",
+    };
+
+    const page1 = renderChapterHtml(template, mockMediaBasic, "file:///tmp/1.jpg", {
+      pageIndex: 0,
+      totalPages: 2,
+    });
+    const page2 = renderChapterHtml(template, mockMediaBasic, "file:///tmp/2.jpg", {
+      pageIndex: 1,
+      totalPages: 2,
+    });
+
+    expect(page1).toContain("<h1>A simple post #test (1/2)</h1>");
+    expect(page1).toContain('<p class="caption">A simple post #test</p>');
+    expect(page2).toContain("<h1>A simple post #test (2/2)</h1>");
+    expect(page2).toContain('<p class="caption"></p>');
+    expect(page2).toContain(mockMediaBasic.permalink);
+  });
 });
 
-test("loadLayoutTemplate throws on read failure", async () => {
+test("loadLayoutTemplateは読み込み失敗時に例外を投げる", async () => {
   // このテストではvi.mock()を使うため、logger.tsの再インポートが発生する
   // LogTapeの二重設定エラーを避けるため、このテストはスキップする
   // 代わりにE2Eテストやintegrationテストで実際のファイル読み込みエラーを検証
