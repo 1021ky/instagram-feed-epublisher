@@ -17,7 +17,7 @@ export default defineConfig({
           jsx: "automatic",
         },
         test: {
-          name: "node",
+          name: "small",
           globals: true,
           environment: "node",
           include: ["**/*.test.{ts,tsx}"],
@@ -41,7 +41,7 @@ export default defineConfig({
           },
         },
         test: {
-          name: "browser",
+          name: "medium",
           globals: true,
           include: ["**/*.browser.test.{ts,tsx}"],
           exclude: ["**/node_modules/**", "**/dist/**", "**/e2e/**"],

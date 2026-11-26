@@ -1,8 +1,8 @@
 /**
- * @file トップページ全体の古典派 Medium 結合テスト（Vitest Browser Mode）。
+ * @file トップページの Medium 結合テスト（Vitest Browser Mode）。
  *
- * 子コンポーネントを一切モックせず、外部 I/O 境界（authClient・fetch・Blob URL・ダウンロード発火）のみを
- * スタブして、リファクタリング前後で変えてはいけないユーザー操作と状態遷移を実ブラウザ上で固定します。
+ * 認証状態に応じた画面表示、デモ体験・フィード絞り込み・投稿選択・装丁設定・EPUB 生成・退会フローなど、
+ * 主要なユーザー操作と画面状態遷移を実ブラウザ上で検証します。
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { userEvent } from "@vitest/browser/context";
@@ -48,7 +48,7 @@ function createLoggedInSession(username = "alice") {
   };
 }
 
-describe("トップページ全体の結合振る舞い（子コンポーネント非モック）", () => {
+describe("トップページ全体の結合振る舞い", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     authMocks.useSession.mockReturnValue({ data: null, isPending: false });
@@ -65,6 +65,65 @@ describe("トップページ全体の結合振る舞い（子コンポーネン�
     window.URL.createObjectURL = originalCreateObjectURL;
     window.URL.revokeObjectURL = originalRevokeObjectURL;
     vi.restoreAllMocks();
+  });
+
+  describe("認証状態ごとの初期表示", () => {
+    it.each([
+      {
+        label: "ログアウト済みでセッション解決後",
+        session: { data: null, isPending: false },
+        expectLoginCard: true,
+        expectAppBody: false,
+        expectUsername: null,
+      },
+      {
+        label: "セッション解決中",
+        session: { data: null, isPending: true },
+        expectLoginCard: false,
+        expectAppBody: false,
+        expectUsername: null,
+      },
+      {
+        label: "ログイン済み",
+        session: createLoggedInSession("alice"),
+        expectLoginCard: false,
+        expectAppBody: true,
+        expectUsername: "@alice",
+      },
+    ])(
+      "$label の場合にログインカードとアプリ本体の表示状態が適切に切り替わること",
+      async ({ session, expectLoginCard, expectAppBody, expectUsername }) => {
+        authMocks.useSession.mockReturnValue(session);
+        globalThis.fetch = vi.fn().mockResolvedValue(
+          new Response(JSON.stringify({ hashtags: [], scannedPosts: 0 }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+        );
+
+        const screen = await render(<Page />);
+        const loginButton = screen.getByRole("button", { name: "Instagramでログイン" });
+        const filterRegion = screen.getByRole("region", { name: "フィード絞り込みフォーム" });
+
+        if (expectLoginCard) {
+          await expect.element(loginButton).toBeVisible();
+        } else {
+          await expect.element(loginButton).not.toBeInTheDocument();
+        }
+
+        if (expectAppBody) {
+          await expect.element(filterRegion).toBeVisible();
+        } else {
+          await expect.element(filterRegion).not.toBeInTheDocument();
+        }
+
+        if (expectUsername) {
+          await expect
+            .element(screen.getByRole("navigation").getByText(expectUsername))
+            .toBeVisible();
+        }
+      },
+    );
   });
 
   describe("デモ体験モードの一気通貫フロー", () => {
@@ -116,7 +175,7 @@ describe("トップページ全体の結合振る舞い（子コンポーネン�
       await expect.element(postListSection.getByText("選択中: 99 / 100 件")).toBeVisible();
       await expect.element(postListSection.getByText("収録する写真を選択（0/3枚）")).toBeVisible();
 
-      // 親投稿チェックボックスをオンに戻すと全写真が再選択される（stopPropagation 維持確認）
+      // 親投稿チェックボックスをオンに戻すと全写真が再選択される
       await postListSection.getByRole("checkbox", { name: "この投稿をEPUBに収録" }).click();
       await expect.element(postListSection.getByText("選択中: 100 / 100 件")).toBeVisible();
       await expect.element(postListSection.getByText("収録する写真を選択（3/3枚）")).toBeVisible();
