@@ -13,6 +13,8 @@
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "test": "pnpm --filter instagram-feed-epublisher-webapp test",
+    "openapi:generate": "pnpm --filter instagram-feed-epublisher-webapp openapi:generate",
+    "openapi:check": "pnpm --filter instagram-feed-epublisher-webapp openapi:check",
     "e2etest": "pnpm --filter instagram-feed-epublisher-webapp e2etest",
     "e2etest:headed": "pnpm --filter instagram-feed-epublisher-webapp e2etest:headed",
     "e2etest:ui": "pnpm --filter instagram-feed-epublisher-webapp e2etest:ui",

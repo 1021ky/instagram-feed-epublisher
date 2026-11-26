@@ -139,23 +139,6 @@ export function buildBffOpenApiDocument() {
           },
         },
       },
-      "/api/openapi.json": {
-        get: {
-          summary: "BFF API の OpenAPI 3.1.0 仕様書 JSON を取得",
-          responses: {
-            "200": {
-              description: "OpenAPI 3.1.0 ドキュメント",
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
     },
   });
 }

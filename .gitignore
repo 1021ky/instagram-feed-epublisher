@@ -67,3 +67,7 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# Generated OpenAPI docs
+docs/openapi/bff-api.openapi.json
+docs/openapi/index.html
+

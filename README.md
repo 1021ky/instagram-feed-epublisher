@@ -32,7 +32,9 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 │   │   ├── flowchart LR.mmd  # ユーザーフロー図
 │   │   └── sequenceDiagram.mmd # 認証・API連携シーケンス図
 │   ├── openapi/          # 外部・内部 API 契約定義 (OpenAPI 3.1)
-│   │   └── instagram-graph-api.openapi.yaml # Instagram Graph API / BFF スキーマ
+│   │   ├── instagram-graph-api.openapi.yaml # Instagram Graph API / モック契約スキーマ
+│   │   ├── bff-api.openapi.json # BFF API OpenAPI 3.1.0 仕様書（自動生成 / Git 管理外）
+│   │   └── index.html           # BFF API 静的 HTML ドキュメント（自動生成 / Git 管理外）
 │   └── documentation-policy.md # ドキュメント更新ポリシー
 ├── scripts/              # リポジトリ共通チェックスクリプト
 └── webapp/               # Next.js Web アプリケーション本体（※詳細は webapp/README.md 参照）
@@ -224,6 +226,10 @@ pnpm terraform:validate
 
 # 単体・結合・OpenAPI 契約テスト (Vitest)
 pnpm test
+
+# BFF API OpenAPI 仕様書 (JSON / 静的 HTML) の生成・同期確認
+pnpm openapi:generate
+pnpm openapi:check
 
 # E2E テスト (Playwright + OpenAPI ローカルモックサーバー)
 pnpm e2etest

@@ -638,3 +638,14 @@
 - [x] E2E スモークテスト新設: `webapp/e2e/top-page-smoke.spec.ts` を作成（HTTP 200, コンソールエラー0件, 主要コンポーネント描画検証）
 - [x] ローカル検証（Oxlint, Oxfmt, tsc, Vitest 329件, Next.js build, Playwright smoke test パス）
 - [x] コミット作成および PR #94 へのプッシュ反映
+
+---
+
+## BFF OpenAPI 仕様書の本番非公開化および `docs/openapi/` 静的 HTML/JSON 生成への移行
+
+- [x] ランタイムエンドポイント削除: `webapp/app/api/openapi.json/route.ts` の削除および `webapp/src/lib/openapi/bff-document.ts` からの `/api/openapi.json` パス除外
+- [x] 静的 HTML レンダラー実装: `webapp/src/lib/openapi/render-html.ts`（自己完結型・XSS 安全エスケープ・ローカル直開き対応）
+- [x] 生成スクリプト & npm スクリプト追加: `webapp/scripts/generate-bff-openapi.mjs`（`.d.mts` 含む）、`openapi:generate` / `openapi:check`、`docs/openapi/bff-api.openapi.json`・`docs/openapi/index.html` の出力（生成物は `.gitignore` へ追加）
+- [x] テスト・ドキュメント更新: `webapp/src/lib/openapi/bff-document.test.ts`、`README.md`、`webapp/README.md`、`docs/adr/0002-api-validation-and-openapi-architecture.md`
+- [x] 将来の Private GitHub Pages CI 公開用 Issue 作成（`github-mcp-server` 経由: Issue #109）
+- [x] 品質ゲート検証（`openapi:generate`, `openapi:check`, `tsc --noEmit`, `lint`, `lint:md`, `format:check`, `test`, `build`）

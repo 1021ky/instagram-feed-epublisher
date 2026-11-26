@@ -36,14 +36,14 @@
 
 1. **現時点の要求への適合性**: 本アプリは Next.js App Router 完結型の小規模 BFF であり、今時点で優先すべきは「プロダクションコードの責務分離（HTTP 境界 / 入力検証 / アプリケーションサービス）」と「Instagram API との結合・契約テストを確実に回せること」であると判断しました。
 2. **既存資産との親和性**: Next.js Route Handler のまま責務分離することで、既存の Better Auth（`/api/auth/[...all]`）や Instagram Graph API モックサーバーを用いた結合テスト資産をそのまま活用できます。
-3. **Zod v4 ネイティブ `.meta()` の活用**: Zod v4 の `.meta()` と `zod-openapi` を組み合わせることで、モンキーパッチ（`.openapi()`）に頼らない純粋な Zod スキーマから OpenAPI 3.1.0（`GET /api/openapi.json`）を生成でき、フロントエンド UI バリデーション（`metadata.title` 必須チェック等）とも同じルールを共有できます。
+3. **Zod v4 ネイティブ `.meta()` の活用**: Zod v4 の `.meta()` と `zod-openapi` を組み合わせることで、モンキーパッチ（`.openapi()`）に頼らない純粋な Zod スキーマから OpenAPI 3.1.0 を生成でき、フロントエンド UI バリデーション（`metadata.title` 必須チェック等）とも同じルールを共有できます。
 
 ### 実装方針
 
 1. `webapp/src/lib/epub/epub-request.schema.ts` に Zod v4 入力スキーマ・正規化パーサー・UI 共有タイトル検証ヘルパーを集約する。
 2. `webapp/src/lib/epub/epub-generation-service.ts` と `webapp/src/lib/epub/http-response.ts` にビジネスオーケストレーション、一時ディレクトリ管理、HTTP エラーマッピング（`400` / `401` / `InstagramGraphApiError.recommendedHttpStatus` / `500`）を分離する。
 3. `webapp/app/api/epub/route.ts` および `webapp/app/api/epub/demo/route.ts` は薄い HTTP アダプターに限定する。
-4. `webapp/src/lib/openapi/bff-document.ts` および `GET /api/openapi.json` で OpenAPI 3.1.0 仕様を生成・検証する。
+4. `webapp/src/lib/openapi/bff-document.ts`、`webapp/src/lib/openapi/render-html.ts`、および `webapp/scripts/generate-bff-openapi.mjs` により、`docs/openapi/`（`bff-api.openapi.json` / `index.html`、`.gitignore` 対象）へ静的ファイルとして OpenAPI 3.1.0 仕様を生成・検証できるようにする（BFF は内部専用 API であるため、本番サーバーに `/api/openapi.json` 等の仕様書配信エンドポイントは公開しない）。
 
 ## 4. 影響・トレードオフ (Consequences)
 
