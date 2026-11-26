@@ -13,5 +13,8 @@ Whenever you read, create, or modify any file in `webapp/src/components/` or `we
 3. **Mandatory Unit Tests (`vitest-test-authoring` - 1:1 Colocation)**:
    - 全コンポーネント（Atoms / Molecules / Organisms / `features/*/ui/`）およびプレゼンターを追加・変更した際は、必ずファイルの真横に 1:1 コロケーションで単体テスト（`[Name].test.tsx` / `[Name].test.ts`）を作成・更新すること。
    - 入力パラメータによるバリエーションは `it.each` でパラメータ化し、日本語のテスト名で記述すること。
-4. **Mechanical Quality Gate Enforcement**:
+4. **TSDoc / JSDoc & Concise Comments**:
+   - すべての `function` / `interface` / `type` には、何を表すものかを簡潔に説明する JSDoc / TSDoc を必ず記載すること。
+   - ディレクトリ名・型・コードから自明な冗長コメント（`(Atom)` / `(Molecule)` 表記や `@file ... の単体テスト` 等）は記載しないこと。
+5. **Mechanical Quality Gate Enforcement**:
    - You **MUST** run `pnpm test`, `pnpm lint`, `pnpm format:check`, and `pnpm --filter instagram-feed-epublisher-webapp exec tsc --noEmit` before concluding your task. Zero errors allowed.

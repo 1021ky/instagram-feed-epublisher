@@ -75,6 +75,11 @@ flowchart TD
 - `webapp/src/components/molecules/index.ts`: すべての Molecule コンポーネント、Props 型、および関連する純粋関数・定数をエクスポートする。
 - `webapp/src/components/organisms/index.ts`: すべての Organism コンポーネントおよび Props 型をエクスポートする。
 
+#### コメント・TSDoc / JSDoc 規約
+
+- **`function` / `interface` / `type` には必ず JSDoc / TSDoc を記載する（MUST）**: コンポーネント関数・カスタムフック・ヘルパー関数・Props やモデルの型定義には、それが何を表すか・責務や制約を簡潔に記載する。
+- **ディレクトリ名・型・コードから自明な冗長コメントは書かない（MUST NOT）**: ファイル配置から明らかな層表記（`(Atom)`, `(Molecule)` 等）、テストファイルの自明な見出し（`@file ... の単体テスト` 等）、実装をそのまま言い換える叙述コメントは書かず、二重メンテナンスを防ぐ。
+
 ---
 
 ### 3. 単体テスト実装規約（`vitest-test-authoring` 準拠・完全コロケーション）
@@ -127,6 +132,7 @@ pnpm typecheck
   - [ ] 下位層（`components/`・`lib/`）から `features/` への逆方向依存が発生していないか？
 - **Organisms / Pages**:
   - [ ] `Organisms` は複数機能で共有するレイアウトブロックに留まり、`Pages`（`app/`）はオーケストレーションに専念しているか？
-- **公開境界・テスト・互換性**:
+- **公開境界・テスト・ドキュメント・互換性**:
   - [ ] 各層の `index.ts` からのエクスポートと 1:1 コロケーションテスト（Small / 必要に応じた Medium）が揃っているか？
+  - [ ] すべての `function` / `interface` / `type` に簡潔な TSDoc / JSDoc が記載され、`(Atom)` / `(Molecule)` や自明なテスト表記などの冗長コメントが紛れ込んでいないか？
   - [ ] 既存の E2E ロケータ（Playwright POM）やアクセシビリティ制御（`inert`・フォーカス誘導等）に破壊的変更を与えていないか？

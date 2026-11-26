@@ -49,7 +49,7 @@ describe("退会確認・完了モーダルの操作 (AccountDeletionModal)", ()
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("確認ステップでモーダルカード本体をクリックしても閉じないこと", async () => {
+  it("確認ステップの右上閉じるボタンが 44px 以上のタップ領域を持ち、カード本体クリックでは閉じないこと", async () => {
     const onClose = vi.fn();
     const screen = await render(
       <AccountDeletionModal
@@ -60,6 +60,11 @@ describe("退会確認・完了モーダルの操作 (AccountDeletionModal)", ()
         onCompleteClose={vi.fn()}
       />,
     );
+
+    const closeButton = screen.getByRole("button", { name: "モーダルを閉じる" });
+    const rect = closeButton.element().getBoundingClientRect();
+    expect(rect.width).toBeGreaterThanOrEqual(44);
+    expect(rect.height).toBeGreaterThanOrEqual(44);
 
     await screen.getByRole("heading", { name: "FeedsToBook を退会しますか？" }).click();
 

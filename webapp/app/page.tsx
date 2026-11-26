@@ -4,18 +4,21 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { authClient, formatLogoutBannerTitle, signInWithInstagram } from "@/lib/auth-client";
 import { AlertBanner, InAppBrowserAlert, StatusBanner } from "@/components/molecules";
 import {
-  AccountDeletionModal,
-  type AccountDeletionStep,
   EpubCustomizeStep,
   ExportModal,
   FeedFilterStep,
-  LoginCard,
   Navbar,
   StickyActionBar,
 } from "@/components/organisms";
+import {
+  AccountDeletionModal,
+  formatLogoutBannerTitle,
+  LoginCard,
+  useAccountDeletion,
+  useAuthFlow,
+} from "@/features/auth";
 import { PostListStep } from "@/features/feed";
 import { fetchHashtagSuggestions, fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";
 import { validateEpubTitle } from "@/lib/epub/epub-request.schema";
@@ -25,13 +28,11 @@ import { extractHashtagsFromPosts } from "@/lib/instagram/hashtag-service";
 import { listCarouselMediaEntries } from "@/lib/instagram/media-resolver";
 import { sortItemsByTimestamp } from "@/lib/epub/sort";
 import type {
-  AppMode,
   EpubCustomSettings,
   ExportProgress,
   FeedFilterOptions,
   FeedPostItem,
   HashtagSuggestion,
-  UserProfile,
 } from "@/types/ui";
 
 const defaultMaxCount = 200;
@@ -67,12 +68,7 @@ export default function Page() {
   const [feed, setFeed] = useState<FeedPostItem[]>([]);
   const [fetchedHashtags, setFetchedHashtags] = useState<HashtagSuggestion[]>([]);
   const [loadingHashtags, setLoadingHashtags] = useState(false);
-  const [loadingLogin, setLoadingLogin] = useState(false);
   const [loadingFeed, setLoadingFeed] = useState(false);
-  const [deletingAccount, setDeletingAccount] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deleteModalStep, setDeleteModalStep] = useState<AccountDeletionStep>("confirm");
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
 
@@ -95,42 +91,64 @@ export default function Page() {
   const downloadUrlRef = useRef<string | null>(null);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [appMode, setAppMode] = useState<AppMode>("real");
-  const [logoutNotice, setLogoutNotice] = useState<{ username?: string } | null>(null);
-
-  const session = authClient.useSession();
-  const isLoggedIn = Boolean(session.data);
-  const isSessionPending = session.isPending;
-  const isDemoMode = appMode === "demo";
-  const canUseApp = isLoggedIn || isDemoMode;
   const isGeneratingEpub = exportProgress.status === "generating";
 
-  const loggedInProfile = useMemo<UserProfile | null>(() => {
-    const user = session.data?.user;
-    if (!user) {
-      return null;
-    }
-    const fallbackUsername = user.email?.endsWith("@instagram.local")
-      ? user.email.replace("@instagram.local", "")
-      : undefined;
-    return {
-      id: user.id,
-      username: user.name ?? fallbackUsername,
-      displayName: user.name ?? fallbackUsername,
-      avatarUrl: user.image ?? undefined,
-    };
-  }, [session.data]);
+  const clearFeedState = useCallback(() => {
+    setFeed([]);
+    setIsFilterCollapsed(false);
+    setHasFetched(false);
+  }, []);
 
-  const activeProfile = isDemoMode
-    ? {
-        id: "demo-user",
-        username: sampleDemoFeedData.username,
-        displayName: "Demo User",
-        avatarUrl: sampleDemoFeedData.avatarUrl,
-      }
-    : loggedInProfile;
+  const resetDemoState = useCallback(() => {
+    setFilter({
+      hashtag: "",
+      startDate: defaultDates.start,
+      endDate: defaultDates.end,
+      maxCount: defaultMaxCount,
+    });
+    setCustomSettings({
+      title: defaultBookTitle,
+      subtitle: "",
+      author: "",
+      coverTheme: "navy",
+      sortOrder: "asc",
+      contact: "",
+      instagramUrl: "",
+    });
+    clearFeedState();
+    setShowCustomizeErrors(false);
+    setError(null);
+  }, [clearFeedState, defaultDates.end, defaultDates.start]);
 
-  const username = activeProfile?.username?.replace(/^@/, "") ?? "";
+  const {
+    isLoggedIn,
+    isSessionPending,
+    isDemoMode,
+    canUseApp,
+    loadingLogin,
+    activeProfile,
+    username,
+    logoutNotice,
+    dismissLogoutNotice,
+    enterDemoMode,
+    exitDemoMode,
+    handleLogin,
+    handleLogout,
+  } = useAuthFlow({
+    onError: setError,
+    onResetDemo: resetDemoState,
+    onLoggedOut: clearFeedState,
+  });
+
+  const handleAccountDeleted = useCallback(() => {
+    clearFeedState();
+    exitDemoMode();
+  }, [clearFeedState, exitDemoMode]);
+
+  const accountDeletion = useAccountDeletion({
+    onDeleted: handleAccountDeleted,
+  });
+
   const recommendedTitle = username ? `@${username}の投稿記録` : defaultBookTitle;
 
   const demoHashtagSuggestions = useMemo(() => {
@@ -186,132 +204,6 @@ export default function Page() {
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);
-  };
-
-  const resetDemoState = useCallback(() => {
-    setAppMode("real");
-    setFilter({
-      hashtag: "",
-      startDate: defaultDates.start,
-      endDate: defaultDates.end,
-      maxCount: defaultMaxCount,
-    });
-    setCustomSettings({
-      title: defaultBookTitle,
-      subtitle: "",
-      author: "",
-      coverTheme: "navy",
-      sortOrder: "asc",
-      contact: "",
-      instagramUrl: "",
-    });
-    setFeed([]);
-    setIsFilterCollapsed(false);
-    setHasFetched(false);
-    setShowCustomizeErrors(false);
-    setError(null);
-  }, [defaultDates.end, defaultDates.start]);
-
-  const handleLogin = async () => {
-    setLoadingLogin(true);
-    setError(null);
-    setLogoutNotice(null);
-    try {
-      await signInWithInstagram();
-    } catch (e) {
-      console.error(e);
-      setError(e instanceof Error ? e.message : "ログインに失敗しました");
-      setLoadingLogin(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    if (isDemoMode) {
-      resetDemoState();
-      return;
-    }
-    const loggedOutUsername = activeProfile?.username;
-    await authClient.signOut();
-    setFeed([]);
-    setIsFilterCollapsed(false);
-    setHasFetched(false);
-    setLogoutNotice({ username: loggedOutUsername });
-  };
-
-  /**
-   * 退会確認モーダルを開く。
-   */
-  const handleOpenDeleteModal = () => {
-    setDeleteModalStep("confirm");
-    setDeleteError(null);
-    setIsDeleteModalOpen(true);
-  };
-
-  /**
-   * 退会モーダルを閉じる（キャンセル）。
-   */
-  const handleCloseDeleteModal = () => {
-    if (!deletingAccount) {
-      setIsDeleteModalOpen(false);
-      setDeleteError(null);
-    }
-  };
-
-  /**
-   * 退会（連携解除）操作を実行する。
-   *
-   * サーバー側の認証 Cookie 破棄 API を呼び出し、クライアントセッションを破棄したうえで
-   * 退会完了ステップ（Instagram 側の連携解除案内）へ遷移する。
-   */
-  const handleConfirmDeleteAccount = async () => {
-    setDeletingAccount(true);
-    setDeleteError(null);
-
-    try {
-      // 1. サーバー側の Cookie 破棄 API を呼び出す
-      const response = await fetch("/api/user/delete", {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? "退会処理に失敗しました");
-      }
-
-      // 2. クライアント側の Better Auth セッションを破棄
-      try {
-        await authClient.signOut();
-      } catch (authError) {
-        console.warn("クライアント サインアウトで例外が発生しました:", authError);
-      }
-
-      // 3. ローカルのフィードやフィルターなどの状態をクリア
-      setFeed([]);
-      setIsFilterCollapsed(false);
-      setHasFetched(false);
-      setAppMode("real");
-
-      // 4. 退会完了ステップへ遷移
-      setDeleteModalStep("completed");
-    } catch (e) {
-      console.error("退会処理でエラーが発生しました:", e);
-      const message = e instanceof Error ? e.message : "退会処理に失敗しました";
-      setDeleteError(message);
-    } finally {
-      setDeletingAccount(false);
-    }
-  };
-
-  /**
-   * 退会完了モーダルを閉じ、トップページ（ログイン前）へ確実に遷移する。
-   */
-  const handleCompleteCloseDeleteModal = () => {
-    setIsDeleteModalOpen(false);
-    if (window.location.pathname === "/" && !window.location.search && !window.location.hash) {
-      window.location.reload();
-    } else {
-      window.location.href = "/";
-    }
   };
 
   // Step 2 の並び順設定に応じた表示用フィード（デフォルト: 古い順 asc）
@@ -395,7 +287,7 @@ export default function Page() {
   const handleDemo = () => {
     const demoStartDate = sampleDemoFeedData.posts[0]?.timestamp.slice(0, 10) ?? defaultDates.start;
     const demoEndDate = sampleDemoFeedData.posts.at(-1)?.timestamp.slice(0, 10) ?? defaultDates.end;
-    setAppMode("demo");
+    enterDemoMode();
     setError(null);
     setFilter({
       hashtag: "100日チャレンジ",
@@ -620,8 +512,8 @@ export default function Page() {
   return (
     <div className={`page ${feed.length > 0 ? "pb-28 sm:pb-32" : ""}`}>
       <div
-        aria-hidden={isExportModalOpen || isDeleteModalOpen}
-        inert={isExportModalOpen || isDeleteModalOpen}
+        aria-hidden={isExportModalOpen || accountDeletion.isOpen}
+        inert={isExportModalOpen || accountDeletion.isOpen}
         className="max-w-3xl mx-auto w-full"
       >
         <InAppBrowserAlert />
@@ -629,8 +521,8 @@ export default function Page() {
           user={activeProfile}
           isDemoMode={isDemoMode}
           onLogout={canUseApp ? handleLogout : undefined}
-          onDeleteAccount={!isDemoMode && isLoggedIn ? handleOpenDeleteModal : undefined}
-          disabled={loadingLogin || loadingFeed || isGeneratingEpub || deletingAccount}
+          onDeleteAccount={!isDemoMode && isLoggedIn ? accountDeletion.openModal : undefined}
+          disabled={loadingLogin || loadingFeed || isGeneratingEpub || accountDeletion.isDeleting}
         />
         {error && <AlertBanner message={error} className="mb-4" />}
 
@@ -641,7 +533,7 @@ export default function Page() {
                 <StatusBanner
                   className="max-w-xl mx-auto"
                   title={formatLogoutBannerTitle(logoutNotice.username)}
-                  onDismiss={() => setLogoutNotice(null)}
+                  onDismiss={dismissLogoutNotice}
                 />
               )}
               <LoginCard loadingLogin={loadingLogin} onLogin={handleLogin} onDemo={handleDemo} />
@@ -766,13 +658,13 @@ export default function Page() {
       />
 
       <AccountDeletionModal
-        isOpen={isDeleteModalOpen}
-        step={deleteModalStep}
-        isDeleting={deletingAccount}
-        error={deleteError}
-        onConfirm={handleConfirmDeleteAccount}
-        onClose={handleCloseDeleteModal}
-        onCompleteClose={handleCompleteCloseDeleteModal}
+        isOpen={accountDeletion.isOpen}
+        step={accountDeletion.step}
+        isDeleting={accountDeletion.isDeleting}
+        error={accountDeletion.error}
+        onConfirm={accountDeletion.confirmDelete}
+        onClose={accountDeletion.closeModal}
+        onCompleteClose={accountDeletion.completeClose}
       />
     </div>
   );
