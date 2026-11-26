@@ -25,7 +25,7 @@ vi.mock("@/lib/auth-client", async (importOriginal) => {
 });
 
 import Page from "./page";
-import { calculatePresetDates } from "@/components/organisms";
+import { calculatePresetDates } from "@/features/feed-filter";
 
 const originalFetch = globalThis.fetch;
 const originalCreateObjectURL = window.URL.createObjectURL;

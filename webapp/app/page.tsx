@@ -5,13 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertBanner, InAppBrowserAlert, StatusBanner } from "@/components/molecules";
-import {
-  EpubCustomizeStep,
-  ExportModal,
-  FeedFilterStep,
-  Navbar,
-  StickyActionBar,
-} from "@/components/organisms";
+import { EpubCustomizeStep, ExportModal, Navbar, StickyActionBar } from "@/components/organisms";
 import {
   AccountDeletionModal,
   formatLogoutBannerTitle,
@@ -20,57 +14,22 @@ import {
   useAuthFlow,
 } from "@/features/auth";
 import { PostListStep } from "@/features/feed";
-import { fetchHashtagSuggestions, fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";
+import { FeedFilterStep, toFeedFetchFilter, useFeedFilter } from "@/features/feed-filter";
+import { requestEpub } from "@/lib/client/instagram";
 import { validateEpubTitle } from "@/lib/epub/epub-request.schema";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
-import { applyFeedFilter } from "@/lib/instagram/filter-service";
-import { extractHashtagsFromPosts } from "@/lib/instagram/hashtag-service";
 import { listCarouselMediaEntries } from "@/lib/instagram/media-resolver";
 import { sortItemsByTimestamp } from "@/lib/epub/sort";
-import type {
-  EpubCustomSettings,
-  ExportProgress,
-  FeedFilterOptions,
-  FeedPostItem,
-  HashtagSuggestion,
-} from "@/types/ui";
+import type { EpubCustomSettings, ExportProgress, FeedPostItem } from "@/types/ui";
 
-const defaultMaxCount = 200;
 const defaultBookTitle = "私のInstagramフィード";
-
-const dateISO = (d: Date) => d.toISOString().slice(0, 10);
-
-/**
- * フィルター用のデフォルト日付範囲を算出するフック。
- */
-function useDefaultDates() {
-  return useMemo(() => {
-    const today = new Date();
-    const start = new Date();
-    start.setDate(today.getDate() - 30);
-    return { start: dateISO(start), end: dateISO(today) };
-  }, []);
-}
 
 /**
  * メインページコンポーネント。
  */
 export default function Page() {
-  const defaultDates = useDefaultDates();
-  const [filter, setFilter] = useState<FeedFilterOptions>({
-    hashtag: "",
-    startDate: defaultDates.start,
-    endDate: defaultDates.end,
-    maxCount: defaultMaxCount,
-  });
-  const [isFilterCollapsed, setIsFilterCollapsed] = useState(false);
-
   const [feed, setFeed] = useState<FeedPostItem[]>([]);
-  const [fetchedHashtags, setFetchedHashtags] = useState<HashtagSuggestion[]>([]);
-  const [loadingHashtags, setLoadingHashtags] = useState(false);
-  const [loadingFeed, setLoadingFeed] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasFetched, setHasFetched] = useState(false);
 
   const [customSettings, setCustomSettings] = useState<EpubCustomSettings>({
     title: defaultBookTitle,
@@ -93,19 +52,11 @@ export default function Page() {
 
   const isGeneratingEpub = exportProgress.status === "generating";
 
-  const clearFeedState = useCallback(() => {
+  const clearFeedPosts = useCallback(() => {
     setFeed([]);
-    setIsFilterCollapsed(false);
-    setHasFetched(false);
   }, []);
 
-  const resetDemoState = useCallback(() => {
-    setFilter({
-      hashtag: "",
-      startDate: defaultDates.start,
-      endDate: defaultDates.end,
-      maxCount: defaultMaxCount,
-    });
+  const resetDemoNonFilterState = useCallback(() => {
     setCustomSettings({
       title: defaultBookTitle,
       subtitle: "",
@@ -115,10 +66,10 @@ export default function Page() {
       contact: "",
       instagramUrl: "",
     });
-    clearFeedState();
+    setFeed([]);
     setShowCustomizeErrors(false);
     setError(null);
-  }, [clearFeedState, defaultDates.end, defaultDates.start]);
+  }, []);
 
   const {
     isLoggedIn,
@@ -136,66 +87,64 @@ export default function Page() {
     handleLogout,
   } = useAuthFlow({
     onError: setError,
-    onResetDemo: resetDemoState,
-    onLoggedOut: clearFeedState,
+    onResetDemo: resetDemoNonFilterState,
+    onLoggedOut: clearFeedPosts,
   });
-
-  const handleAccountDeleted = useCallback(() => {
-    clearFeedState();
-    exitDemoMode();
-  }, [clearFeedState, exitDemoMode]);
-
-  const accountDeletion = useAccountDeletion({
-    onDeleted: handleAccountDeleted,
-  });
-
-  const recommendedTitle = username ? `@${username}の投稿記録` : defaultBookTitle;
-
-  const demoHashtagSuggestions = useMemo(() => {
-    if (!isDemoMode) {
-      return [];
-    }
-    return extractHashtagsFromPosts(sampleDemoFeedData.posts, { limit: 20 });
-  }, [isDemoMode]);
-
-  useEffect(() => {
-    if (!isLoggedIn || isDemoMode) {
-      setFetchedHashtags([]);
-      setLoadingHashtags(false);
-      return;
-    }
-
-    let cancelled = false;
-    setLoadingHashtags(true);
-
-    fetchHashtagSuggestions(20)
-      .then((suggestions) => {
-        if (!cancelled) {
-          setFetchedHashtags(suggestions);
-        }
-      })
-      .catch((err) => {
-        console.warn("ハッシュタグ候補の自動取得をスキップしました:", err);
-        if (!cancelled) {
-          setFetchedHashtags([]);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoadingHashtags(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isLoggedIn, isDemoMode]);
 
   const scrollToSection = useCallback((id: string) => {
     window.requestAnimationFrame(() => {
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }, []);
+
+  const handleFetchSuccess = useCallback(() => {
+    scrollToSection("post-list");
+  }, [scrollToSection]);
+
+  const {
+    filter,
+    setFilter,
+    isFilterCollapsed,
+    toggleFilterCollapsed,
+    hashtagSuggestions,
+    isLoadingHashtags,
+    loadingFeed,
+    hasFetched,
+    handleFetch,
+    applyDemoFilter,
+    resetFetchState,
+    resetFilter,
+  } = useFeedFilter({
+    isLoggedIn,
+    isDemoMode,
+    canUseApp,
+    sortOrder: customSettings.sortOrder,
+    onError: setError,
+    onFeedFetched: setFeed,
+    onFetchSuccess: handleFetchSuccess,
+  });
+
+  const handleLogoutClick = useCallback(async () => {
+    const wasDemo = isDemoMode;
+    await handleLogout();
+    if (wasDemo) {
+      resetFilter();
+    } else {
+      resetFetchState();
+    }
+  }, [handleLogout, isDemoMode, resetFetchState, resetFilter]);
+
+  const handleAccountDeleted = useCallback(() => {
+    setFeed([]);
+    resetFetchState();
+    exitDemoMode();
+  }, [exitDemoMode, resetFetchState]);
+
+  const accountDeletion = useAccountDeletion({
+    onDeleted: handleAccountDeleted,
+  });
+
+  const recommendedTitle = username ? `@${username}の投稿記録` : defaultBookTitle;
 
   const triggerDownload = (url: string, filename = "instagram-feed.epub") => {
     const anchor = document.createElement("a");
@@ -285,16 +234,9 @@ export default function Page() {
   }, []);
 
   const handleDemo = () => {
-    const demoStartDate = sampleDemoFeedData.posts[0]?.timestamp.slice(0, 10) ?? defaultDates.start;
-    const demoEndDate = sampleDemoFeedData.posts.at(-1)?.timestamp.slice(0, 10) ?? defaultDates.end;
     enterDemoMode();
     setError(null);
-    setFilter({
-      hashtag: "100日チャレンジ",
-      startDate: demoStartDate,
-      endDate: demoEndDate,
-      maxCount: 200,
-    });
+    applyDemoFilter();
     setCustomSettings({
       title: "100日チャレンジの記録",
       subtitle: "100日チャレンジの振り返り",
@@ -307,53 +249,6 @@ export default function Page() {
 
     // デモ投稿を初期全選択状態でセット
     setFeed(sampleDemoFeedData.posts.map((p) => ({ ...p, selected: true })));
-    setHasFetched(true);
-    // Step 1 は折りたたまず、通常時と同じように検索条件を表示
-    setIsFilterCollapsed(false);
-  };
-
-  const handleFetch = async () => {
-    if (!canUseApp) {
-      setError("先にログインしてください");
-      return;
-    }
-    setLoadingFeed(true);
-    setError(null);
-    try {
-      const cleanFilter = {
-        hashtag: filter.hashtag ? filter.hashtag.replace(/^#/, "") : undefined,
-        startDate: filter.startDate,
-        endDate: filter.endDate,
-        maxCount: filter.maxCount,
-        sortOrder: customSettings.sortOrder,
-      };
-
-      const items: FeedPostItem[] = isDemoMode
-        ? applyFeedFilter(sampleDemoFeedData.posts, cleanFilter).map((item) => ({
-            ...item,
-            selected: true,
-          }))
-        : (await fetchInstagramFeed(cleanFilter)).map((item) => ({
-            ...item,
-            selected: true,
-          }));
-
-      setFeed(items);
-      setHasFetched(true);
-      if (items.length === 0) {
-        setError(
-          "フィードが取得できませんでした。指定した条件に該当する投稿がないか、アカウントに投稿がありません。",
-        );
-      } else {
-        setIsFilterCollapsed(true);
-        scrollToSection("post-list");
-      }
-    } catch (e) {
-      console.error(e);
-      setError(e instanceof Error ? e.message : "フィード取得に失敗しました");
-    } finally {
-      setLoadingFeed(false);
-    }
   };
 
   const handleGenerate = async () => {
@@ -405,13 +300,7 @@ export default function Page() {
       }
       const hasCarouselSelections = Object.keys(selectedCarouselChildren).length > 0;
 
-      const cleanFilter = {
-        hashtag: filter.hashtag ? filter.hashtag.replace(/^#/, "") : undefined,
-        startDate: filter.startDate,
-        endDate: filter.endDate,
-        maxCount: filter.maxCount,
-        sortOrder: customSettings.sortOrder,
-      };
+      const cleanFilter = toFeedFetchFilter(filter, customSettings.sortOrder);
 
       // デモモード時は選択された並び順でソート
       const sortedItemsForEpub = isDemoMode
@@ -520,7 +409,7 @@ export default function Page() {
         <Navbar
           user={activeProfile}
           isDemoMode={isDemoMode}
-          onLogout={canUseApp ? handleLogout : undefined}
+          onLogout={canUseApp ? handleLogoutClick : undefined}
           onDeleteAccount={!isDemoMode && isLoggedIn ? accountDeletion.openModal : undefined}
           disabled={loadingLogin || loadingFeed || isGeneratingEpub || accountDeletion.isDeleting}
         />
@@ -552,11 +441,11 @@ export default function Page() {
                   error={error}
                   fetchedCount={feed.length > 0 ? feed.length : undefined}
                   isCollapsed={isFilterCollapsed}
-                  onToggleCollapse={() => setIsFilterCollapsed((prev) => !prev)}
+                  onToggleCollapse={toggleFilterCollapsed}
                   disabled={isGeneratingEpub}
                   isDemoMode={isDemoMode}
-                  hashtagSuggestions={isDemoMode ? demoHashtagSuggestions : fetchedHashtags}
-                  isLoadingHashtags={!isDemoMode && loadingHashtags}
+                  hashtagSuggestions={hashtagSuggestions}
+                  isLoadingHashtags={isLoadingHashtags}
                 />
               </div>
 
