@@ -25,6 +25,7 @@ description: >-
 - 関数名・API エンドポイント・コンポーネント名を併記する場合は、**日本語の責務・振る舞い名を主とし、識別子は括弧書き等で補助する**形式にすること（例: `describe("Instagram アクセストークン解決 (resolveInstagramAccessToken)", ...)`、`describe("ハッシュタグ候補取得 API の結合・OpenAPI 契約テスト (GET /api/instagram/hashtags)", ...)`）。
 - 英語のみの `describe` や `it` / `test`（例: `describe("resolveInstagramAccessToken")`、`it("returns items on success")`、`describe("GET handler")`）を記述してはならない（MUST NOT）。
 - PR や計画時の一時的な管理番号（`UT-1:`、`IT-01:`、`TC-01:`、`E2E-1:` 等）をコード上の `describe` / `it` / `test` やコメントに含めてはならない（MUST NOT）。
+- 1 つの `it` / `test` ブロックには「1 つの論理的な振る舞い」のみを検証させ、無関係な複数シナリオを直列に詰め込んで `// 1. ... // 2. ...` のような手続きコメントで区切らないこと（MUST NOT）。関心事ごとに独立した `it` へ分割し、`describe` で階層化することで、失敗時にどの仕様が壊れたかをレポートから即座に判別できるようにすること（共通の前処理はヘルパー関数または `beforeEach` に切り出す）。
 - テストケース名やコメントには検証対象の仕様・振る舞いのみを記述し、「古典派」「非モック」「子モック」等のテスト手法・実装詳細に関する表現を書かないこと（MUST NOT）。モック方針は本 SOP 側で担保する。
 
 ### 2. 因子分析に基づくテストケース設計とパラメータ化（`it.each` 必須）
