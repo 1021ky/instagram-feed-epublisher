@@ -3,6 +3,9 @@
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { ActionButton } from "@/components/atoms";
 
+/**
+ * 退会確認ステップが受け取るプロパティ。
+ */
 export interface AccountDeletionConfirmStepProps {
   isDeleting: boolean;
   error: string | null;
@@ -10,6 +13,9 @@ export interface AccountDeletionConfirmStepProps {
   onClose: () => void;
 }
 
+/**
+ * 退会モーダルの確認ステップ（アプリ内処理・Instagram 側制約の説明と実行操作）。
+ */
 export function AccountDeletionConfirmStep({
   isDeleting,
   error,

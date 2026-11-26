@@ -6,6 +6,9 @@ import type { AccountDeletionStep } from "../model/useAccountDeletion";
 import { AccountDeletionCompletedStep } from "./AccountDeletionCompletedStep";
 import { AccountDeletionConfirmStep } from "./AccountDeletionConfirmStep";
 
+/**
+ * 退会確認・完了モーダルが受け取るプロパティ。
+ */
 export type AccountDeletionModalProps = {
   isOpen: boolean;
   step: AccountDeletionStep;

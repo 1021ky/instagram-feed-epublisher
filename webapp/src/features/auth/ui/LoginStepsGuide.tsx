@@ -16,6 +16,9 @@ const GUIDE_STEPS = [
   },
 ] as const;
 
+/**
+ * ログインカード下部に表示する「かんたん 3 ステップ」の利用手順ガイド。
+ */
 export function LoginStepsGuide() {
   return (
     <div className="pt-5 border-t border-slate-100">

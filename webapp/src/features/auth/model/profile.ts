@@ -1,5 +1,8 @@
 import type { DemoFeedData, UserProfile } from "@/types/ui";
 
+/**
+ * Better Auth セッションに含まれるユーザー情報の最小入力型。
+ */
 export interface SessionUserInput {
   id: string;
   name?: string | null;
@@ -9,6 +12,10 @@ export interface SessionUserInput {
 
 const INSTAGRAM_LOCAL_EMAIL_SUFFIX = "@instagram.local";
 
+/**
+ * セッションのユーザー情報から画面表示用のプロフィールを生成する。
+ * `name` が欠けている場合は `@instagram.local` メールのローカル部をフォールバックとして使用する。
+ */
 export function toLoggedInUserProfile(
   user: SessionUserInput | null | undefined,
 ): UserProfile | null {
@@ -28,6 +35,9 @@ export function toLoggedInUserProfile(
   };
 }
 
+/**
+ * デモ体験モード時に表示する仮のユーザープロフィールを生成する。
+ */
 export function createDemoUserProfile(
   demo: Pick<DemoFeedData, "username" | "avatarUrl">,
 ): UserProfile {
@@ -39,10 +49,16 @@ export function createDemoUserProfile(
   };
 }
 
+/**
+ * ユーザー名の先頭 `@` を除去した正規化文字列を返す。
+ */
 export function normalizeUsername(username?: string | null): string {
   return username?.replace(/^@/, "") ?? "";
 }
 
+/**
+ * ログアウト直後のステータスバナーに表示する見出し文言を生成する。
+ */
 export function formatLogoutBannerTitle(username?: string): string {
   const trimmed = username?.trim();
   if (!trimmed) {

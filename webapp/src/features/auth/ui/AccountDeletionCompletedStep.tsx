@@ -4,10 +4,16 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { ActionButton } from "@/components/atoms";
 
+/**
+ * 退会完了ステップが受け取るプロパティ。
+ */
 export interface AccountDeletionCompletedStepProps {
   onCompleteClose: () => void;
 }
 
+/**
+ * 退会モーダルの完了ステップ（Instagram 側の連携解除リンクとデータ削除手順案内）。
+ */
 export function AccountDeletionCompletedStep({
   onCompleteClose,
 }: AccountDeletionCompletedStepProps) {

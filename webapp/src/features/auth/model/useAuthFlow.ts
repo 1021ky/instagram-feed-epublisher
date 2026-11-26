@@ -6,12 +6,18 @@ import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 import type { AppMode, UserProfile } from "@/types/ui";
 import { createDemoUserProfile, normalizeUsername, toLoggedInUserProfile } from "./profile";
 
+/**
+ * 認証・デモモード遷移フックが受け取る外部連携コールバック。
+ */
 export interface UseAuthFlowOptions {
   onError: (message: string | null) => void;
   onResetDemo: () => void;
   onLoggedOut: () => void;
 }
 
+/**
+ * 認証・デモモードの状態およびログイン／ログアウト操作ハンドラ。
+ */
 export interface UseAuthFlowResult {
   appMode: AppMode;
   isLoggedIn: boolean;
@@ -29,6 +35,9 @@ export interface UseAuthFlowResult {
   handleLogout: () => Promise<void>;
 }
 
+/**
+ * Better Auth セッションとデモ体験モードの切替、ログイン・ログアウト処理を一元管理するフック。
+ */
 export function useAuthFlow({
   onError,
   onResetDemo,

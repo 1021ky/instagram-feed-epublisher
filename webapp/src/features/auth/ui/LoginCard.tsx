@@ -3,12 +3,18 @@
 import { ActionButton, InstagramBrandIcon } from "@/components/atoms";
 import { LoginStepsGuide } from "./LoginStepsGuide";
 
+/**
+ * ログインカードが受け取るプロパティ。
+ */
 export type LoginCardProps = {
   loadingLogin: boolean;
   onDemo: () => void;
   onLogin: () => void;
 };
 
+/**
+ * 未ログイン時のトップ画面に表示する Instagram ログイン・デモ体験導線カード。
+ */
 export function LoginCard({ loadingLogin, onDemo, onLogin }: LoginCardProps) {
   return (
     <section className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm border border-slate-200/80 max-w-xl mx-auto">

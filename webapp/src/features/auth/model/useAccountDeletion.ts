@@ -3,14 +3,23 @@
 import { useCallback, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
+/**
+ * 退会モーダルの表示ステップ。
+ */
 export type AccountDeletionStep = "confirm" | "completed";
 
+/**
+ * 退会フローフックが受け取るコールバック設定。
+ */
 export interface UseAccountDeletionOptions {
   onDeleted: () => void;
   /** テスト時に画面遷移を差し替えるための任意コールバック */
   onNavigateHome?: () => void;
 }
 
+/**
+ * 退会モーダルの開閉・進行状態と操作ハンドラ。
+ */
 export interface UseAccountDeletionResult {
   isOpen: boolean;
   step: AccountDeletionStep;
@@ -22,6 +31,9 @@ export interface UseAccountDeletionResult {
   completeClose: () => void;
 }
 
+/**
+ * 退会完了後にログイン前トップページへ確実に遷移するデフォルト処理。
+ */
 function defaultNavigateHome() {
   if (window.location.pathname === "/" && !window.location.search && !window.location.hash) {
     window.location.reload();
@@ -30,6 +42,9 @@ function defaultNavigateHome() {
   }
 }
 
+/**
+ * 退会（連携解除）モーダルの状態遷移とサーバー Cookie 破棄 API 呼び出しを管理するフック。
+ */
 export function useAccountDeletion({
   onDeleted,
   onNavigateHome = defaultNavigateHome,

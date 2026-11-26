@@ -11,6 +11,9 @@ export const authClient = createAuthClient({
   plugins: [genericOAuthClient()],
 });
 
+/**
+ * Instagram OAuth ログインを開始する。
+ */
 export async function signInWithInstagram() {
   return authClient.signIn.oauth2({
     providerId: "instagram",
