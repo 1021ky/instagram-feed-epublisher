@@ -7,6 +7,7 @@
  */
 import { test as base, expect } from "@playwright/test";
 import { FeedFilterPage } from "../pages/FeedFilterPage";
+import { PostListPage } from "../pages/PostListPage";
 import { TopLoginPage } from "../pages/TopLoginPage";
 
 export type HeldRequestGate = {
@@ -35,6 +36,7 @@ export type HashtagApiMockController = {
 export type E2EFixtures = {
   topLoginPage: TopLoginPage;
   feedFilterPage: FeedFilterPage;
+  postListPage: PostListPage;
   hashtagApiMock: HashtagApiMockController;
 };
 
@@ -44,6 +46,9 @@ export const test = base.extend<E2EFixtures>({
   },
   feedFilterPage: async ({ page }, use) => {
     await use(new FeedFilterPage(page));
+  },
+  postListPage: async ({ page }, use) => {
+    await use(new PostListPage(page));
   },
   hashtagApiMock: async ({ page }, use) => {
     const controller: HashtagApiMockController = {

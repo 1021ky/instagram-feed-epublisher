@@ -48,4 +48,26 @@ describe("投稿アイテムの日時ソート (sortItemsByTimestamp)", () => {
     const result = sortItemsByTimestamp([]);
     expect(result).toEqual([]);
   });
+
+  it("不正な timestamp を持つ項目は末尾に元の順序のまま配置すること", () => {
+    const mixed = [
+      { id: "invalid-1", timestamp: "not-a-date" },
+      { id: "valid-2", timestamp: "2026-02-01T00:00:00Z" },
+      { id: "valid-1", timestamp: "2026-01-01T00:00:00Z" },
+      { id: "invalid-2", timestamp: "also-invalid" },
+    ];
+
+    expect(sortItemsByTimestamp(mixed, "asc").map((i) => i.id)).toEqual([
+      "valid-1",
+      "valid-2",
+      "invalid-1",
+      "invalid-2",
+    ]);
+    expect(sortItemsByTimestamp(mixed, "desc").map((i) => i.id)).toEqual([
+      "valid-2",
+      "valid-1",
+      "invalid-1",
+      "invalid-2",
+    ]);
+  });
 });

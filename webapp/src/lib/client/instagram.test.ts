@@ -17,11 +17,16 @@ describe("Instagram クライアント API ヘルパー", () => {
       ok: true,
       json: async () => ({ items: [{ id: "1", media_url: "x", permalink: "p", timestamp: "t" }] }),
     } as Response;
-    globalThis.fetch = vi.fn().mockResolvedValue(response);
+    const fetchMock = vi.fn().mockResolvedValue(response);
+    globalThis.fetch = fetchMock;
 
-    const items = await fetchInstagramFeed({ maxCount: 10 });
+    const items = await fetchInstagramFeed({ maxCount: 10, sortOrder: "asc" });
     expect(items).toHaveLength(1);
     expect(items[0]?.id).toBe("1");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/instagram/media?maxCount=10&sortOrder=asc",
+      expect.objectContaining({ credentials: "include" }),
+    );
   });
 
   it("fetchInstagramFeed がエラー応答時に例外を送出する", async () => {

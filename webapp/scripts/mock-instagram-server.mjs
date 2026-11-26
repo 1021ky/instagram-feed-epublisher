@@ -94,13 +94,31 @@ export function buildDeterministicMockMedia(baseDate = new Date()) {
     },
   ];
 
-  return rawItems.map((entry, idx) => ({
-    id: entry.id,
-    caption: entry.caption,
-    media_url: buildMockSvgDataUrl(idx + 1, `Post ${idx + 1}`),
-    permalink: `https://www.instagram.com/p/mockpost${idx + 1}/`,
-    timestamp: new Date(anchorMs - entry.daysAgo * DAY_MS).toISOString(),
-  }));
+  return rawItems.map((entry, idx) => {
+    const baseItem = {
+      id: entry.id,
+      caption: entry.caption,
+      media_type: idx === 2 ? "CAROUSEL_ALBUM" : "IMAGE",
+      media_url: buildMockSvgDataUrl(idx + 1, `Post ${idx + 1}`),
+      permalink: `https://www.instagram.com/p/mockpost${idx + 1}/`,
+      timestamp: new Date(anchorMs - entry.daysAgo * DAY_MS).toISOString(),
+    };
+
+    if (idx === 2) {
+      return {
+        ...baseItem,
+        children: {
+          data: [1, 2, 3].map((slide) => ({
+            id: `${entry.id}_child_${slide}`,
+            media_type: "IMAGE",
+            media_url: buildMockSvgDataUrl(idx + slide + 10, `Post ${idx + 1} (${slide}/3)`),
+          })),
+        },
+      };
+    }
+
+    return baseItem;
+  });
 }
 
 /**

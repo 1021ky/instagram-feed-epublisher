@@ -23,6 +23,7 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
 ├── .github/              # GitHub Actions CI ワークフロー、エージェント向け指示定義
 ├── book_layout/          # EPUB 生成時の HTML / CSS レイアウトテンプレート
 ├── docs/                 # 設計資産・ドキュメント更新ポリシー
+│   ├── adr/              # アーキテクチャ決定記録 (ADR)
 │   ├── designdoc/        # 設計ドキュメント・Mermaid 図面
 │   │   ├── designDoc.md      # Webapp 詳細設計書
 │   │   ├── infra-designdoc.md # インフラ基本設計書・運用手順
@@ -60,6 +61,9 @@ Next.js (App Router) + TypeScript + Better Auth を採用し、同一オリジ�
   - Next.js フロントエンド、Better Auth、Instagram Graph API 間の認証・データ取得シーケンス。
 - 📜 [ドキュメント更新ポリシー](docs/documentation-policy.md)
   - 人間および AI エージェントが遵守すべきドキュメント配置、更新義務、品質基準（Markdown / Mermaid の検証ルール）。
+- 🏛 [アーキテクチャ決定記録 (ADR)](docs/adr/)
+  - [ADR-0001: Instagram OAuth ログイン時の再認証制御とログアウト通知の設計](docs/adr/0001-instagram-oauth-login-and-account-switching.md)
+  - [ADR-0002: Next.js Route Handler の責務分離と Zod v4 ＋ `zod-openapi` による BFF 契約管理](docs/adr/0002-api-validation-and-openapi-architecture.md)
 
 ---
 

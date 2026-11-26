@@ -14,13 +14,15 @@ import {
   FeedFilterStep,
   LoginCard,
   Navbar,
-  PostListStep,
   StickyActionBar,
 } from "@/components/organisms";
+import { PostListStep } from "@/features/feed";
 import { fetchHashtagSuggestions, fetchInstagramFeed, requestEpub } from "@/lib/client/instagram";
+import { validateEpubTitle } from "@/lib/epub/epub-request.schema";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";
 import { extractHashtagsFromPosts } from "@/lib/instagram/hashtag-service";
+import { listCarouselMediaEntries } from "@/lib/instagram/media-resolver";
 import { sortItemsByTimestamp } from "@/lib/epub/sort";
 import type {
   AppMode,
@@ -89,7 +91,9 @@ export default function Page() {
     message: "",
   });
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [showCustomizeErrors, setShowCustomizeErrors] = useState(false);
   const downloadUrlRef = useRef<string | null>(null);
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
 
   const [appMode, setAppMode] = useState<AppMode>("real");
   const [logoutNotice, setLogoutNotice] = useState<{ username?: string } | null>(null);
@@ -204,6 +208,7 @@ export default function Page() {
     setFeed([]);
     setIsFilterCollapsed(false);
     setHasFetched(false);
+    setShowCustomizeErrors(false);
     setError(null);
   }, [defaultDates.end, defaultDates.start]);
 
@@ -309,23 +314,77 @@ export default function Page() {
     }
   };
 
+  // Step 2 の並び順設定に応じた表示用フィード（デフォルト: 古い順 asc）
+  const sortedFeed = useMemo(() => {
+    return sortItemsByTimestamp(feed, customSettings.sortOrder);
+  }, [feed, customSettings.sortOrder]);
+
   // 選択中の投稿一覧
   const selectedPosts = useMemo(() => {
-    return feed.filter((item) => item.selected !== false);
-  }, [feed]);
+    return sortedFeed.filter((item) => item.selected !== false);
+  }, [sortedFeed]);
 
   // 単一投稿の選択トグル
   const handleToggleSelect = useCallback((postId: string) => {
     setFeed((prev) =>
-      prev.map((item) =>
-        item.id === postId ? { ...item, selected: item.selected === false } : item,
-      ),
+      prev.map((item) => {
+        if (item.id !== postId) {
+          return item;
+        }
+        const nextSelected = item.selected === false;
+        return {
+          ...item,
+          selected: nextSelected,
+          selectedChildIds:
+            nextSelected && item.selectedChildIds?.length === 0 ? undefined : item.selectedChildIds,
+        };
+      }),
+    );
+  }, []);
+
+  // カルーセル投稿内の個別写真選択トグル
+  const handleToggleChildSelect = useCallback((postId: string, childId: string) => {
+    setFeed((prev) =>
+      prev.map((item) => {
+        if (item.id !== postId) {
+          return item;
+        }
+        const allIds = listCarouselMediaEntries(item).map((entry) => entry.id);
+        if (allIds.length === 0) {
+          return item;
+        }
+        const currentIds =
+          item.selected === false && item.selectedChildIds === undefined
+            ? []
+            : (item.selectedChildIds ?? allIds);
+        const currentSet = new Set(currentIds);
+        if (currentSet.has(childId)) {
+          currentSet.delete(childId);
+        } else {
+          currentSet.add(childId);
+        }
+        const nextIds = allIds.filter((id) => currentSet.has(id));
+        if (nextIds.length === 0) {
+          return { ...item, selected: false, selectedChildIds: [] };
+        }
+        return {
+          ...item,
+          selected: true,
+          selectedChildIds: nextIds.length === allIds.length ? undefined : nextIds,
+        };
+      }),
     );
   }, []);
 
   // すべて選択
   const handleSelectAll = useCallback(() => {
-    setFeed((prev) => prev.map((item) => ({ ...item, selected: true })));
+    setFeed((prev) =>
+      prev.map((item) => ({
+        ...item,
+        selected: true,
+        selectedChildIds: item.selectedChildIds?.length === 0 ? undefined : item.selectedChildIds,
+      })),
+    );
   }, []);
 
   // 選択解除
@@ -374,6 +433,7 @@ export default function Page() {
         startDate: filter.startDate,
         endDate: filter.endDate,
         maxCount: filter.maxCount,
+        sortOrder: customSettings.sortOrder,
       };
 
       const items: FeedPostItem[] = isDemoMode
@@ -413,6 +473,14 @@ export default function Page() {
       setError("収録する投稿が1件も選択されていません。投稿を選択してください。");
       return;
     }
+    const titleError = validateEpubTitle(customSettings.title);
+    if (titleError) {
+      setShowCustomizeErrors(true);
+      setError(titleError);
+      titleInputRef.current?.focus();
+      return;
+    }
+    setShowCustomizeErrors(false);
     setError(null);
     setIsExportModalOpen(true);
     if (downloadUrlRef.current) {
@@ -428,11 +496,22 @@ export default function Page() {
       // EPUB生成対象の投稿（選択されたもののみ）
       const itemsForEpub = selectedPosts.map((p) => ({
         id: p.id,
+        media_type: p.media_type,
         media_url: p.media_url,
+        thumbnail_url: p.thumbnail_url,
+        children: p.children,
         permalink: p.permalink,
         caption: p.caption,
         timestamp: p.timestamp,
       }));
+
+      const selectedCarouselChildren: Record<string, string[]> = {};
+      for (const post of selectedPosts) {
+        if (post.selectedChildIds !== undefined) {
+          selectedCarouselChildren[post.id] = post.selectedChildIds;
+        }
+      }
+      const hasCarouselSelections = Object.keys(selectedCarouselChildren).length > 0;
 
       const cleanFilter = {
         hashtag: filter.hashtag ? filter.hashtag.replace(/^#/, "") : undefined,
@@ -451,7 +530,7 @@ export default function Page() {
         demoMode: isDemoMode,
         filter: cleanFilter,
         metadata: {
-          title: customSettings.title || recommendedTitle,
+          title: customSettings.title.trim(),
           subtitle: customSettings.subtitle,
           author: customSettings.author,
           contact: customSettings.contact ?? "",
@@ -461,6 +540,7 @@ export default function Page() {
         coverTheme: customSettings.coverTheme,
         sortOrder: customSettings.sortOrder,
         selectedMediaIds: itemsForEpub.map((item) => item.id),
+        ...(hasCarouselSelections ? { selectedCarouselChildren } : {}),
         items: sortedItemsForEpub,
       });
 
@@ -591,9 +671,14 @@ export default function Page() {
               {/* Step 2: 投稿確認・選択リスト */}
               <div id="post-list">
                 <PostListStep
-                  posts={feed}
+                  posts={sortedFeed}
+                  sortOrder={customSettings.sortOrder}
+                  onSortOrderChange={(sortOrder) =>
+                    setCustomSettings((prev) => ({ ...prev, sortOrder }))
+                  }
                   isFetched={hasFetched || feed.length > 0}
                   onToggleSelect={handleToggleSelect}
+                  onToggleChildSelect={handleToggleChildSelect}
                   onSelectAll={handleSelectAll}
                   onDeselectAll={handleDeselectAll}
                 />
@@ -605,6 +690,8 @@ export default function Page() {
                   settings={customSettings}
                   onChange={setCustomSettings}
                   defaultTitle={recommendedTitle}
+                  showValidationErrors={showCustomizeErrors}
+                  titleInputRef={titleInputRef}
                 />
 
                 <div className="pt-2">

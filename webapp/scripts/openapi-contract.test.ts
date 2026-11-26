@@ -120,4 +120,36 @@ describe("OpenAPI 3.1 契約仕様およびスキーマ検証器", () => {
     expect(errRes.status).toBe(400);
     assertValidOpenApiSchema(spec, "GraphErrorResponse", await errRes.json());
   });
+
+  it("CAROUSEL_ALBUM（children付き）や VIDEO（thumbnail_url付き）を含む GraphMediaListResponse を検証・許容する", () => {
+    const result = validateOpenApiSchema(spec, "GraphMediaListResponse", {
+      data: [
+        {
+          id: "carousel-1",
+          caption: "カルーセルテスト",
+          media_type: "CAROUSEL_ALBUM",
+          media_url: "https://example.com/c1.jpg",
+          permalink: "https://www.instagram.com/p/carousel-1/",
+          timestamp: "2026-10-20T09:00:00.000Z",
+          children: {
+            data: [
+              {
+                id: "child-1",
+                media_type: "IMAGE",
+                media_url: "https://example.com/c1.jpg",
+              },
+              {
+                id: "child-2",
+                media_type: "VIDEO",
+                media_url: "https://example.com/c2.mp4",
+                thumbnail_url: "https://example.com/c2-thumb.jpg",
+              },
+            ],
+          },
+        },
+      ],
+    });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
 });

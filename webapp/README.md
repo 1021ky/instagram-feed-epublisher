@@ -37,7 +37,8 @@ webapp/
 │   ├── api/              # API Route Handlers
 │   │   ├── auth/         # Better Auth 認証エンドポイント
 │   │   ├── epub/         # EPUB 生成 API
-│   │   └── instagram/    # Instagram Graph API プロキシ
+│   │   ├── instagram/    # Instagram Graph API プロキシ
+│   │   └── openapi.json/ # BFF API OpenAPI 3.1.0 ドキュメント配信エンドポイント
 │   ├── data-deletion/    # Meta 審査向けデータ削除手順ページ
 │   ├── layout.tsx        # ルートレイアウト
 │   ├── privacy/          # Meta 審査向けプライバシーポリシーページ
@@ -55,8 +56,9 @@ webapp/
     │   └── organisms/    # 独立セクション・ステップ・モーダル (Navbar, LoginCard, AccountDeletionModal, 各Step, StickyActionBar, SiteFooter, LegalPage)
     ├── lib/              # 共通ライブラリ・ロジック
     │   ├── auth/         # Better Auth 設定・セッションサービス
-    │   ├── epub/         # EPUB ビルダー・レンダラー
-    │   └── instagram/    # Instagram Graph API クライアント
+    │   ├── epub/         # EPUB ビルダー・レンダラー・Zod v4 スキーマ・生成サービス
+    │   ├── instagram/    # Instagram Graph API クライアント
+    │   └── openapi/      # Zod v4 スキーマからの OpenAPI 3.1.0 ドキュメント生成
     └── types/            # UI・ドメイン共通型定義 (ui.ts 等)
 ```
 

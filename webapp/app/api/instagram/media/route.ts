@@ -22,12 +22,15 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const rawMaxCount = url.searchParams.get("maxCount");
     const maxCountParam = rawMaxCount !== null ? Number(rawMaxCount) : DEFAULT_MAX_COUNT;
+    const rawSortOrder = url.searchParams.get("sortOrder");
+    const sortOrder = rawSortOrder === "asc" || rawSortOrder === "desc" ? rawSortOrder : undefined;
     const filter: FeedFilter = {
       hashtag: url.searchParams.get("hashtag") || undefined,
       startDate: url.searchParams.get("startDate") || undefined,
       endDate: url.searchParams.get("endDate") || undefined,
       maxCount:
         Number.isFinite(maxCountParam) && maxCountParam > 0 ? maxCountParam : DEFAULT_MAX_COUNT,
+      ...(sortOrder ? { sortOrder } : {}),
     };
 
     logger.info("Feed request received", { filter });

@@ -33,7 +33,9 @@
     "react-dom": "19.3.0",
     "satori": "0.33.5",
     "sharp": "0.35.4",
-    "winston": "3.19.0"
+    "winston": "3.19.0",
+    "zod": "4.6.7",
+    "zod-openapi": "6.0.2"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "11.17.0",

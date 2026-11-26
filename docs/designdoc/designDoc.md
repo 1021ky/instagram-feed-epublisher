@@ -276,3 +276,4 @@
 設計上の主要な意思決定ログは `docs/adr/` 配下に記録しています。
 
 - [ADR-0001: Instagram OAuth ログイン時の再認証制御とアカウント切り替え導線の設計](../adr/0001-instagram-oauth-login-and-account-switching.md)
+- [ADR-0002: Next.js Route Handler の責務分離と Zod v4 ＋ `zod-openapi` による BFF 契約管理](../adr/0002-api-validation-and-openapi-architecture.md)
