@@ -1,12 +1,12 @@
-/**
- * @file カルーセル投稿の複数写真選択（横スクロール）コンポーネント
- */
 "use client";
 
 import Image from "next/image";
 import { Check } from "lucide-react";
-import type { CarouselPhotoViewModel } from "@/features/feed/model/post-presenter";
+import type { CarouselPhotoViewModel } from "../model/post-presenter";
 
+/**
+ * カルーセル個別写真選択リストコンポーネントの Props。
+ */
 export interface CarouselPhotoStripProps {
   /** カルーセル内の写真一覧 */
   photos: CarouselPhotoViewModel[];

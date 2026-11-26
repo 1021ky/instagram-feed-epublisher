@@ -1,10 +1,7 @@
-/**
- * @file 投稿カードコンポーネント (PostCard) の単体テスト
- */
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import type { PostCardViewModel } from "@/features/feed/model/post-presenter";
+import type { PostCardViewModel } from "../model/post-presenter";
 import { PostCard } from "./PostCard";
 
 describe("投稿カード (PostCard)", () => {

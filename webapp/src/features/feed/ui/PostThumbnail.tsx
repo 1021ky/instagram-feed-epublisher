@@ -1,12 +1,12 @@
-/**
- * @file 投稿カードのサムネイル領域（連番・複数枚バッジ・画像読み込みフォールバック）
- */
 "use client";
 
 import { useState } from "react";
 import Image from "next/image";
 import { ImageIcon, Layers } from "lucide-react";
 
+/**
+ * 投稿サムネイルコンポーネントの Props。
+ */
 export interface PostThumbnailProps {
   /** 表示画像 URL */
   src?: string;

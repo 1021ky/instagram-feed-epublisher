@@ -1,11 +1,11 @@
-/**
- * @file 投稿カード上部のメタ情報ヘッダー（投稿日時・Instagram外部リンク）
- */
 "use client";
 
 import type React from "react";
 import { Calendar, ExternalLink } from "lucide-react";
 
+/**
+ * 投稿カード上部のメタ情報ヘッダー（投稿日時・元投稿リンク）の Props。
+ */
 export interface PostMetaHeaderProps {
   /** 表示用に整形済みの日時文字列 */
   formattedDate: string;

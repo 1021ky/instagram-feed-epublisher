@@ -1,6 +1,3 @@
-/**
- * @file 投稿プレゼンター (toPostCardViewModel) の単体テスト
- */
 import { describe, expect, it } from "vitest";
 import type { FeedPostItem } from "@/types/ui";
 import { toPostCardViewModel } from "./post-presenter";

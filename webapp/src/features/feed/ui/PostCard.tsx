@@ -1,18 +1,16 @@
-/**
- * @file Step 2: 投稿カードコンポーネント (PostCard)
- * 表示専用 ViewModel を受け取り、選択チェック・サムネイル・メタヘッダー・キャプション・
- * カルーセル写真選択の各 UI 部品を組み合わせて描画します。
- */
 "use client";
 
 import { useId } from "react";
 import { SelectionCheckbox } from "@/components/atoms";
-import type { PostCardViewModel } from "@/features/feed/model/post-presenter";
-import { CarouselPhotoStrip } from "@/features/feed/ui/CarouselPhotoStrip";
-import { PostFooterStatus } from "@/features/feed/ui/PostFooterStatus";
-import { PostMetaHeader } from "@/features/feed/ui/PostMetaHeader";
-import { PostThumbnail } from "@/features/feed/ui/PostThumbnail";
+import type { PostCardViewModel } from "../model/post-presenter";
+import { CarouselPhotoStrip } from "./CarouselPhotoStrip";
+import { PostFooterStatus } from "./PostFooterStatus";
+import { PostMetaHeader } from "./PostMetaHeader";
+import { PostThumbnail } from "./PostThumbnail";
 
+/**
+ * 投稿カードコンポーネントの Props。
+ */
 export interface PostCardProps {
   /** 投稿カード表示用の正規化済み ViewModel */
   post: PostCardViewModel;

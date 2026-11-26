@@ -1,6 +1,3 @@
-/**
- * @file 投稿リストステップ (PostListStep) の単体テスト
- */
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
