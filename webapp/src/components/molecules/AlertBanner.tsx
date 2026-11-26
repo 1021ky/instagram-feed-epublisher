@@ -1,6 +1,5 @@
 /**
- * @file エラーアラートバナーコンポーネント (Molecule)
- * 画面上部やフォーム内で共通利用される role="alert" のエラーメッセージ表示を提供します。
+ * @file 画面上部やフォーム内で共通利用されるエラーアラートバナー
  */
 
 export interface AlertBannerProps {
@@ -10,9 +9,6 @@ export interface AlertBannerProps {
   className?: string;
 }
 
-/**
- * エラーアラートバナーコンポーネント。
- */
 export function AlertBanner({ message, className = "" }: AlertBannerProps) {
   return (
     <div

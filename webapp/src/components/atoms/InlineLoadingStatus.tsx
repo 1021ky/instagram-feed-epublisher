@@ -1,5 +1,5 @@
 /**
- * @file インラインのスピナー付きステータスメッセージ (Atom)
+ * @file インラインのスピナー付きステータスメッセージ
  * 集計処理中などの軽量な非同期ステータスを aria-live="polite" で通知します。
  */
 import { Loader2 } from "lucide-react";

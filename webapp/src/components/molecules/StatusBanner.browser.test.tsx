@@ -32,4 +32,29 @@ describe("ステータス通知バナーの操作 (StatusBanner)", () => {
       .element(screen.getByRole("button", { name: "通知を閉じる" }))
       .not.toBeInTheDocument();
   });
+
+  it("success トーンと action スロットを指定したとき、アクションボタンが操作でき、閉じるボタンも動作すること", async () => {
+    const onAction = vi.fn();
+    const onDismiss = vi.fn();
+    const screen = await render(
+      <StatusBanner
+        tone="success"
+        title="EPUBの書き出しが完了しました"
+        action={
+          <button type="button" onClick={onAction}>
+            転送ガイド・ダウンロードを再表示
+          </button>
+        }
+        onDismiss={onDismiss}
+      />,
+    );
+
+    await expect.element(screen.getByRole("status")).toBeVisible();
+
+    await screen.getByRole("button", { name: "転送ガイド・ダウンロードを再表示" }).click();
+    expect(onAction).toHaveBeenCalledTimes(1);
+
+    await screen.getByRole("button", { name: "通知を閉じる" }).click();
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+  });
 });

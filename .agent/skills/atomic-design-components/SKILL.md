@@ -37,13 +37,19 @@ flowchart TD
 
 1. **Layer 1: Atoms (`webapp/src/components/atoms/`)**
    - **責務**: これ以上分解できない最小単位の汎用 UI 要素。
+   - **切り出し基準（2回目の原則 / 品質・a11y 先行抽出）**:
+     - 一般的なロジック共通化では「Rule of Three（3回の法則）」が用いられるが、**タップ領域（44px 以上）、フォーカス可視化（`focus-visible`）、必須 WAI-ARIA 属性（`aria-label`、`aria-pressed`、`role="checkbox"` 等）など「品質やアクセシビリティを担保したい最小 UI パーツ」は、2回目が出たら（あるいは最初から）`webapp/src/components/atoms/` に切り出す（MUST）**。
+     - 代表例: `IconButton`, `ActionButton`, `FilterChip`, `SelectionCheckbox`, `InlineLoadingStatus`, `InstagramBrandIcon`。
+   - **Atom 側と呼び出し側の責務境界（Tailwind CSS × Atomic Design）**:
+     - **Atom 側の責務**: 最小タップ領域（`min-h-[44px]` / `min-w-[44px]`）、フォーカス表示（`focus-visible:outline-none focus-visible:ring-2`）、必須の WAI-ARIA 属性（例: `IconButton` における `aria-label` の型レベル必須化）、基本レイアウト・カーソル・無効化状態の統一。
+     - **呼び出し側の責務**: 親コンテナ内での位置調整用マージン・絶対配置（`-mr-1.5`, `absolute top-3 right-3` 等）、およびコンテキストに応じたカラーバリアントや幅指定。
    - **制約**:
      - **ドメイン知識を持たない（MUST）**: 特定のビジネスモデル（`FeedPostItem` や `EpubCustomSettings` など）に依存した Props を受け取らないこと。汎用的なプリミティブ型（`string`, `number`, `boolean`, コールバック関数等）のみを受け取る。
      - **セマンティクスとアクセシビリティの完結（MUST）**: `aria-pressed`, `role="status"`, `role="checkbox"` 等の WAI-ARIA 属性を適切にカプセル化する。
      - **タップ領域（MUST）**: モバイル操作を前提とし、インタラクティブ要素は最低 44px（`min-h-[44px]`）のタップ領域を確保する。
 
 2. **Layer 2: Molecules (`webapp/src/components/molecules/`)**
-   - **責務**: 複数の Atoms や基本要素を組み合わせた、ドメイン非依存の単一目的複合 UI パーツ。
+   - **責務**: 複数の Atoms や基本要素を組み合わせた、ドメイン非依存の単一目的複合 UI パーツ（例: `AlertBanner`, `StatusBanner`, `ModalDialog`, `StepCardHeader`, `SegmentedControl`）。
    - **制約**:
      - **単一責務の維持（MUST）**: 画面全体のレイアウトや無関係な機能（例: フィルター条件と投稿一覧の混在）を抱え込まないこと。
      - **API / ドメイン型への非依存（SHOULD）**: 特定機能専用のカードやセレクタは `features/<domain>/` へ切り出す。
@@ -76,7 +82,8 @@ flowchart TD
 Atoms、Molecules、および Organisms の全コンポーネントは、保守性と検索性を最大化するため**「1コンポーネント = 1テストファイル（`[ComponentName].test.tsx`）」の 1:1 コロケーション（同ディレクトリ同名配置）を必須（MUST）**とします。
 
 - **テストファイル配置（Colocation）**:
-  - 各 `.tsx` コンポーネントファイルの真横に `[ComponentName].test.tsx` を配置する（例: `FilterChip.test.tsx`, `PostCard.test.tsx`, `Navbar.test.tsx` 等）。
+  - 各 `.tsx` コンポーネントファイルの真横に `[ComponentName].test.tsx`（Small: `renderToStaticMarkup` によるマークアップ・ARIA・バリエーション検証）を配置する（例: `FilterChip.test.tsx`, `PostCard.test.tsx`, `Navbar.test.tsx` 等）。
+  - クリック操作・キーボード（`Escape` 等）・フォーカス移動・44px タップ領域実測を伴うコンポーネントは、同ディレクトリに `[ComponentName].browser.test.tsx`（Medium: Vitest Browser Mode）を併置する。
   - 1つのテストファイルに複数コンポーネントを集約するアンチパターンは禁止する。
 - **パラメータ化テストの義務化（`it.each`）**:
   - 表示状態（アクティブ/非アクティブ、件数あり/なし、disabled/readOnly 等）のバリエーションは `it.each` で網羅する。
@@ -92,7 +99,7 @@ Atoms、Molecules、および Organisms の全コンポーネントは、保守�
 変更作業を完了する前に、以下のコマンドを実行しすべて 0 件エラーで通過することを確認します。
 
 ```bash
-# 1. 単体テスト実行
+# 1. 全テスト実行（Small -> Medium -> Large E2E）
 pnpm test
 
 # 2. 静的解析（Oxlint）
@@ -101,14 +108,25 @@ pnpm lint
 # 3. コードフォーマット検証（Oxfmt）
 pnpm format:check
 
-# 4. TypeScript 型チェック
-pnpm --filter instagram-feed-epublisher-webapp exec tsc --noEmit
+# 4. Markdown 構文検証
+pnpm lint:md
+
+# 5. TypeScript 型チェック
+pnpm typecheck
 ```
 
 #### セルフレビューチェックリスト
 
-- [ ] Atom にビジネスロジックやドメイン全体の型を直接渡していないか？
-- [ ] ボタン・チップ等の操作要素に 44px（`min-h-[44px]`）のタップ領域が確保されているか？
-- [ ] `aria-pressed`, `role="status"`, `role="alert"` などの WAI-ARIA 属性が適切に設定されているか？
-- [ ] 各ディレクトリの `index.ts` から公開されているか？
-- [ ] 既存の E2E ロケータ（Playwright POM）に破壊的変更を与えていないか？
+- **Atoms**:
+  - [ ] ドメイン知識や API 型に依存せず、汎用的な Props のみで構成されているか？
+  - [ ] 操作要素のアクセシビリティ（十分なタップ領域・フォーカス可視化・適切な WAI-ARIA 属性）を Atom 側で担保し、配置余白やコンテキスト別バリアントは呼び出し側へ委譲できているか？
+- **Molecules**:
+  - [ ] 特定ドメインに依存せず、単一目的の複合 UI パーツとして責務が閉じているか？（機能固有のものは `features/` へ配置）
+- **Features (`features/<domain>/`)**:
+  - [ ] ロジック／ViewModel 変換（`model/`）と意味単位の UI 部品（`ui/`）が分離され、外部からは `index.ts` の Public API のみ公開されているか？
+  - [ ] 下位層（`components/`・`lib/`）から `features/` への逆方向依存が発生していないか？
+- **Organisms / Pages**:
+  - [ ] `Organisms` は複数機能で共有するレイアウトブロックに留まり、`Pages`（`app/`）はオーケストレーションに専念しているか？
+- **公開境界・テスト・互換性**:
+  - [ ] 各層の `index.ts` からのエクスポートと 1:1 コロケーションテスト（Small / 必要に応じた Medium）が揃っているか？
+  - [ ] 既存の E2E ロケータ（Playwright POM）やアクセシビリティ制御（`inert`・フォーカス誘導等）に破壊的変更を与えていないか？

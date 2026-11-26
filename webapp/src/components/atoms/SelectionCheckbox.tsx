@@ -1,6 +1,3 @@
-/**
- * @file 44px以上のタップ領域とWAI-ARIAを備えた汎用チェックボックスボタン (Atom)
- */
 "use client";
 
 import type React from "react";
