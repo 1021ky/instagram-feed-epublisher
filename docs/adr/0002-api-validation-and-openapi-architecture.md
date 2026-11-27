@@ -43,7 +43,7 @@
 1. `webapp/src/lib/epub/epub-request.schema.ts` に Zod v4 入力スキーマ・正規化パーサー・UI 共有タイトル検証ヘルパーを集約する。
 2. `webapp/src/lib/epub/epub-generation-service.ts` と `webapp/src/lib/epub/http-response.ts` にビジネスオーケストレーション、一時ディレクトリ管理、HTTP エラーマッピング（`400` / `401` / `InstagramGraphApiError.recommendedHttpStatus` / `500`）を分離する。
 3. `webapp/app/api/epub/route.ts` および `webapp/app/api/epub/demo/route.ts` は薄い HTTP アダプターに限定する。
-4. `webapp/src/lib/openapi/bff-document.ts`、`webapp/src/lib/openapi/render-html.ts`、および `webapp/scripts/generate-bff-openapi.mjs` により、`docs/openapi/`（`bff-api.openapi.json` / `index.html`、`.gitignore` 対象）へ静的ファイルとして OpenAPI 3.1.0 仕様を生成・検証できるようにする（BFF は内部専用 API であるため、本番サーバーに `/api/openapi.json` 等の仕様書配信エンドポイントは公開しない）。
+4. `webapp/scripts/openapi/bff-document.ts` および `webapp/scripts/openapi/generate.mjs`（`@redocly/cli` 利用）により、`pnpm doc:apischema` で `docs/openapi/`（`bff-api.openapi.json` / `index.html`、`.gitignore` 対象）へ OpenAPI 3.1.0 仕様と静的 HTML を生成し、`pnpm lint:openapi`（`redocly lint`）を Document CI で自動検証する（BFF は内部専用 API であるため、本番サーバーに `/api/openapi.json` 等の仕様書配信エンドポイントは公開しない）。
 
 ## 4. 影響・トレードオフ (Consequences)
 

@@ -1,0 +1,8 @@
+extends:
+  - recommended
+
+rules:
+  # 内部 BFF および契約テスト用モック仕様のため外部向けライセンス記載は不要
+  info-license: off
+  # OAuth 認可エンドポイント (/oauth/authorize) の 302 リダイレクト応答を許容
+  operation-2xx-response: off

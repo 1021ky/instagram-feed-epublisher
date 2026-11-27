@@ -12,25 +12,25 @@ Next.js (App Router) + TypeScript + Better Auth を採用しています。
 
 すべてのコマンドは `webapp/` ディレクトリ内で実行します（プロジェクトルートからも `pnpm <コマンド>` で直接実行可能です）。
 
-| コマンド                | 説明                                                                   |
-| :---------------------- | :--------------------------------------------------------------------- |
-| `pnpm dev`              | 開発サーバー起動（ローカル HTTPS: `https://localhost:3000`）           |
-| `pnpm clean`            | Next.js ビルドキャッシュ（`.next`）の削除                              |
-| `pnpm build`            | Next.js 本番用ビルド                                                   |
-| `pnpm build:clean`      | ビルドキャッシュ削除後のクリーンビルド                                 |
-| `pnpm start`            | ビルド済みアプリケーションの起動                                       |
-| `pnpm lint`             | oxlint による静的解析                                                  |
-| `pnpm format`           | oxfmt によるコードフォーマット                                         |
-| `pnpm format:check`     | oxfmt によるフォーマットチェック                                       |
-| `pnpm test`             | 全テスト実行（Small → Medium → Large）                                 |
-| `pnpm test:small`       | Small テスト（Node / Vitest 単体・API・OpenAPI 契約テスト）            |
-| `pnpm test:medium`      | Medium テスト（Vitest Browser Mode 実ブラウザ結合テスト）              |
-| `pnpm test:large`       | Large テスト（Playwright フルスタック E2E テスト）                     |
-| `pnpm openapi:generate` | Zod v4 スキーマから `docs/openapi/` へ OpenAPI JSON/HTML 生成          |
-| `pnpm openapi:check`    | `docs/openapi/` の生成済み OpenAPI JSON/HTML の最新性検証              |
-| `pnpm e2etest`          | Playwright によるフルスタック E2E テスト実行（`pnpm test:large` 相当） |
-| `pnpm e2etest:ui`       | Playwright UI モードでのテスト実行                                     |
-| `pnpm e2etest:debug`    | Playwright デバッグモードでのテスト実行                                |
+| コマンド             | 説明                                                                         |
+| :------------------- | :--------------------------------------------------------------------------- |
+| `pnpm dev`           | 開発サーバー起動（ローカル HTTPS: `https://localhost:3000`）                 |
+| `pnpm clean`         | Next.js ビルドキャッシュ（`.next`）の削除                                    |
+| `pnpm build`         | Next.js 本番用ビルド                                                         |
+| `pnpm build:clean`   | ビルドキャッシュ削除後のクリーンビルド                                       |
+| `pnpm start`         | ビルド済みアプリケーションの起動                                             |
+| `pnpm lint`          | oxlint による静的解析                                                        |
+| `pnpm format`        | oxfmt によるコードフォーマット                                               |
+| `pnpm format:check`  | oxfmt によるフォーマットチェック                                             |
+| `pnpm test`          | 全テスト実行（Small → Medium → Large）                                       |
+| `pnpm test:small`    | Small テスト（Node / Vitest 単体・API・OpenAPI 契約テスト）                  |
+| `pnpm test:medium`   | Medium テスト（Vitest Browser Mode 実ブラウザ結合テスト）                    |
+| `pnpm test:large`    | Large テスト（Playwright フルスタック E2E テスト）                           |
+| `pnpm doc:apischema` | Zod v4 スキーマから `docs/openapi/` へ OpenAPI JSON / Redocly 静的 HTML 生成 |
+| `pnpm lint:openapi`  | Redocly CLI (`redocly lint`) による全 OpenAPI 3.1 仕様書の妥当性検証         |
+| `pnpm e2etest`       | Playwright によるフルスタック E2E テスト実行（`pnpm test:large` 相当）       |
+| `pnpm e2etest:ui`    | Playwright UI モードでのテスト実行                                           |
+| `pnpm e2etest:debug` | Playwright デバッグモードでのテスト実行                                      |
 
 ---
 
@@ -52,7 +52,7 @@ webapp/
 ├── e2e/                  # Playwright E2E テスト (POM + Custom Fixtures)
 │   ├── fixtures/         # Page Object・API モック注入用 Custom Fixtures
 │   └── pages/            # Page Object Model クラス群
-├── scripts/              # 開発サーバー・OpenAPI モックサーバー・Oxlint プラグイン
+├── scripts/              # 開発サーバー・OpenAPI モック/仕様書生成・Oxlint プラグイン
 └── src/
     ├── components/       # ドメイン非依存の共通 UI コンポーネント (Atomic Design)
     │   ├── atoms/        # 最小単位 UI 要素 (ActionButton, FilterChip, IconButton, InlineLoadingStatus, InstagramBrandIcon, SelectionCheckbox)
@@ -66,8 +66,7 @@ webapp/
     ├── lib/              # 共通ライブラリ・ロジック
     │   ├── auth/         # Better Auth 設定・セッションサービス
     │   ├── epub/         # EPUB ビルダー・レンダラー・Zod v4 スキーマ・生成サービス
-    │   ├── instagram/    # Instagram Graph API クライアント
-    │   └── openapi/      # Zod v4 スキーマからの OpenAPI 3.1.0 ドキュメント生成
+    │   └── instagram/    # Instagram Graph API クライアント
     └── types/            # UI・ドメイン共通型定義 (ui.ts 等)
 ```
 

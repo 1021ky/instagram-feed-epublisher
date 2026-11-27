@@ -1,7 +1,5 @@
 /**
- * @file BFF API 向けの OpenAPI 3.1.0 ドキュメント生成モジュール。
- *
- * Zod v4 スキーマの `.meta()` をそのまま読み取り、実装と乖離しない OpenAPI 仕様書を構築します。
+ * @file Zod v4 スキーマの .meta() から BFF API（EPUB 生成系）の OpenAPI 3.1.0 ドキュメントを構築する。
  */
 import { createDocument } from "zod-openapi";
 import {
@@ -11,7 +9,7 @@ import {
 } from "@/lib/epub/epub-request.schema";
 
 /**
- * BFF API（EPUB生成系エンドポイント）の OpenAPI 3.1.0 ドキュメントを構築します。
+ * BFF API（EPUB生成系エンドポイント）の OpenAPI 3.1.0 ドキュメントを構築する。
  */
 export function buildBffOpenApiDocument() {
   return createDocument({
@@ -22,10 +20,28 @@ export function buildBffOpenApiDocument() {
       description:
         "Instagram投稿からEPUB書籍を生成するNext.js BFF API仕様。リクエスト検証用のZod v4スキーマを単一ソースとして生成されています。",
     },
+    servers: [
+      {
+        url: "https://feedstobook.ksanchu.page",
+        description: "Production Next.js BFF Server",
+      },
+    ],
+    components: {
+      securitySchemes: {
+        sessionCookie: {
+          type: "apiKey",
+          in: "cookie",
+          name: "better-auth.session_token",
+          description: "Better Auth セッション Cookie",
+        },
+      },
+    },
     paths: {
       "/api/epub": {
         post: {
+          operationId: "generateEpub",
           summary: "InstagramフィードからEPUBファイルを生成して返却",
+          security: [{ sessionCookie: [] }],
           requestBody: {
             required: true,
             content: {
@@ -99,7 +115,9 @@ export function buildBffOpenApiDocument() {
       },
       "/api/epub/demo": {
         post: {
+          operationId: "generateDemoEpub",
           summary: "同梱デモデータセットからEPUBファイルを生成して返却",
+          security: [],
           requestBody: {
             required: true,
             content: {

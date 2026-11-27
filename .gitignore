@@ -67,9 +67,10 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-# Generated OpenAPI docs
+# Generated OpenAPI docs (pnpm doc:apischema / Redocly)
 docs/openapi/bff-api.openapi.json
-docs/openapi/index.html
+docs/openapi/*.html
+redoc-static.html
 
 # Local task notes
 tasks/todo.md

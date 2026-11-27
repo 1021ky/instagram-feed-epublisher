@@ -11,7 +11,9 @@ servers:
 paths:
   /oauth/authorize:
     get:
+      operationId: authorizeInstagram
       summary: "Instagram OAuth 2.0 Authorization Endpoint"
+      security: []
       parameters:
         - name: client_id
           in: query
@@ -44,9 +46,13 @@ paths:
       responses:
         "302":
           description: "Redirects back to redirect_uri with authorization code and state"
+        "400":
+          description: "Invalid OAuth authorization request parameters"
   /oauth/access_token:
     post:
+      operationId: exchangeShortLivedToken
       summary: "Exchange authorization code for short-lived Instagram user access token"
+      security: []
       responses:
         "200":
           description: "Short-lived token payload"
@@ -54,9 +60,17 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OAuthShortTokenResponse"
+        "400":
+          description: "Invalid authorization code or OAuth error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraphErrorResponse"
   /access_token:
     get:
+      operationId: exchangeLongLivedToken
       summary: "Exchange short-lived token for long-lived Instagram token (ig_exchange_token)"
+      security: []
       parameters:
         - name: grant_type
           in: query
@@ -82,9 +96,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OAuthLongTokenResponse"
+        "400":
+          description: "Invalid token exchange request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GraphErrorResponse"
   /me:
     get:
+      operationId: getInstagramProfile
       summary: "Fetch authenticated Instagram user profile"
+      security:
+        - instagramAccessToken: []
       parameters:
         - name: fields
           in: query
@@ -111,7 +134,10 @@ paths:
                 $ref: "#/components/schemas/GraphErrorResponse"
   /me/media:
     get:
+      operationId: listInstagramMedia
       summary: "Fetch user media items with cursor pagination"
+      security:
+        - instagramAccessToken: []
       parameters:
         - name: fields
           in: query
@@ -166,7 +192,10 @@ paths:
                 $ref: "#/components/schemas/GraphErrorResponse"
   /api/instagram/hashtags:
     get:
+      operationId: listHashtagSuggestions
       summary: "Internal Next.js BFF endpoint returning aggregated hashtag suggestions from recent posts"
+      security:
+        - sessionCookie: []
       parameters:
         - name: limit
           in: query
@@ -196,6 +225,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/BffErrorResponse"
 components:
+  securitySchemes:
+    instagramAccessToken:
+      type: apiKey
+      in: query
+      name: access_token
+      description: "Instagram Graph API OAuth access token"
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: better-auth.session_token
+      description: "Better Auth session cookie"
   schemas:
     OAuthShortTokenResponse:
       type: object
