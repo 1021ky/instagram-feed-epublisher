@@ -1,10 +1,13 @@
 /**
- * @file 投稿カード下部のステータス領域（いいね数・収録対象ラベル）
+ * @file 投稿カード下部にいいね数バッジと収録対象・除外のステータスラベルを描画する。
  */
 "use client";
 
 import { Heart } from "lucide-react";
 
+/**
+ * 投稿カード下部のステータス表示（いいね数・収録対象ラベル）の Props。
+ */
 export interface PostFooterStatusProps {
   /** いいね数（UI表示専用、EPUB非出力） */
   likeCount?: number;

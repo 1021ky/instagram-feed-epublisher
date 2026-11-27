@@ -1,6 +1,3 @@
-/**
- * @file 投稿リストステップ (PostListStep) の単体テスト
- */
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
@@ -8,6 +5,7 @@ import type { FeedPostItem } from "@/types/ui";
 import { PostListStep } from "./PostListStep";
 
 describe("投稿リストステップ (PostListStep)", () => {
+  /** 選択件数集計（3件中2件選択）と一覧・並び順描画の検証に使う基準投稿データ */
   const samplePosts: FeedPostItem[] = [
     {
       id: "p1",

@@ -1,5 +1,5 @@
 /**
- * @file 投稿カードのサムネイル領域（連番・複数枚バッジ・画像読み込みフォールバック）
+ * @file 投稿カードのサムネイル画像と連番・カルーセル選択枚数バッジを描画し、画像未設定や読み込み失敗時は代替プレースホルダーへ切り替える。
  */
 "use client";
 
@@ -7,6 +7,9 @@ import { useState } from "react";
 import Image from "next/image";
 import { ImageIcon, Layers } from "lucide-react";
 
+/**
+ * 投稿サムネイルコンポーネントの Props。
+ */
 export interface PostThumbnailProps {
   /** 表示画像 URL */
   src?: string;

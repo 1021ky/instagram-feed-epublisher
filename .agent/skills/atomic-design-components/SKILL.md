@@ -55,9 +55,11 @@ flowchart TD
      - **API / ドメイン型への非依存（SHOULD）**: 特定機能専用のカードやセレクタは `features/<domain>/` へ切り出す。
 
 3. **Layer 3: Features (`webapp/src/features/<domain>/`)**
-   - **責務**: 特定機能（例: `features/feed/`）に閉じたプレゼンター（`model/`）と UI 群（`ui/`）を垂直スライスとして管理する。
+   - **責務**: 特定機能（例: `features/feed/`）に閉じたロジック・プレゼンター・状態フック（`model/`）と UI 群（`ui/`）を垂直スライスとして管理する。
    - **制約**:
+     - **純粋ロジックと React 接続層の分離（MUST）**: `model/` 内で計算・変換・状態遷移・リクエスト組み立て等のロジック本体は **React 非依存（`from "react"` なし）の純粋 `.ts` ファイル**（例: `selection.ts`, `date-preset.ts`, `post-presenter.ts`）として実装し、Vitest Small テストで直接検証可能にする。カスタムフック（`use*.ts`）は純粋関数を React の `useState` / `useEffect` / `useMemo` / `useCallback` 等へ接続する薄いアダプターに徹し、複雑な業務分岐を直接抱え込まないこと。
      - **API 構造と表示 Props の分離（SHOULD）**: `model/` のプレゼンター（例: `toPostCardViewModel`）で API 寄りの型を表示専用 ViewModel に変換し、末端 UI（`PostCard`, `PostThumbnail` 等）に API 構造を持ち込まない。
+     - **ローカル UI 状態の限定（SHOULD）**: `ui/` 内で使う `useState` / `useId` 等はそのコンポーネント内で完結する一時状態（検索入力・画像エラー・ローカル開閉など）に限定し、他機能やページと共有する業務状態は `model/use*.ts` または `app/` で管理する。
      - **セクション単位の合成（MUST）**: `PostCard` 等が肥大化する場合は、意味単位の小さなプレゼンテーション部品（`PostThumbnail`, `PostMetaHeader`, `CarouselPhotoStrip` 等）へ分割し、`return` 内で全体構成が一望できる宣言的コードにする。
      - **Public API 限定（MUST）**: 外部（`app/` 等）からは `features/<domain>/index.ts` が公開するシンボルのみを import し、下位層（`components/`・`lib/`）から `features/` への逆方向依存を禁止する。
 
@@ -77,6 +79,7 @@ flowchart TD
 
 #### コメント・TSDoc / JSDoc 規約
 
+- **実装ファイルの先頭に `@file` の JSDoc / TSDoc を必ず記載する（MUST）**: `model/`・`ui/`・`index.ts`・`components/` 等の実装ファイル先頭には `@file` を記述し、中身を開かなくてもファイルの役割・振る舞いが具体的に伝わる 1 文でストレートに記載する（例: `@file 投稿APIデータから日時・キャプション・代表サムネイル・カルーセル選択状態を整形し、投稿カード用の表示データを生成する。`）。
 - **`function` / `interface` / `type` には必ず JSDoc / TSDoc を記載する（MUST）**: コンポーネント関数・カスタムフック・ヘルパー関数・Props やモデルの型定義には、それが何を表すか・責務や制約を簡潔に記載する。
 - **ディレクトリ名・型・コードから自明な冗長コメントは書かない（MUST NOT）**: ファイル配置から明らかな層表記（`(Atom)`, `(Molecule)` 等）、テストファイルの自明な見出し（`@file ... の単体テスト` 等）、実装をそのまま言い換える叙述コメントは書かず、二重メンテナンスを防ぐ。
 
@@ -129,10 +132,12 @@ pnpm typecheck
   - [ ] 特定ドメインに依存せず、単一目的の複合 UI パーツとして責務が閉じているか？（機能固有のものは `features/` へ配置）
 - **Features (`features/<domain>/`)**:
   - [ ] ロジック／ViewModel 変換（`model/`）と意味単位の UI 部品（`ui/`）が分離され、外部からは `index.ts` の Public API のみ公開されているか？
+  - [ ] 計算・変換・状態遷移・リクエスト組み立て等のロジック本体が React 非依存（`from "react"` なし）の純粋 `.ts` へ切り出され、`use*.ts` は React の state / effect へ繋ぐ薄いアダプターに留まっているか？
+  - [ ] `ui/` 内の React Hooks（`useState` / `useId` 等）がコンポーネント内で完結するローカル UI 状態に限定されているか？
   - [ ] 下位層（`components/`・`lib/`）から `features/` への逆方向依存が発生していないか？
 - **Organisms / Pages**:
   - [ ] `Organisms` は複数機能で共有するレイアウトブロックに留まり、`Pages`（`app/`）はオーケストレーションに専念しているか？
 - **公開境界・テスト・ドキュメント・互換性**:
   - [ ] 各層の `index.ts` からのエクスポートと 1:1 コロケーションテスト（Small / 必要に応じた Medium）が揃っているか？
-  - [ ] すべての `function` / `interface` / `type` に簡潔な TSDoc / JSDoc が記載され、`(Atom)` / `(Molecule)` や自明なテスト表記などの冗長コメントが紛れ込んでいないか？
+  - [ ] すべての実装ファイル先頭に役割・振る舞いを具体的に示す `@file`、および全 `function` / `interface` / `type` に簡潔な TSDoc / JSDoc が記載され、`(Atom)` / `(Molecule)` や自明なテスト表記などの冗長コメントが紛れ込んでいないか？
   - [ ] 既存の E2E ロケータ（Playwright POM）やアクセシビリティ制御（`inert`・フォーカス誘導等）に破壊的変更を与えていないか？

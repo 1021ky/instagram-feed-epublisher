@@ -1,11 +1,14 @@
 /**
- * @file 投稿カード上部のメタ情報ヘッダー（投稿日時・Instagram外部リンク）
+ * @file 投稿カード上部の投稿日時と元のInstagram投稿への外部リンクを描画し、リンククリック時の親カード選択へのイベント伝播を抑止する。
  */
 "use client";
 
 import type React from "react";
 import { Calendar, ExternalLink } from "lucide-react";
 
+/**
+ * 投稿カード上部のメタ情報ヘッダー（投稿日時・元投稿リンク）の Props。
+ */
 export interface PostMetaHeaderProps {
   /** 表示用に整形済みの日時文字列 */
   formattedDate: string;

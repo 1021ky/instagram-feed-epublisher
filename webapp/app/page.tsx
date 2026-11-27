@@ -3,7 +3,7 @@
  */
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertBanner, InAppBrowserAlert, StatusBanner } from "@/components/molecules";
 import { EpubCustomizeStep, ExportModal, Navbar, StickyActionBar } from "@/components/organisms";
 import {
@@ -13,14 +13,13 @@ import {
   useAccountDeletion,
   useAuthFlow,
 } from "@/features/auth";
-import { PostListStep } from "@/features/feed";
+import { PostListStep, useFeedSelection } from "@/features/feed";
 import { FeedFilterStep, toFeedFetchFilter, useFeedFilter } from "@/features/feed-filter";
 import { requestEpub } from "@/lib/client/instagram";
 import { validateEpubTitle } from "@/lib/epub/epub-request.schema";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
-import { listCarouselMediaEntries } from "@/lib/instagram/media-resolver";
 import { sortItemsByTimestamp } from "@/lib/epub/sort";
-import type { EpubCustomSettings, ExportProgress, FeedPostItem } from "@/types/ui";
+import type { EpubCustomSettings, ExportProgress } from "@/types/ui";
 
 const defaultBookTitle = "私のInstagramフィード";
 
@@ -28,7 +27,6 @@ const defaultBookTitle = "私のInstagramフィード";
  * メインページコンポーネント。
  */
 export default function Page() {
-  const [feed, setFeed] = useState<FeedPostItem[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const [customSettings, setCustomSettings] = useState<EpubCustomSettings>({
@@ -52,9 +50,17 @@ export default function Page() {
 
   const isGeneratingEpub = exportProgress.status === "generating";
 
-  const clearFeedPosts = useCallback(() => {
-    setFeed([]);
-  }, []);
+  const {
+    feed,
+    setFeed,
+    clearFeed,
+    sortedFeed,
+    selectedPosts,
+    toggleSelect,
+    toggleChildSelect,
+    selectAll,
+    deselectAll,
+  } = useFeedSelection({ sortOrder: customSettings.sortOrder });
 
   const resetDemoNonFilterState = useCallback(() => {
     setCustomSettings({
@@ -66,10 +72,10 @@ export default function Page() {
       contact: "",
       instagramUrl: "",
     });
-    setFeed([]);
+    clearFeed();
     setShowCustomizeErrors(false);
     setError(null);
-  }, []);
+  }, [clearFeed]);
 
   const {
     isLoggedIn,
@@ -88,7 +94,7 @@ export default function Page() {
   } = useAuthFlow({
     onError: setError,
     onResetDemo: resetDemoNonFilterState,
-    onLoggedOut: clearFeedPosts,
+    onLoggedOut: clearFeed,
   });
 
   const scrollToSection = useCallback((id: string) => {
@@ -135,10 +141,10 @@ export default function Page() {
   }, [handleLogout, isDemoMode, resetFetchState, resetFilter]);
 
   const handleAccountDeleted = useCallback(() => {
-    setFeed([]);
+    clearFeed();
     resetFetchState();
     exitDemoMode();
-  }, [exitDemoMode, resetFetchState]);
+  }, [clearFeed, exitDemoMode, resetFetchState]);
 
   const accountDeletion = useAccountDeletion({
     onDeleted: handleAccountDeleted,
@@ -154,84 +160,6 @@ export default function Page() {
     anchor.click();
     document.body.removeChild(anchor);
   };
-
-  // Step 2 の並び順設定に応じた表示用フィード（デフォルト: 古い順 asc）
-  const sortedFeed = useMemo(() => {
-    return sortItemsByTimestamp(feed, customSettings.sortOrder);
-  }, [feed, customSettings.sortOrder]);
-
-  // 選択中の投稿一覧
-  const selectedPosts = useMemo(() => {
-    return sortedFeed.filter((item) => item.selected !== false);
-  }, [sortedFeed]);
-
-  // 単一投稿の選択トグル
-  const handleToggleSelect = useCallback((postId: string) => {
-    setFeed((prev) =>
-      prev.map((item) => {
-        if (item.id !== postId) {
-          return item;
-        }
-        const nextSelected = item.selected === false;
-        return {
-          ...item,
-          selected: nextSelected,
-          selectedChildIds:
-            nextSelected && item.selectedChildIds?.length === 0 ? undefined : item.selectedChildIds,
-        };
-      }),
-    );
-  }, []);
-
-  // カルーセル投稿内の個別写真選択トグル
-  const handleToggleChildSelect = useCallback((postId: string, childId: string) => {
-    setFeed((prev) =>
-      prev.map((item) => {
-        if (item.id !== postId) {
-          return item;
-        }
-        const allIds = listCarouselMediaEntries(item).map((entry) => entry.id);
-        if (allIds.length === 0) {
-          return item;
-        }
-        const currentIds =
-          item.selected === false && item.selectedChildIds === undefined
-            ? []
-            : (item.selectedChildIds ?? allIds);
-        const currentSet = new Set(currentIds);
-        if (currentSet.has(childId)) {
-          currentSet.delete(childId);
-        } else {
-          currentSet.add(childId);
-        }
-        const nextIds = allIds.filter((id) => currentSet.has(id));
-        if (nextIds.length === 0) {
-          return { ...item, selected: false, selectedChildIds: [] };
-        }
-        return {
-          ...item,
-          selected: true,
-          selectedChildIds: nextIds.length === allIds.length ? undefined : nextIds,
-        };
-      }),
-    );
-  }, []);
-
-  // すべて選択
-  const handleSelectAll = useCallback(() => {
-    setFeed((prev) =>
-      prev.map((item) => ({
-        ...item,
-        selected: true,
-        selectedChildIds: item.selectedChildIds?.length === 0 ? undefined : item.selectedChildIds,
-      })),
-    );
-  }, []);
-
-  // 選択解除
-  const handleDeselectAll = useCallback(() => {
-    setFeed((prev) => prev.map((item) => ({ ...item, selected: false })));
-  }, []);
 
   const handleDemo = () => {
     enterDemoMode();
@@ -458,10 +386,10 @@ export default function Page() {
                     setCustomSettings((prev) => ({ ...prev, sortOrder }))
                   }
                   isFetched={hasFetched || feed.length > 0}
-                  onToggleSelect={handleToggleSelect}
-                  onToggleChildSelect={handleToggleChildSelect}
-                  onSelectAll={handleSelectAll}
-                  onDeselectAll={handleDeselectAll}
+                  onToggleSelect={toggleSelect}
+                  onToggleChildSelect={toggleChildSelect}
+                  onSelectAll={selectAll}
+                  onDeselectAll={deselectAll}
                 />
               </div>
 
