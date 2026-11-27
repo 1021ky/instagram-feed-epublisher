@@ -30,8 +30,8 @@ Next.js App Router（`webapp/app/` = Pages）を前提とし、**汎用UI（`src
    - 画面全体の状態管理を抱え込まず、イベントで疎結合に保つ。
 3. **Features (`webapp/src/features/<domain>/`)**:
    - 特定ドメイン（Instagram 投稿一覧・選択、EPUB 装丁など）に紐づく UI と ViewModel 変換を垂直スライスとして格納する（例: `features/feed/`）。
-   - **`model/`**: API 構造（`FeedPostItem` 等）から UI 表示専用 ViewModel への変換プレゼンターを配置する。
-   - **`ui/`**: 意味単位の小さなプレゼンテーション部品（`PostThumbnail`, `PostMetaHeader`, `CarouselPhotoStrip`）と、それらを合成する `PostCard` / `PostListStep` を配置する。
+   - **`model/`**: 計算・変換・状態遷移・リクエスト組み立て等の本体は **React 非依存（`from "react"` なし）の純粋 `.ts`** として切り出し、カスタムフック（`use*.ts`）はそれらを React の state / effect に接続する薄いアダプターに徹する。
+   - **`ui/`**: 意味単位の小さなプレゼンテーション部品（`PostThumbnail`, `PostMetaHeader`, `CarouselPhotoStrip`）と、それらを合成する `PostCard` / `PostListStep` を配置する（`ui/` 内の `useState` 等はその部品内で閉じるローカル UI 状態に限定する）。
    - **`index.ts`**: 外部（Pages 層）へ公開する Public API のみをエクスポートする。
 4. **Organisms (`webapp/src/components/organisms/`)** _(段階的に `features/` へ移行中)_:
    - 既存ステップコンポーネント（`FeedFilterStep`, `EpubCustomizeStep`, `Navbar` 等）。新規のドメイン機能セクションは `features/<domain>/` へ配置する。
