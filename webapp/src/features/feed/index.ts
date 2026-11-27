@@ -1,3 +1,6 @@
+/**
+ * @file Step 2 投稿確認・選択機能（UIコンポーネント・選択ロジック・状態フック・ViewModel変換）の公開APIをまとめてエクスポートする。
+ */
 export {
   type CarouselPhotoViewModel,
   type PostCardViewModel,

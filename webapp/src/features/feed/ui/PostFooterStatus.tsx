@@ -1,3 +1,6 @@
+/**
+ * @file 投稿カード下部にいいね数バッジと収録対象・除外のステータスラベルを描画する。
+ */
 "use client";
 
 import { Heart } from "lucide-react";

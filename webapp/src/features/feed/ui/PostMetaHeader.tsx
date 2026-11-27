@@ -1,3 +1,6 @@
+/**
+ * @file 投稿カード上部の投稿日時と元のInstagram投稿への外部リンクを描画し、リンククリック時の親カード選択へのイベント伝播を抑止する。
+ */
 "use client";
 
 import type React from "react";

@@ -1,3 +1,6 @@
+/**
+ * @file Step 2 の投稿確認・選択リストとして、選択件数表示・キャプション検索・一括選択/解除・並び順切替・未取得/空状態およびカード一覧を描画する。
+ */
 "use client";
 
 import { useId, useMemo, useState } from "react";

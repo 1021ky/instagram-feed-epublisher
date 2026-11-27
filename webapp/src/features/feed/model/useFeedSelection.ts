@@ -1,3 +1,6 @@
+/**
+ * @file 取得済み投稿一覧の保持、並び順に応じたソート済み・選択済みリストの算出、および各種選択操作ハンドラを一元管理する。
+ */
 "use client";
 
 import type * as React from "react";

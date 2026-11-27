@@ -1,3 +1,6 @@
+/**
+ * @file 投稿一覧の選択判定・件数集計・キャプション検索・単体/カルーセル個別/一括の選択状態更新を行う純粋関数群を提供する。
+ */
 import { listCarouselMediaEntries } from "@/lib/instagram/media-resolver";
 import type { EpubSortOrder, FeedPostItem } from "@/types/ui";
 

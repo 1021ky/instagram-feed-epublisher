@@ -1,3 +1,6 @@
+/**
+ * @file 投稿APIデータから日時・キャプション・代表サムネイル・カルーセル選択状態を整形し、投稿カード用の表示データを生成する。
+ */
 import { formatDateTimeJP } from "@/lib/format/date";
 import { listCarouselMediaEntries, resolveMediaDisplayUrl } from "@/lib/instagram/media-resolver";
 import type { FeedPostItem } from "@/types/ui";
