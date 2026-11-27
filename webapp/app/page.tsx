@@ -4,12 +4,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AlertBanner, InAppBrowserAlert, StatusBanner } from "@/components/molecules";
+import { AlertBanner, InAppBrowserAlert } from "@/components/molecules";
 import { Navbar, StickyActionBar } from "@/components/organisms";
 import {
   AccountDeletionModal,
-  formatLogoutBannerTitle,
   LoginCard,
+  LogoutNoticeBanner,
   useAccountDeletion,
   useAuthFlow,
 } from "@/features/auth";
@@ -185,9 +185,8 @@ export default function Page() {
           {!canUseApp && !isSessionPending && (
             <>
               {logoutNotice && (
-                <StatusBanner
-                  className="max-w-xl mx-auto"
-                  title={formatLogoutBannerTitle(logoutNotice.username)}
+                <LogoutNoticeBanner
+                  username={logoutNotice.username}
                   onDismiss={dismissLogoutNotice}
                 />
               )}

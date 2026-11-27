@@ -14,3 +14,4 @@ export {
 export { useAuthFlow, type UseAuthFlowOptions, type UseAuthFlowResult } from "./model/useAuthFlow";
 export { AccountDeletionModal, type AccountDeletionModalProps } from "./ui/AccountDeletionModal";
 export { LoginCard, type LoginCardProps } from "./ui/LoginCard";
+export { LogoutNoticeBanner, type LogoutNoticeBannerProps } from "./ui/LogoutNoticeBanner";
