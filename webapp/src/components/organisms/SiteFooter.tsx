@@ -1,3 +1,6 @@
+/**
+ * @file 法的情報ページへの導線リンクとコピーライト表示をまとめたサイト共通フッターを描画する。
+ */
 import Link from "next/link";
 
 export function SiteFooter() {

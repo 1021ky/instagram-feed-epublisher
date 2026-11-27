@@ -1,3 +1,6 @@
+/**
+ * @file 退会（連携解除）の確認ステップと完了ステップをモーダルダイアログとして切り替え表示し、処理中の誤クローズを抑止する。
+ */
 "use client";
 
 import { AlertTriangle, CheckCircle2 } from "lucide-react";

@@ -1,5 +1,5 @@
 /**
- * @file 共通モーダルダイアログシェル
+ * @file WAI-ARIA ダイアログ属性と Escape キー・背景クリック・closeDisabled による閉じ制御を統一した汎用モーダルシェルを描画する。
  */
 "use client";
 

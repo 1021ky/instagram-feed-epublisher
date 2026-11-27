@@ -1,3 +1,6 @@
+/**
+ * @file Meta 審査およびユーザー向けのデータ削除・アプリ連携解除手順ページを描画する。
+ */
 import Link from "next/link";
 import type { Metadata } from "next";
 import { LegalContactBox, LegalPage, LegalSection } from "@/components/organisms";

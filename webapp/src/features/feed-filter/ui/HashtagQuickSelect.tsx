@@ -1,3 +1,6 @@
+/**
+ * @file 集計済みのよく使うハッシュタグ候補をピル型チップ群として描画し、クリックによる絞り込み条件トグルを提供する。
+ */
 "use client";
 
 import { FilterChip, InlineLoadingStatus } from "@/components/atoms";

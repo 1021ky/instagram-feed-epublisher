@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
+/** セッション状態・サインイン・サインアウトの遷移を検証するための Better Auth モック */
 const authMocks = vi.hoisted(() => ({
   useSession: vi.fn(),
   signOut: vi.fn(),

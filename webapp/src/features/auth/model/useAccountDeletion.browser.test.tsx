@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
+/** 退会処理時のクライアント側 signOut 呼び出しを検証するための Better Auth モック */
 const authMocks = vi.hoisted(() => ({
   signOut: vi.fn(),
 }));
@@ -18,6 +19,7 @@ vi.mock("@/lib/auth-client", async (importOriginal) => {
 
 import { useAccountDeletion } from "./useAccountDeletion";
 
+/** ブラウザテスト内でモックへ差し替える前のグローバル fetch の退避参照 */
 const originalFetch = globalThis.fetch;
 
 function AccountDeletionHarness({

@@ -1,3 +1,6 @@
+/**
+ * @file 未ログイン時のトップ画面に Instagram ログイン・デモ体験ボタンと利用手順ガイドを備えた導入カードを描画する。
+ */
 "use client";
 
 import { ActionButton, InstagramBrandIcon } from "@/components/atoms";

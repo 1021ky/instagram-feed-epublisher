@@ -1,5 +1,5 @@
 /**
- * @file Next.js App Router ルートレイアウト
+ * @file アプリ全体の HTML 骨格・メタデータ・グローバルスタイルおよび共通フッターを配置するルートレイアウトを描画する。
  */
 import { SiteFooter } from "@/components/organisms";
 import type { ReactNode } from "react";

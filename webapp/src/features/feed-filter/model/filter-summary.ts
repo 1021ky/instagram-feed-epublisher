@@ -1,3 +1,6 @@
+/**
+ * @file 折りたたまれた Step 1 絞り込み条件カードに表示する 1 行サマリー文字列を生成する。
+ */
 import type { DatePreset, FeedFilterOptions } from "@/types/ui";
 import { stripLeadingHash } from "./hashtag";
 

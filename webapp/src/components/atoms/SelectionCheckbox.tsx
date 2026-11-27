@@ -1,3 +1,6 @@
+/**
+ * @file 親要素へのクリック伝播を抑止しつつ 44px 以上のタップ領域で選択状態を切り替えるチェックボックスボタンを描画する。
+ */
 "use client";
 
 import type React from "react";

@@ -1,5 +1,5 @@
 /**
- * @file Step 1〜3 で共有するステップカード共通ヘッダー
+ * @file Step 1〜3 のカード上部で共有する番号バッジ・見出し・説明文・右側スロットのヘッダーを描画する。
  */
 import type * as React from "react";
 

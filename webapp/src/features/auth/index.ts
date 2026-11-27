@@ -1,10 +1,6 @@
-export {
-  createDemoUserProfile,
-  formatLogoutBannerTitle,
-  normalizeUsername,
-  type SessionUserInput,
-  toLoggedInUserProfile,
-} from "./model/profile";
+/**
+ * @file 認証・デモ遷移・アカウント削除機能ドメインのカスタムフックと UI コンポーネントを外部へ公開する。
+ */
 export {
   type AccountDeletionStep,
   useAccountDeletion,

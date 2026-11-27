@@ -1,5 +1,8 @@
+/**
+ * @file 汎用 Molecule UI コンポーネントおよびそのプロパティ型を外部へ公開する。
+ */
 export { AlertBanner, type AlertBannerProps } from "./AlertBanner";
-export { InAppBrowserAlert, isInstagramOrFacebookInAppBrowser } from "./InAppBrowserAlert";
+export { InAppBrowserAlert } from "./InAppBrowserAlert";
 export { ModalDialog, type ModalDialogProps } from "./ModalDialog";
 export {
   SegmentedControl,

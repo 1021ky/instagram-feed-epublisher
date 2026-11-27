@@ -1,3 +1,6 @@
+/**
+ * @file フィード絞り込みの期間プリセット計算・現在プリセット判定・初期条件生成および API 向け取得条件の正規化を行う。
+ */
 import type { DatePreset, EpubSortOrder, FeedFilterOptions } from "@/types/ui";
 import { stripLeadingHash } from "./hashtag";
 

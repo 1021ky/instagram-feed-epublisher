@@ -3,6 +3,7 @@ import { render } from "vitest-browser-react";
 import type { FeedPostItem } from "@/types/ui";
 import { useFeedFilter, type UseFeedFilterOptions } from "./useFeedFilter";
 
+/** ブラウザテスト内でモックへ差し替える前のグローバル fetch の退避参照 */
 const originalFetch = globalThis.fetch;
 
 /**
@@ -24,6 +25,8 @@ function FeedFilterHarness(props: UseFeedFilterOptions) {
   return (
     <div>
       <p data-testid="hashtag">{state.filter.hashtag ?? ""}</p>
+      <p data-testid="fetch-filter-hashtag">{state.fetchFilter.hashtag ?? ""}</p>
+      <p data-testid="fetch-filter-sort">{state.fetchFilter.sortOrder ?? ""}</p>
       <p data-testid="collapsed">{String(state.isFilterCollapsed)}</p>
       <p data-testid="has-fetched">{String(state.hasFetched)}</p>
       <p data-testid="loading-hashtags">{String(state.isLoadingHashtags)}</p>
@@ -211,10 +214,15 @@ describe("フィード絞り込み・取得フック (useFeedFilter)", () => {
 
     await screen.getByRole("button", { name: "デモ条件適用" }).click();
     await expect.element(screen.getByTestId("hashtag")).toHaveTextContent("100日チャレンジ");
+    await expect
+      .element(screen.getByTestId("fetch-filter-hashtag"))
+      .toHaveTextContent("100日チャレンジ");
+    await expect.element(screen.getByTestId("fetch-filter-sort")).toHaveTextContent("asc");
     await expect.element(screen.getByTestId("has-fetched")).toHaveTextContent("true");
 
     await screen.getByRole("button", { name: "条件リセット" }).click();
     await expect.element(screen.getByTestId("hashtag")).toHaveTextContent("");
+    await expect.element(screen.getByTestId("fetch-filter-hashtag")).toHaveTextContent("");
     await expect.element(screen.getByTestId("has-fetched")).toHaveTextContent("false");
   });
 });

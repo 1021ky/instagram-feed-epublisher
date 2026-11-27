@@ -1,3 +1,6 @@
+/**
+ * @file Better Auth セッションとデモ体験モードの切替、プロフィール解決、ログイン・ログアウト状態を一元管理する。
+ */
 "use client";
 
 import { useCallback, useMemo, useState } from "react";

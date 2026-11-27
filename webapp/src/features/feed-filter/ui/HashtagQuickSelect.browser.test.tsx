@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import { HashtagQuickSelect } from "./HashtagQuickSelect";
 
+/** 選択トグルとデモ制限挙動の検証に用いる 2 件のハッシュタグ候補サンプル */
 const sampleSuggestions = [
   { tag: "京都カフェ", count: 5, lastUsedAt: "2026-09-20T09:00:00.000Z" },
   { tag: "朝活", count: 3, lastUsedAt: "2026-09-19T09:00:00.000Z" },

@@ -54,10 +54,15 @@ webapp/
 │   └── pages/            # Page Object Model クラス群
 ├── scripts/              # 開発サーバー・OpenAPI モックサーバー・Oxlint プラグイン
 └── src/
-    ├── components/       # UI コンポーネント (atoms, molecules, organisms)
-    │   ├── atoms/        # 最小単位 UI 要素 (FilterChip, InlineLoadingStatus)
-    │   ├── molecules/    # 単一責務の複合パーツ (AlertBanner, HashtagQuickSelect, InAppBrowserAlert, CoverThemeSelector, PostCard)
-    │   └── organisms/    # 独立セクション・ステップ・モーダル (Navbar, LoginCard, AccountDeletionModal, 各Step, StickyActionBar, SiteFooter, LegalPage)
+    ├── components/       # ドメイン非依存の共通 UI コンポーネント (Atomic Design)
+    │   ├── atoms/        # 最小単位 UI 要素 (ActionButton, FilterChip, IconButton, InlineLoadingStatus, InstagramBrandIcon, SelectionCheckbox)
+    │   ├── molecules/    # 単一責務の複合パーツ (AlertBanner, InAppBrowserAlert, ModalDialog, SegmentedControl, StatusBanner, StepCardHeader)
+    │   └── organisms/    # ページ横断のレイアウトブロック (Navbar, StickyActionBar, SiteFooter, LegalPage)
+    ├── features/         # 機能ドメイン垂直スライス (Feature-First: model/・ui/・index.ts)
+    │   ├── auth/         # 認証・デモ遷移・ログアウト通知・退会モーダル
+    │   ├── feed-filter/  # Step 1: フィード絞り込み・ハッシュタグ候補・期間プリセット
+    │   ├── feed/         # Step 2: 投稿確認・カルーセル個別選択・並び替え
+    │   └── epub-export/  # Step 3: EPUB 装丁設定・表紙テーマ・生成実行・書き出しモーダル
     ├── lib/              # 共通ライブラリ・ロジック
     │   ├── auth/         # Better Auth 設定・セッションサービス
     │   ├── epub/         # EPUB ビルダー・レンダラー・Zod v4 スキーマ・生成サービス
