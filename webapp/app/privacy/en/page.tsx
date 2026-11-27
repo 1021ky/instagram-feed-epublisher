@@ -1,3 +1,6 @@
+/**
+ * @file 英語版のプライバシーポリシーページを描画する。
+ */
 import Link from "next/link";
 import type { Metadata } from "next";
 import { LegalContactBox, LegalPage, LegalSection } from "@/components/organisms";

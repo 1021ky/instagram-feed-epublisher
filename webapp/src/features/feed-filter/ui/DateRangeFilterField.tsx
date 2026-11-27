@@ -1,3 +1,6 @@
+/**
+ * @file 期間プリセット切替ボタン群と開始日・終了日の日付入力フィールドを描画する。
+ */
 "use client";
 
 import { useId } from "react";

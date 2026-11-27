@@ -1,6 +1,5 @@
 /**
- * @file Instagram ブランドロゴ SVG アイコン
- * lucide-react にブランドロゴが含まれないため、重複していた SVG パスを集約する。
+ * @file アプリ全体で共有する Instagram ブランドロゴの SVG アイコンを描画する。
  */
 
 export interface InstagramBrandIconProps {

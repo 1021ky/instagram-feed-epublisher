@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import { SegmentedControl } from "./SegmentedControl";
 
+/** 期間プリセット切替の操作・タップ領域検証に用いる 3 択オプション定義 */
 const PRESET_OPTIONS = [
   { value: "100days", label: "直近100日" },
   { value: "30days", label: "直近30日" },

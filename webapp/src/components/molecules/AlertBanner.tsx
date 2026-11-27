@@ -1,5 +1,5 @@
 /**
- * @file 画面上部やフォーム内で共通利用されるエラーアラートバナー
+ * @file 画面上部やフォーム内でエラーメッセージを role="alert" のインラインバナーとして表示する。
  */
 
 export interface AlertBannerProps {

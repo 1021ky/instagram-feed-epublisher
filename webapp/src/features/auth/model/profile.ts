@@ -1,3 +1,6 @@
+/**
+ * @file セッションユーザー情報やデモデータからプロフィールを生成し、ユーザー名正規化とログアウト通知タイトルを整形する。
+ */
 import type { DemoFeedData, UserProfile } from "@/types/ui";
 
 /**

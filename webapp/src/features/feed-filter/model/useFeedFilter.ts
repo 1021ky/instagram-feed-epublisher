@@ -1,8 +1,15 @@
+/**
+ * @file フィード絞り込み条件の保持、正規化済み取得条件の算出、ハッシュタグ候補の自動取得、投稿フィード取得フローを一元管理する。
+ */
 "use client";
 
 import type * as React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { fetchHashtagSuggestions, fetchInstagramFeed } from "@/lib/client/instagram";
+import {
+  fetchHashtagSuggestions,
+  fetchInstagramFeed,
+  type FeedFilter,
+} from "@/lib/client/instagram";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 import { applyFeedFilter } from "@/lib/instagram/filter-service";
 import { extractHashtagsFromPosts } from "@/lib/instagram/hashtag-service";
@@ -35,6 +42,8 @@ export interface UseFeedFilterOptions {
 export interface UseFeedFilterResult {
   /** 現在の絞り込み条件 */
   filter: FeedFilterOptions;
+  /** 現在の絞り込み条件と並び順を API・EPUB 生成向けに正規化した条件 */
+  fetchFilter: FeedFilter;
   /** 絞り込み条件の更新関数 */
   setFilter: React.Dispatch<React.SetStateAction<FeedFilterOptions>>;
   /** Step 1 カードの折りたたみ状態 */
@@ -148,6 +157,11 @@ export function useFeedFilter({
     setIsFilterCollapsed(false);
   }, []);
 
+  const fetchFilter = useMemo<FeedFilter>(
+    () => toFeedFetchFilter(filter, sortOrder),
+    [filter, sortOrder],
+  );
+
   const handleFetch = useCallback(async () => {
     if (!canUseApp) {
       onError("先にログインしてください");
@@ -157,14 +171,12 @@ export function useFeedFilter({
     setLoadingFeed(true);
     onError(null);
     try {
-      const cleanFilter = toFeedFetchFilter(filter, sortOrder);
-
       const items: FeedPostItem[] = isDemoMode
-        ? applyFeedFilter(sampleDemoFeedData.posts, cleanFilter).map((item) => ({
+        ? applyFeedFilter(sampleDemoFeedData.posts, fetchFilter).map((item) => ({
             ...item,
             selected: true,
           }))
-        : (await fetchInstagramFeed(cleanFilter)).map((item) => ({
+        : (await fetchInstagramFeed(fetchFilter)).map((item) => ({
             ...item,
             selected: true,
           }));
@@ -186,10 +198,11 @@ export function useFeedFilter({
     } finally {
       setLoadingFeed(false);
     }
-  }, [canUseApp, filter, isDemoMode, onError, onFeedFetched, onFetchSuccess, sortOrder]);
+  }, [canUseApp, fetchFilter, isDemoMode, onError, onFeedFetched, onFetchSuccess]);
 
   return {
     filter,
+    fetchFilter,
     setFilter,
     isFilterCollapsed,
     toggleFilterCollapsed,

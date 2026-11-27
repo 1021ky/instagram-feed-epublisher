@@ -1,3 +1,6 @@
+/**
+ * @file ハッシュタグ絞り込み入力欄・datalist 補完候補およびクイック選択チップ群をまとめて描画する。
+ */
 "use client";
 
 import { useId } from "react";

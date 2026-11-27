@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { SegmentedControl } from "./SegmentedControl";
 
+/** 並び順切替のマークアップ検証に用いる 2 択オプション定義 */
 const SORT_OPTIONS = [
   { value: "asc", label: "古い順（おすすめ）" },
   { value: "desc", label: "新しい順" },

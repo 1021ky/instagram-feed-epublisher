@@ -1,3 +1,6 @@
+/**
+ * @file デモ体験モードで使用する 100 日チャレンジ用のサンプルアカウント情報と SVG ダミー投稿データを生成する。
+ */
 import type { DemoFeedData } from "@/types/ui";
 
 function createSvgDataUrl(svg: string) {

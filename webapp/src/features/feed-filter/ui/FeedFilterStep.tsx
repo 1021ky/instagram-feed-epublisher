@@ -1,3 +1,6 @@
+/**
+ * @file Step 1 のフィード絞り込みフォーム本体と折りたたみサマリー表示を切り替え、ハッシュタグ・期間指定と投稿取得実行を提供する。
+ */
 "use client";
 
 import { useMemo, useState } from "react";

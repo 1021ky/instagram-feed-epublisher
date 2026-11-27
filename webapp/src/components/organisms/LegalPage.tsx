@@ -1,3 +1,6 @@
+/**
+ * @file プライバシーポリシー・利用規約・データ削除手順などの法的情報ページで共有するレイアウト、セクション見出し、問い合わせ窓口を描画する。
+ */
 import Link from "next/link";
 import { ArrowLeft, Clock, ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";

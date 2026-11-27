@@ -77,8 +77,9 @@ flowchart TD
 新しいコンポーネントを追加した場合は、各層のバレルファイル（`index.ts`）に登録します。
 
 - `webapp/src/components/atoms/index.ts`: すべての Atom コンポーネントおよび Props 型をエクスポートする。
-- `webapp/src/components/molecules/index.ts`: すべての Molecule コンポーネント、Props 型、および関連する純粋関数・定数をエクスポートする。
-- `webapp/src/components/organisms/index.ts`: すべての Organism コンポーネントおよび Props 型をエクスポートする。
+- `webapp/src/components/molecules/index.ts`: 外部利用する Molecule コンポーネントおよび Props 型をエクスポートする。
+- `webapp/src/components/organisms/index.ts`: ページ横断の Organism コンポーネントおよび Props 型をエクスポートする。
+- `webapp/src/features/<domain>/index.ts`: 外部（Pages 層等）から実際に利用される UI コンポーネント・状態管理フック・公開型のみを明示的な名前付きエクスポートで公開する（`export *` 禁止）。単体テストから相対 import できる内部ヘルパー（表示文言整形・判定関数等）は、外部利用がない限りバレルから公開しない。
 
 #### コメント・TSDoc / JSDoc 規約
 
@@ -141,7 +142,9 @@ pnpm typecheck
 - **Organisms / Pages**:
   - [ ] `Organisms` は複数機能で共有するレイアウトブロックに留まり、`Pages`（`app/`）はオーケストレーションに専念しているか？
   - [ ] `Pages`（`app/`）で単一の汎用 Atom / Molecule（`AlertBanner`, `InAppBrowserAlert` 等）をそのまま配置する箇所に中身のないラッパーを量産しておらず、一方で複数部品の合成やドメイン固有の条件分岐・文言組み立てを行う UI は該当の `features/<domain>/ui/` へ切り出されているか？
-- **公開境界・テスト・ドキュメント・互換性**:
-  - [ ] 各層の `index.ts` からのエクスポートと 1:1 コロケーションテスト（Small / 必要に応じた Medium）が揃っているか？
+- **公開境界・モジュールカプセル化・テスト・ドキュメント・互換性**:
+  - [ ] 各層の `index.ts` は外部利用される Public API のみを最小公開（テスト専用の内部ヘルパーをバレルから垂れ流さず、`export *` を使わない）し、1:1 コロケーションテスト（Small / 必要に応じた Medium）が揃っているか？
+  - [ ] **全層共通のモジュール境界チェック**: 上位層（Pages / Features / Organisms 等）が下位層（Features / Organisms / Molecules / Atoms）から UI や `use*` 以外の純粋関数・ヘルパーを import している場合、それは本当にモジュール間の橋渡し（または共通型・定数）か？特定コンポーネント／特定 Feature 内で完結する内部詳細（表示文言整形・表示条件判定・イベント制御等）が漏れているなら下位側へ閉じ込め、逆にルールを守るためだけに中身のない薄いラッパーや state を持たない偽 `use*` フックを量産していないか？
   - [ ] すべての実装ファイル先頭に役割・振る舞いを具体的に示す `@file`、および全 `function` / `interface` / `type` に簡潔な TSDoc / JSDoc が記載され、`(Atom)` / `(Molecule)` や自明なテスト表記などの冗長コメントが紛れ込んでいないか？
   - [ ] 既存の E2E ロケータ（Playwright POM）やアクセシビリティ制御（`inert`・フォーカス誘導等）に破壊的変更を与えていないか？
+  - [ ] 機械判定できる構造制約（逆方向依存・Public API バイパス・Cross-import・循環依存・純粋 `model/` の React 依存等）は `pnpm lint`（Oxlint）で担保し、セルフレビューでは上記の文脈・設計判断に集中できているか？

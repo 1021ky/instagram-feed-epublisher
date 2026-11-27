@@ -1,3 +1,6 @@
+/**
+ * @file 退会（連携解除）モーダルの開閉・確認/完了ステップ遷移およびサーバーセッション破棄 API 呼び出しを一元管理する。
+ */
 "use client";
 
 import { useCallback, useState } from "react";

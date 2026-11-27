@@ -4,6 +4,7 @@ import type { FeedFilterOptions } from "@/types/ui";
 import { calculatePresetDates } from "../model/date-preset";
 import { FeedFilterStep } from "./FeedFilterStep";
 
+/** 期間プリセットとハッシュタグ操作の検証に用いる初期絞り込み条件 */
 const baseFilter: FeedFilterOptions = {
   hashtag: "",
   startDate: "2026-08-22",
@@ -11,6 +12,7 @@ const baseFilter: FeedFilterOptions = {
   maxCount: 200,
 };
 
+/** クイック選択チップの表示・クリック検証に用いるハッシュタグ候補サンプル */
 const sampleSuggestions = [{ tag: "京都カフェ", count: 5, lastUsedAt: "2026-09-20T09:00:00.000Z" }];
 
 describe("フィード絞り込みステップのブラウザ操作 (FeedFilterStep)", () => {

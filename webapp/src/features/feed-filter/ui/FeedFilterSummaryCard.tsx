@@ -1,3 +1,6 @@
+/**
+ * @file 折りたたみ中の Step 1 絞り込み条件を 1 行サマリーとして表示し、再展開ボタンを提供する。
+ */
 "use client";
 
 import { ChevronDown } from "lucide-react";

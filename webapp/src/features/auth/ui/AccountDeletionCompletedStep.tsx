@@ -1,3 +1,6 @@
+/**
+ * @file 退会モーダルの完了ステップとして Instagram 側のアプリ連携解除リンクとデータ削除手順への導線を表示する。
+ */
 "use client";
 
 import Link from "next/link";

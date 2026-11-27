@@ -20,7 +20,7 @@ import {
   useEpubExport,
 } from "@/features/epub-export";
 import { PostListStep, useFeedSelection } from "@/features/feed";
-import { FeedFilterStep, toFeedFetchFilter, useFeedFilter } from "@/features/feed-filter";
+import { FeedFilterStep, useFeedFilter } from "@/features/feed-filter";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
 
 /**
@@ -96,6 +96,7 @@ export default function Page() {
 
   const {
     filter,
+    fetchFilter,
     setFilter,
     isFilterCollapsed,
     toggleFilterCollapsed,
@@ -152,10 +153,10 @@ export default function Page() {
   const handleGenerate = useCallback(() => {
     void generateEpub({
       canUseApp,
-      filter: toFeedFetchFilter(filter, customSettings.sortOrder),
+      filter: fetchFilter,
       selectedPosts,
     });
-  }, [canUseApp, customSettings.sortOrder, filter, generateEpub, selectedPosts]);
+  }, [canUseApp, fetchFilter, generateEpub, selectedPosts]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

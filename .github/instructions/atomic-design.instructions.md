@@ -41,7 +41,8 @@ Next.js App Router（`webapp/app/` = Pages）を前提とし、**汎用UI（`src
 
 ## 3. バレルファイルと単体テストの義務化
 
-- 外部公開するコンポーネント・型は各層または各 Feature の `index.ts` からエクスポートする。
+- 外部公開するコンポーネント・フック・型は各層または各 Feature の `index.ts` から最小限の Public API として名前付きエクスポートする（テスト専用の内部ヘルパーはバレル公開せず、`export *` も禁止）。
+- 上位層が下位層から UI や `use*` 以外の純粋関数を import している場合は、「モジュール間の橋渡しか、下位の内部詳細漏れか」を必ず点検し、内部詳細の漏れは下位側へ閉じ込める（ただし橋渡しのためだけに中身のない薄いラッパーや偽 `use*` フックを量産しない）。
 - 実装ファイルの先頭には役割・振る舞いを具体的に 1 文で示す `@file` を記載し、すべての `function` / `interface` / `type` には何を表すものかを説明する JSDoc / TSDoc を必ず記載する。一方でディレクトリ名やコードから自明な冗長コメント（`(Atom)` / `(Molecule)` 表記、`@file ... の単体テスト` 等）は書かない。
 - 全コンポーネント（Atoms / Molecules / Organisms / `features/*/ui/`）およびプレゼンターの作成・更新時は、同ディレクトリに 1:1 コロケーションで `*.test.tsx` / `*.test.ts` を配置し、`it.each` を用いた網羅的な単体テスト（日本語表記）を作成する。
 - 変更完了前に `pnpm test`, `pnpm lint`, `pnpm format:check`, `pnpm --filter instagram-feed-epublisher-webapp exec tsc --noEmit` を実行してエラー 0 件を確認する。

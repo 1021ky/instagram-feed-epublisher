@@ -1,6 +1,5 @@
 /**
- * @file インラインのスピナー付きステータスメッセージ
- * 集計処理中などの軽量な非同期ステータスを aria-live="polite" で通知します。
+ * @file 軽量な非同期処理の進行状況をスピナー付きメッセージとして aria-live="polite" で通知する。
  */
 import { Loader2 } from "lucide-react";
 

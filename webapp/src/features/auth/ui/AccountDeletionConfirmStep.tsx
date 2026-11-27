@@ -1,3 +1,6 @@
+/**
+ * @file 退会モーダルの確認ステップとしてセッション破棄・Instagram 側制約の説明と実行/キャンセル操作を表示する。
+ */
 "use client";
 
 import { AlertTriangle, Loader2 } from "lucide-react";

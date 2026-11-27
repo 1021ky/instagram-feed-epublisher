@@ -8,8 +8,9 @@ Whenever you read, create, or modify any file in `webapp/src/components/` or `we
    - **Atoms (`src/components/atoms/`)**: 最小単位の汎用 UI 要素。ビジネスロジック・ドメインモデルを持たず、WAI-ARIA セマンティクスと 44px（`min-h-[44px]`）以上のタップ領域をカプセル化する。
    - **Molecules (`src/components/molecules/`)**: 複数の Atom や基本要素を組み合わせた汎用複合 UI パーツ。ドメイン・API 型へ直接依存させない。
    - **Features (`src/features/<domain>/`)**: 特定機能ドメイン（例: `features/feed/`）の垂直スライス。`model/`（React 非依存の純粋ロジック・ViewModel 変換 `.ts` と、それらを React 状態へ繋ぐ薄い `use*.ts` フック）と `ui/`（意味単位の部品とステップ UI）を持ち、`index.ts` 経由で Public API のみ公開する。
-   - **Organisms (`src/components/organisms/`)**: 既存共通セクション・モーダル群（機能固有ステップは段階的に `features/` へ移行）。
+   - **Organisms (`src/components/organisms/`)**: ページ横断で共有するレイアウトブロック（`Navbar`, `StickyActionBar`, `SiteFooter`, `LegalPage`）。
    - **Pages (`webapp/app/`)**: Next.js App Router ページ。全体ステート管理・データ取得・Feature / Organisms のオーケストレーション。単一の汎用 Atom / Molecule（`AlertBanner`, `InAppBrowserAlert` 等）の直 import は許容するが、複数部品の組み合わせやドメイン固有の条件分岐・文言組み立てを伴う UI は `features/<domain>/ui/` へ切り出すこと。
+   - **全層共通のモジュール境界・Public API 最小化**: 各層の `index.ts` は外部利用される最小限のシンボルのみを名前付きエクスポートし（テスト専用の内部ヘルパー公開や `export *` を避ける）、上位層から下位層の純粋関数を import している箇所が「モジュール間の橋渡しか、下位の内部詳細漏れか」を点検すること（不要な薄いラッパーや偽 `use*` フックも避ける）。
 3. **Mandatory Unit Tests (`vitest-test-authoring` - 1:1 Colocation)**:
    - 全コンポーネント（Atoms / Molecules / Organisms / `features/*/ui/`）およびプレゼンターを追加・変更した際は、必ずファイルの真横に 1:1 コロケーションで単体テスト（`[Name].test.tsx` / `[Name].test.ts`）を作成・更新すること。
    - 入力パラメータによるバリエーションは `it.each` でパラメータ化し、日本語のテスト名で記述すること。

@@ -1,3 +1,6 @@
+/**
+ * @file デモ体験モード中の条件固定仕様を案内し、変更操作がブロックされた直後は警告トーンへ切り替えて表示する。
+ */
 "use client";
 
 import { StatusBanner } from "@/components/molecules";

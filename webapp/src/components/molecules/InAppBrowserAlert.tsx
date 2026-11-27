@@ -1,3 +1,6 @@
+/**
+ * @file Instagram や Facebook のアプリ内ブラウザを User-Agent から検知し、外部ブラウザでの閲覧を促す警告バナーを表示する。
+ */
 "use client";
 
 import { useEffect, useState } from "react";
