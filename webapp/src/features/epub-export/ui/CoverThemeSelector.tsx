@@ -1,14 +1,21 @@
 /**
- * @file EPUB 表紙テーマセレクター
+ * @file EPUB の表紙カラーテーマをカード形式のラジオボタングループで表示し、クリックおよび矢印キーによる選択切替を提供する。
  */
-import * as React from "react";
+"use client";
+
+import type * as React from "react";
 import { COVER_THEMES } from "@/lib/epub/themes";
 import type { CoverThemeId } from "@/types/ui";
 
-type CoverThemeSelectorProps = {
+/**
+ * 表紙テーマ選択コンポーネントのプロパティ。
+ */
+export interface CoverThemeSelectorProps {
+  /** 現在選択されている表紙テーマ ID */
   selectedTheme: CoverThemeId;
+  /** 表紙テーマ変更時のコールバック */
   onChange: (themeId: CoverThemeId) => void;
-};
+}
 
 /**
  * EPUB 表紙テーマの視覚的な選択 UI を表示する。
@@ -58,7 +65,7 @@ export function CoverThemeSelector({ selectedTheme, onChange }: CoverThemeSelect
             role="radio"
             aria-checked={isSelected}
             tabIndex={isSelected ? 0 : -1}
-            className={`relative p-4 rounded-2xl border text-left cursor-pointer transition min-h-[140px] flex flex-col justify-between overflow-hidden shadow-xs focus:outline-none ${
+            className={`relative p-4 rounded-2xl border text-left cursor-pointer transition min-h-[140px] flex flex-col justify-between overflow-hidden shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 ${
               isSelected
                 ? "ring-2 ring-slate-900 ring-offset-2 border-transparent"
                 : "border-slate-200/80 hover:border-slate-300 hover:shadow-sm"

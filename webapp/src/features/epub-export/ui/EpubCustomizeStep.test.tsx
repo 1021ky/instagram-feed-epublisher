@@ -1,7 +1,18 @@
-import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import type { EpubCustomSettings } from "@/types/ui";
 import { EpubCustomizeStep } from "./EpubCustomizeStep";
+
+/** 全項目が入力された標準状態の装丁設定データ */
+const baseSettings: EpubCustomSettings = {
+  title: "@demo_userの投稿記録",
+  subtitle: "100日チャレンジ",
+  author: "@demo_user",
+  coverTheme: "navy",
+  sortOrder: "asc",
+  contact: "demo@example.com",
+  instagramUrl: "https://instagram.com/demo_user",
+};
 
 describe("EPUB装丁設定ステップ (EpubCustomizeStep)", () => {
   it.each([
@@ -21,15 +32,7 @@ describe("EPUB装丁設定ステップ (EpubCustomizeStep)", () => {
       const html = renderToStaticMarkup(
         <EpubCustomizeStep
           defaultTitle="@demo_userの投稿記録"
-          settings={{
-            title: "@demo_userの投稿記録",
-            subtitle: "100日チャレンジ",
-            author: "@demo_user",
-            coverTheme: "navy",
-            sortOrder,
-            contact: "demo@example.com",
-            instagramUrl: "https://instagram.com/demo_user",
-          }}
+          settings={{ ...baseSettings, sortOrder }}
           onChange={() => undefined}
         />,
       );

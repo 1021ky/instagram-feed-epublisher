@@ -1,5 +1,4 @@
 export { AlertBanner, type AlertBannerProps } from "./AlertBanner";
-export { CoverThemeSelector } from "./CoverThemeSelector";
 export { InAppBrowserAlert, isInstagramOrFacebookInAppBrowser } from "./InAppBrowserAlert";
 export { ModalDialog, type ModalDialogProps } from "./ModalDialog";
 export {

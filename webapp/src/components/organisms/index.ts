@@ -1,5 +1,3 @@
-export { EpubCustomizeStep } from "./EpubCustomizeStep";
-export { ExportModal } from "./ExportModal";
 export { LegalContactBox, LegalPage, LegalSection } from "./LegalPage";
 export { Navbar } from "./Navbar";
 export { SiteFooter } from "./SiteFooter";

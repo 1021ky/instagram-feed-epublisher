@@ -1,11 +1,11 @@
 /**
- * @file メインページコンポーネント
+ * @file メインページの認証・絞り込み・投稿選択・EPUB書き出し各機能スライスを統合して描画する。
  */
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AlertBanner, InAppBrowserAlert, StatusBanner } from "@/components/molecules";
-import { EpubCustomizeStep, ExportModal, Navbar, StickyActionBar } from "@/components/organisms";
+import { Navbar, StickyActionBar } from "@/components/organisms";
 import {
   AccountDeletionModal,
   formatLogoutBannerTitle,
@@ -13,69 +13,22 @@ import {
   useAccountDeletion,
   useAuthFlow,
 } from "@/features/auth";
+import {
+  EpubCustomizeStep,
+  EpubExportActionSection,
+  ExportModal,
+  useEpubExport,
+} from "@/features/epub-export";
 import { PostListStep, useFeedSelection } from "@/features/feed";
 import { FeedFilterStep, toFeedFetchFilter, useFeedFilter } from "@/features/feed-filter";
-import { requestEpub } from "@/lib/client/instagram";
-import { validateEpubTitle } from "@/lib/epub/epub-request.schema";
 import { sampleDemoFeedData } from "@/lib/demo/sampleData";
-import { sortItemsByTimestamp } from "@/lib/epub/sort";
-import type { EpubCustomSettings, ExportProgress } from "@/types/ui";
-
-const defaultBookTitle = "私のInstagramフィード";
 
 /**
  * メインページコンポーネント。
  */
 export default function Page() {
   const [error, setError] = useState<string | null>(null);
-
-  const [customSettings, setCustomSettings] = useState<EpubCustomSettings>({
-    title: defaultBookTitle,
-    subtitle: "",
-    author: "",
-    coverTheme: "navy",
-    sortOrder: "asc",
-    contact: "",
-    instagramUrl: "",
-  });
-  const [exportProgress, setExportProgress] = useState<ExportProgress>({
-    status: "idle",
-    progress: 0,
-    message: "",
-  });
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [showCustomizeErrors, setShowCustomizeErrors] = useState(false);
-  const downloadUrlRef = useRef<string | null>(null);
-  const titleInputRef = useRef<HTMLInputElement | null>(null);
-
-  const isGeneratingEpub = exportProgress.status === "generating";
-
-  const {
-    feed,
-    setFeed,
-    clearFeed,
-    sortedFeed,
-    selectedPosts,
-    toggleSelect,
-    toggleChildSelect,
-    selectAll,
-    deselectAll,
-  } = useFeedSelection({ sortOrder: customSettings.sortOrder });
-
-  const resetDemoNonFilterState = useCallback(() => {
-    setCustomSettings({
-      title: defaultBookTitle,
-      subtitle: "",
-      author: "",
-      coverTheme: "navy",
-      sortOrder: "asc",
-      contact: "",
-      instagramUrl: "",
-    });
-    clearFeed();
-    setShowCustomizeErrors(false);
-    setError(null);
-  }, [clearFeed]);
+  const noop = useCallback(() => {}, []);
 
   const {
     isLoggedIn,
@@ -93,9 +46,43 @@ export default function Page() {
     handleLogout,
   } = useAuthFlow({
     onError: setError,
-    onResetDemo: resetDemoNonFilterState,
-    onLoggedOut: clearFeed,
+    onResetDemo: noop,
+    onLoggedOut: noop,
   });
+
+  const {
+    customSettings,
+    setCustomSettings,
+    setSortOrder,
+    recommendedTitle,
+    exportProgress,
+    isGenerating: isGeneratingEpub,
+    isModalOpen: isExportModalOpen,
+    openModal: openExportModal,
+    closeModal: closeExportModal,
+    showValidationErrors: showCustomizeErrors,
+    titleInputRef,
+    applyDemoSettings,
+    resetExportState,
+    generateEpub,
+    redownload,
+  } = useEpubExport({
+    username,
+    isDemoMode,
+    onError: setError,
+  });
+
+  const {
+    feed,
+    setFeed,
+    clearFeed,
+    sortedFeed,
+    selectedPosts,
+    toggleSelect,
+    toggleChildSelect,
+    selectAll,
+    deselectAll,
+  } = useFeedSelection({ sortOrder: customSettings.sortOrder });
 
   const scrollToSection = useCallback((id: string) => {
     window.requestAnimationFrame(() => {
@@ -133,155 +120,42 @@ export default function Page() {
   const handleLogoutClick = useCallback(async () => {
     const wasDemo = isDemoMode;
     await handleLogout();
+    clearFeed();
     if (wasDemo) {
+      resetExportState();
       resetFilter();
+      setError(null);
     } else {
       resetFetchState();
     }
-  }, [handleLogout, isDemoMode, resetFetchState, resetFilter]);
+  }, [clearFeed, handleLogout, isDemoMode, resetExportState, resetFetchState, resetFilter]);
 
   const handleAccountDeleted = useCallback(() => {
     clearFeed();
     resetFetchState();
+    resetExportState();
     exitDemoMode();
-  }, [clearFeed, exitDemoMode, resetFetchState]);
+  }, [clearFeed, exitDemoMode, resetExportState, resetFetchState]);
 
   const accountDeletion = useAccountDeletion({
     onDeleted: handleAccountDeleted,
   });
 
-  const recommendedTitle = username ? `@${username}の投稿記録` : defaultBookTitle;
-
-  const triggerDownload = (url: string, filename = "instagram-feed.epub") => {
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = filename;
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-  };
-
-  const handleDemo = () => {
+  const handleDemo = useCallback(() => {
     enterDemoMode();
     setError(null);
     applyDemoFilter();
-    setCustomSettings({
-      title: "100日チャレンジの記録",
-      subtitle: "100日チャレンジの振り返り",
-      author: `@${sampleDemoFeedData.username}`,
-      contact: "",
-      instagramUrl: `https://www.instagram.com/${sampleDemoFeedData.username}/`,
-      coverTheme: "navy",
-      sortOrder: "asc",
-    });
-
-    // デモ投稿を初期全選択状態でセット
+    applyDemoSettings(sampleDemoFeedData.username);
     setFeed(sampleDemoFeedData.posts.map((p) => ({ ...p, selected: true })));
-  };
+  }, [applyDemoFilter, applyDemoSettings, enterDemoMode, setFeed]);
 
-  const handleGenerate = async () => {
-    if (!canUseApp) {
-      setError("先にログインしてください");
-      return;
-    }
-    if (selectedPosts.length === 0) {
-      setError("収録する投稿が1件も選択されていません。投稿を選択してください。");
-      return;
-    }
-    const titleError = validateEpubTitle(customSettings.title);
-    if (titleError) {
-      setShowCustomizeErrors(true);
-      setError(titleError);
-      titleInputRef.current?.focus();
-      return;
-    }
-    setShowCustomizeErrors(false);
-    setError(null);
-    setIsExportModalOpen(true);
-    if (downloadUrlRef.current) {
-      window.URL.revokeObjectURL(downloadUrlRef.current);
-      downloadUrlRef.current = null;
-    }
-    setExportProgress({
-      status: "generating",
-      progress: 20,
-      message: "投稿を並び替えてEPUBを生成しています…",
+  const handleGenerate = useCallback(() => {
+    void generateEpub({
+      canUseApp,
+      filter: toFeedFetchFilter(filter, customSettings.sortOrder),
+      selectedPosts,
     });
-    try {
-      // EPUB生成対象の投稿（選択されたもののみ）
-      const itemsForEpub = selectedPosts.map((p) => ({
-        id: p.id,
-        media_type: p.media_type,
-        media_url: p.media_url,
-        thumbnail_url: p.thumbnail_url,
-        children: p.children,
-        permalink: p.permalink,
-        caption: p.caption,
-        timestamp: p.timestamp,
-      }));
-
-      const selectedCarouselChildren: Record<string, string[]> = {};
-      for (const post of selectedPosts) {
-        if (post.selectedChildIds !== undefined) {
-          selectedCarouselChildren[post.id] = post.selectedChildIds;
-        }
-      }
-      const hasCarouselSelections = Object.keys(selectedCarouselChildren).length > 0;
-
-      const cleanFilter = toFeedFetchFilter(filter, customSettings.sortOrder);
-
-      // デモモード時は選択された並び順でソート
-      const sortedItemsForEpub = isDemoMode
-        ? sortItemsByTimestamp(itemsForEpub, customSettings.sortOrder)
-        : undefined;
-
-      const epubBlob = await requestEpub({
-        demoMode: isDemoMode,
-        filter: cleanFilter,
-        metadata: {
-          title: customSettings.title.trim(),
-          subtitle: customSettings.subtitle,
-          author: customSettings.author,
-          contact: customSettings.contact ?? "",
-          instagramUrl: customSettings.instagramUrl ?? "",
-          coverTheme: customSettings.coverTheme,
-        },
-        coverTheme: customSettings.coverTheme,
-        sortOrder: customSettings.sortOrder,
-        selectedMediaIds: itemsForEpub.map((item) => item.id),
-        ...(hasCarouselSelections ? { selectedCarouselChildren } : {}),
-        items: sortedItemsForEpub,
-      });
-
-      setExportProgress({
-        status: "generating",
-        progress: 80,
-        message: "EPUBを書き出しました。ダウンロードを開始しています…",
-      });
-      const url = window.URL.createObjectURL(epubBlob);
-      downloadUrlRef.current = url;
-      const downloadFilename = isDemoMode ? "instagram-feed-demo.epub" : "instagram-feed.epub";
-      triggerDownload(url, downloadFilename);
-      setExportProgress({
-        status: "completed",
-        progress: 100,
-        message: "ダウンロードが始まりました。端末への転送方法も確認できます。",
-        downloadUrl: url,
-      });
-      setIsExportModalOpen(true);
-    } catch (e) {
-      console.error(e);
-      const message = e instanceof Error ? e.message : "EPUB生成に失敗しました";
-      setError(message);
-      setExportProgress({
-        status: "error",
-        progress: 0,
-        message: "EPUBの生成に失敗しました。",
-        error: message,
-      });
-      setIsExportModalOpen(true);
-    }
-  };
+  }, [canUseApp, customSettings.sortOrder, filter, generateEpub, selectedPosts]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -289,42 +163,6 @@ export default function Page() {
       scrollToSection("filters");
     }
   }, [scrollToSection]);
-
-  useEffect(() => {
-    setCustomSettings((current) => {
-      const nextAuthor = current.author || (username ? `@${username}` : "");
-      const nextInstagramUrl =
-        current.instagramUrl || (username ? `https://instagram.com/${username}` : "");
-      const nextTitle = current.title === defaultBookTitle ? recommendedTitle : current.title;
-
-      if (
-        nextAuthor === current.author &&
-        nextInstagramUrl === current.instagramUrl &&
-        nextTitle === current.title
-      ) {
-        return current;
-      }
-
-      return {
-        ...current,
-        title: nextTitle,
-        author: nextAuthor,
-        instagramUrl: nextInstagramUrl,
-      };
-    });
-  }, [recommendedTitle, username]);
-
-  useEffect(() => {
-    return () => {
-      if (downloadUrlRef.current) {
-        window.URL.revokeObjectURL(downloadUrlRef.current);
-      }
-    };
-  }, []);
-
-  const closeExportModal = () => {
-    setIsExportModalOpen(false);
-  };
 
   return (
     <div className={`page ${feed.length > 0 ? "pb-28 sm:pb-32" : ""}`}>
@@ -382,9 +220,7 @@ export default function Page() {
                 <PostListStep
                   posts={sortedFeed}
                   sortOrder={customSettings.sortOrder}
-                  onSortOrderChange={(sortOrder) =>
-                    setCustomSettings((prev) => ({ ...prev, sortOrder }))
-                  }
+                  onSortOrderChange={setSortOrder}
                   isFetched={hasFetched || feed.length > 0}
                   onToggleSelect={toggleSelect}
                   onToggleChildSelect={toggleChildSelect}
@@ -403,46 +239,13 @@ export default function Page() {
                   titleInputRef={titleInputRef}
                 />
 
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    className="w-full sm:w-auto px-6 py-3 rounded-xl text-white font-medium text-sm bg-gradient-to-r from-[#405DE6] via-[#C13584] to-[#E1306C] hover:opacity-95 transition flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-50 min-h-[44px]"
-                    onClick={handleGenerate}
-                    disabled={isGeneratingEpub || selectedPosts.length === 0}
-                  >
-                    <svg
-                      className="w-4 h-4 fill-current shrink-0"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                    </svg>
-                    <span>
-                      {isGeneratingEpub
-                        ? "EPUB生成中..."
-                        : `EPUBを生成してダウンロード (${selectedPosts.length}件収録)`}
-                    </span>
-                  </button>
-                </div>
-
-                {exportProgress.status === "completed" && (
-                  <div
-                    role="status"
-                    className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center justify-between gap-3"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-emerald-600">✓</span>
-                      <span>EPUBの書き出しが完了しました</span>
-                    </div>
-                    <button
-                      type="button"
-                      className="text-emerald-700 font-semibold underline text-sm hover:text-emerald-900 cursor-pointer whitespace-nowrap"
-                      onClick={() => setIsExportModalOpen(true)}
-                    >
-                      転送ガイド・ダウンロードを再表示
-                    </button>
-                  </div>
-                )}
+                <EpubExportActionSection
+                  selectedCount={selectedPosts.length}
+                  isGenerating={isGeneratingEpub}
+                  isCompleted={exportProgress.status === "completed"}
+                  onGenerate={handleGenerate}
+                  onReopenModal={openExportModal}
+                />
               </div>
 
               {/* 画面下部固定アクションバー */}
@@ -464,14 +267,7 @@ export default function Page() {
         progress={exportProgress}
         isOpen={isExportModalOpen}
         onClose={closeExportModal}
-        onDownload={() => {
-          if (downloadUrlRef.current) {
-            const downloadFilename = isDemoMode
-              ? "instagram-feed-demo.epub"
-              : "instagram-feed.epub";
-            triggerDownload(downloadUrlRef.current, downloadFilename);
-          }
-        }}
+        onDownload={redownload}
       />
 
       <AccountDeletionModal

@@ -1,18 +1,30 @@
 /**
- * @file EPUB 装丁設定ステップ UI
+ * @file Step 3 の EPUB 装丁・メタデータ入力フォームを表示し、必須タイトル検証・推奨タイトル補完・表紙テーマ選択を提供する。
  */
-import * as React from "react";
-import { CoverThemeSelector } from "@/components/molecules";
+"use client";
+
+import type * as React from "react";
+import { useState } from "react";
+import { StepCardHeader } from "@/components/molecules";
 import { validateEpubTitle } from "@/lib/epub/epub-request.schema";
 import type { EpubCustomSettings } from "@/types/ui";
+import { CoverThemeSelector } from "./CoverThemeSelector";
 
-type EpubCustomizeStepProps = {
+/**
+ * EPUB 装丁設定ステップコンポーネントのプロパティ。
+ */
+export interface EpubCustomizeStepProps {
+  /** 現在の EPUB 装丁・メタデータ設定 */
   settings: EpubCustomSettings;
+  /** 設定値変更時の更新ハンドラ */
   onChange: (settings: EpubCustomSettings) => void;
+  /** タイトル空欄時に補完候補として提示する推奨タイトル */
   defaultTitle: string;
+  /** 送信時などに未操作フィールドのバリデーションエラーを強制表示するか */
   showValidationErrors?: boolean;
+  /** タイトル入力欄へフォーカス誘導するための Ref */
   titleInputRef?: React.RefObject<HTMLInputElement | null>;
-};
+}
 
 const TITLE_INPUT_ID = "epub-book-title-input";
 const TITLE_ERROR_ID = "epub-book-title-error";
@@ -27,7 +39,7 @@ export function EpubCustomizeStep({
   showValidationErrors = false,
   titleInputRef,
 }: EpubCustomizeStepProps) {
-  const [titleTouched, setTitleTouched] = React.useState(false);
+  const [titleTouched, setTitleTouched] = useState(false);
 
   const update = <Key extends keyof EpubCustomSettings>(
     key: Key,
@@ -45,19 +57,11 @@ export function EpubCustomizeStep({
 
   return (
     <section className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6 space-y-6">
-      <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">
-          3
-        </span>
-        <div>
-          <h2 className="text-sm sm:text-base font-bold text-slate-900 m-0">
-            Step 3: EPUBの装丁を整える
-          </h2>
-          <p className="text-xs text-slate-500 m-0">
-            タイトルや表紙テーマを設定して、読みやすい1冊に仕上げます
-          </p>
-        </div>
-      </div>
+      <StepCardHeader
+        stepNumber={3}
+        title="Step 3: EPUBの装丁を整える"
+        description="タイトルや表紙テーマを設定して、読みやすい1冊に仕上げます"
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5 text-xs font-semibold text-slate-700">
