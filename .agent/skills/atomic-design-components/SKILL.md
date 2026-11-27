@@ -66,6 +66,9 @@ flowchart TD
 4. **Layer 4: Organisms (`webapp/src/components/organisms/`) & Pages (`webapp/app/`)**
    - **Organisms**: 共通レイアウトブロック（`Navbar`, `SiteFooter`, `LegalPage` 等）および移行中の既存ステップ。
    - **Pages (`webapp/app/`)**: Next.js App Router のページ。全体の状態管理、データ取得、Feature / Organisms のオーケストレーションを担う。
+   - **Pages 層における汎用 UI の直 import と Feature 切り出しの境界**:
+     - **単一の汎用 Atom / Molecule の直 import は許容する**: `AlertBanner` や `InAppBrowserAlert` のように単一の汎用部品をそのまま配置するだけの場合は、中身のない薄いラッパーを量産せず、Pages から `components/` を直接 import してよい。
+     - **複数部品の合成やドメイン固有の組み立ては `features/<domain>/ui/` へ切り出す（MUST）**: Pages 内で複数の Atom / Molecule やドメイン固有の条件分岐・文言組み立て（例: `StatusBanner` + `formatLogoutBannerTitle` を束ねる `LogoutNoticeBanner`、生成ボタンと完了バナーを束ねる `EpubExportActionSection` 等）を作り込み始めたら、該当の `features/<domain>/ui/` へ切り出し、Pages はオーケストレーションに専念させる。
 
 ---
 
@@ -137,6 +140,7 @@ pnpm typecheck
   - [ ] 下位層（`components/`・`lib/`）から `features/` への逆方向依存が発生していないか？
 - **Organisms / Pages**:
   - [ ] `Organisms` は複数機能で共有するレイアウトブロックに留まり、`Pages`（`app/`）はオーケストレーションに専念しているか？
+  - [ ] `Pages`（`app/`）で単一の汎用 Atom / Molecule（`AlertBanner`, `InAppBrowserAlert` 等）をそのまま配置する箇所に中身のないラッパーを量産しておらず、一方で複数部品の合成やドメイン固有の条件分岐・文言組み立てを行う UI は該当の `features/<domain>/ui/` へ切り出されているか？
 - **公開境界・テスト・ドキュメント・互換性**:
   - [ ] 各層の `index.ts` からのエクスポートと 1:1 コロケーションテスト（Small / 必要に応じた Medium）が揃っているか？
   - [ ] すべての実装ファイル先頭に役割・振る舞いを具体的に示す `@file`、および全 `function` / `interface` / `type` に簡潔な TSDoc / JSDoc が記載され、`(Atom)` / `(Molecule)` や自明なテスト表記などの冗長コメントが紛れ込んでいないか？

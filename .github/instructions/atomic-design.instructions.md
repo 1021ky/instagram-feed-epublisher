@@ -37,6 +37,7 @@ Next.js App Router（`webapp/app/` = Pages）を前提とし、**汎用UI（`src
    - 既存ステップコンポーネント（`FeedFilterStep`, `EpubCustomizeStep`, `Navbar` 等）。新規のドメイン機能セクションは `features/<domain>/` へ配置する。
 5. **Pages (`webapp/app/`)**:
    - ルーティング、ページ全体の状態管理・データ取得・Feature / Organism のオーケストレーション。
+   - 単一の汎用 Atom / Molecule（`AlertBanner`, `InAppBrowserAlert` 等）をそのまま配置する直 import は許容する（中身のないラッパー量産を避ける）。一方で、複数の Atom / Molecule やドメイン固有の条件分岐・文言組み立てを組み合わせて UI を作り込み始めたら、該当の `features/<domain>/ui/` へ切り出す（MUST）。
 
 ## 3. バレルファイルと単体テストの義務化
 

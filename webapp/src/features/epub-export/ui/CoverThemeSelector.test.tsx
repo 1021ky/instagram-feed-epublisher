@@ -1,4 +1,3 @@
-import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { COVER_THEMES } from "@/lib/epub/themes";
@@ -20,13 +19,13 @@ describe("表紙テーマセレクター (CoverThemeSelector)", () => {
   });
 
   it.each([
-    { themeId: "navy" as CoverThemeId, expectedTheme: "濃紺: チャレンジ" },
-    { themeId: "slate" as CoverThemeId, expectedTheme: "スレート: モダン" },
-    { themeId: "ivory" as CoverThemeId, expectedTheme: "アイボリー: エディトリアル" },
-    { themeId: "white" as CoverThemeId, expectedTheme: "白: ミニマル" },
-    { themeId: "purple" as CoverThemeId, expectedTheme: "紫: ダーク" },
+    { themeId: "navy" as CoverThemeId, label: "濃紺: チャレンジ" },
+    { themeId: "slate" as CoverThemeId, label: "スレート: モダン" },
+    { themeId: "ivory" as CoverThemeId, label: "アイボリー: エディトリアル" },
+    { themeId: "white" as CoverThemeId, label: "白: ミニマル" },
+    { themeId: "purple" as CoverThemeId, label: "紫: ダーク" },
   ])(
-    "選択中のテーマ ($themeId) に aria-checked='true' と tabIndex=0 が適用されること",
+    "選択中のテーマ ($label / $themeId) に aria-checked='true' と tabIndex=0 が適用されること",
     ({ themeId }) => {
       const html = renderToStaticMarkup(
         <CoverThemeSelector selectedTheme={themeId} onChange={() => undefined} />,
