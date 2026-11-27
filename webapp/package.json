@@ -17,8 +17,8 @@
     "test:small": "pnpm vitest run --config vitest.config.ts --project small",
     "test:medium": "pnpm vitest run --config vitest.config.ts --project medium",
     "test:large": "pnpm playwright test",
-    "openapi:generate": "node scripts/generate-bff-openapi.mjs",
-    "openapi:check": "node scripts/generate-bff-openapi.mjs --check",
+    "doc:apischema": "node scripts/openapi/generate.mjs",
+    "lint:openapi": "node scripts/openapi/generate.mjs --lint",
     "e2etest": "pnpm test:large",
     "e2etest:headed": "pnpm playwright test --headed --workers=1",
     "e2etest:ui": "pnpm playwright test --ui",
@@ -40,12 +40,12 @@
     "satori": "0.33.5",
     "sharp": "0.35.4",
     "winston": "3.19.0",
-    "zod": "4.6.7",
-    "zod-openapi": "6.0.2"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "11.17.0",
     "@playwright/test": "1.63.0",
+    "@redocly/cli": "2.84.0",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "25.9.8",
     "@types/react": "19.3.0",
@@ -61,7 +61,8 @@
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
     "vitest": "3.2.7",
-    "vitest-browser-react": "1.0.1"
+    "vitest-browser-react": "1.0.1",
+    "zod-openapi": "6.0.2"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

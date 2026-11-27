@@ -235,9 +235,9 @@ pnpm test:small   # Small テスト (Node / Vitest)
 pnpm test:medium  # Medium テスト (Browser Mode / Vitest)
 pnpm test:large   # Large テスト (Playwright E2E + OpenAPI ローカルモックサーバー)
 
-# BFF API OpenAPI 仕様書 (JSON / 静的 HTML) の生成・同期確認
-pnpm openapi:generate
-pnpm openapi:check
+# BFF API OpenAPI 仕様書 (JSON / Redocly 静的 HTML) の生成・OpenAPI Lint 検証
+pnpm doc:apischema
+pnpm lint:openapi
 ```
 
 ---

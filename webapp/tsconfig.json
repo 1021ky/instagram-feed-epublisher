@@ -32,6 +32,7 @@
     "proxy.ts",
     "proxy.test.ts",
     "scripts/**/*.d.mts",
+    "scripts/openapi/**/*.ts",
     "src",
     "test-fakes",
     "vitest.browser.setup.ts",
