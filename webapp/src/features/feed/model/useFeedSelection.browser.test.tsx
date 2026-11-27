@@ -4,6 +4,7 @@ import { render } from "vitest-browser-react";
 import type { EpubSortOrder, FeedPostItem } from "@/types/ui";
 import { useFeedSelection } from "./useFeedSelection";
 
+/** 並び順切替とカルーセル子画像トグルを検証するための基準投稿データ（古い単一画像1件＋新しい2枚カルーセル1件） */
 const initialPosts: FeedPostItem[] = [
   {
     id: "p-older",

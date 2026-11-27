@@ -3,6 +3,7 @@ import type { FeedPostItem } from "@/types/ui";
 import { toPostCardViewModel } from "./post-presenter";
 
 describe("投稿カード ViewModel 変換 (toPostCardViewModel)", () => {
+  /** 通常画像投稿の変換テストで基準となるサンプル投稿データ（前後空白キャプション・いいね数付き） */
   const basePost: FeedPostItem = {
     id: "post-1",
     media_type: "IMAGE",

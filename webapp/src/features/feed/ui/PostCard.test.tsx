@@ -5,6 +5,7 @@ import type { PostCardViewModel } from "../model/post-presenter";
 import { PostCard } from "./PostCard";
 
 describe("投稿カード (PostCard)", () => {
+  /** 選択状態・いいね数・外部リンク表示の検証に使う単一画像投稿の基準ViewModel */
   const sampleViewModel: PostCardViewModel = {
     id: "post-1",
     selected: true,

@@ -3,6 +3,7 @@ import { render } from "vitest-browser-react";
 import type { FeedPostItem } from "@/types/ui";
 import { PostListStep } from "./PostListStep";
 
+/** キーワード検索・一括選択/解除・並び順切替の検証に使う2件（選択中1件・除外中1件）の基準投稿データ */
 const samplePosts: FeedPostItem[] = [
   {
     id: "p1",

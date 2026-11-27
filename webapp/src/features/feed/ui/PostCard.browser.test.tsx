@@ -3,9 +3,11 @@ import { render } from "vitest-browser-react";
 import type { PostCardViewModel } from "../model/post-presenter";
 import { PostCard } from "./PostCard";
 
+/** 実ブラウザ上で外部通信を起こさず即座に読み込み完了させるためのダミーSVG画像Data URL */
 const mockImageUrl =
   "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E";
 
+/** 3枚カルーセル（2枚目のみ未選択）・外部リンク付きの投稿カード基準テストデータ */
 const baseViewModel: PostCardViewModel = {
   id: "post-1",
   selected: true,

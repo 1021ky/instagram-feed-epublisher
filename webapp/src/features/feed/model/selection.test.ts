@@ -73,6 +73,7 @@ describe("投稿選択判定・集計 (isPostSelected / getSelectedPosts / count
 });
 
 describe("キャプションキーワード絞り込み (filterPostsByCaptionQuery)", () => {
+  /** 英字・日本語・キャプション未設定の3パターンを網羅する検索テスト用投稿データ */
   const posts = [
     createSinglePost({ id: "p1", caption: "Day 1: Kyoto Coffee" }),
     createSinglePost({ id: "p2", caption: "Day 2: 鴨川さんぽ" }),
