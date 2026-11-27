@@ -3,6 +3,30 @@
   "ignorePatterns": ["next-env.d.ts"],
   "overrides": [
     {
+      "files": [
+        "app/**/*.ts",
+        "app/**/*.tsx",
+        "src/components/**/*.ts",
+        "src/components/**/*.tsx",
+        "src/features/**/*.ts",
+        "src/features/**/*.tsx",
+        "src/lib/**/*.ts",
+        "src/lib/**/*.tsx"
+      ],
+      "jsPlugins": ["./scripts/oxlint-plugin-architecture.mjs"],
+      "plugins": ["eslint", "typescript", "unicorn", "oxc", "import"],
+      "rules": {
+        "import/no-cycle": "error",
+        "architecture/no-reverse-layer-import": "error",
+        "architecture/enforce-feature-public-api": "error",
+        "architecture/no-cross-feature-import": "error",
+        "architecture/no-react-in-pure-model": "error",
+        "architecture/no-runtime-react-in-atoms": "error",
+        "architecture/no-wildcard-reexport": "error",
+        "architecture/require-file-header": "error"
+      }
+    },
+    {
       "files": ["e2e/**/*.ts"],
       "jsPlugins": ["./scripts/oxlint-plugin-playwright.mjs"],
       "plugins": ["eslint", "typescript", "unicorn", "oxc", "vitest"],
